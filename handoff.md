@@ -4,7 +4,7 @@
 Format: optimized for AI agents. Facts are key: value lines or tables with exact identifiers.
 Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. "UNVERIFIED" = implemented but never
 observed working where it matters. "UNKNOWN" = ask the user or check before relying on it.
-Last updated: 2026-11-09, night (final report rebuilt as IEEE two-column LaTeX, 12pt Times New Roman, in tcp-congestion/report/, rewritten in the user's own voice; the Claude Doc report is now superseded; doc rev 69 shows the 4 suggestions accepted). 2026-11-09, late (deck restyled to Capture Dark + animations, v25; report fixes waiting as 4 suggestions; this file and requirements.md moved from the project root into tcp-congestion/ and committed; .gitignore extended). Earlier 2026-11-09: re-review of project vs report + deck (OPEN_ITEMS #0). Before that 2026-10-24, late session (Step 10 slide deck built and redesigned visual-first with live animations; report prose rewritten for style, rev 53, still 8 pages; earlier: report cut to 8 pages, F18/F19 fixed, notebook repaired, guide evidence statuses set). Update STATE and OPEN_ITEMS when anything changes.
+Last updated: 2026-11-09, night (final report rebuilt as IEEE two-column LaTeX in tcp-congestion/report/, 12pt Times New Roman, in the user's own voice; Sonnet review fixes applied; committed and pushed as 9148bbd; Claude Doc report superseded). Earlier 2026-11-09: deck restyled to Capture Dark + animations (v25); handoff.md/requirements.md moved into tcp-congestion/; re-review of report + deck (OPEN_ITEMS #0). 2026-10-24: deck built; report rewritten for style; F18/F19 fixed; notebook repaired. Update STATE and OPEN_ITEMS when anything changes.
 -->
 
 ## 0. READ_FIRST
@@ -12,9 +12,9 @@ Last updated: 2026-11-09, night (final report rebuilt as IEEE two-column LaTeX, 
 1. Read this file fully before acting. It lives at `tcp-congestion/handoff.md` (moved from the project root 2026-11-09; a session started in `project/` must open it explicitly). Then read `requirements.md` (same folder) (course requirements; the report must satisfy its "Final Report" and "Evaluation Criteria" sections).
 2. Doc state may have changed since this file was written. Before editing a doc, read its changes since the last known revision (section 4): `read(ref node <body_node_id>, payload {"kind":"view","sinceRev":<rev>})`.
 3. Do not trust STATUS=UNKNOWN items. Ask the user or check (section 9).
-4. All experiments are finished and the data is frozen (tag s3-done). Step 9 report is DONE pending the user's read-through (8 pages, E9.1 saved). Step 10: slide deck DONE as a draft (section 4b); rehearsals, recording and transcript remain.
-5. Highest-priority open items: OPEN_ITEMS #0 (user accepts the 4 report suggestions, then re-export PDF + page check) and #5a - the user should step through the restyled deck (v25) in Present mode (none of the 4 live animations or the click builds have been seen rendered), then rehearse with demo.py. Also still unconfirmed: #1 (VM commit after the report fixes) and #1b (guarded scp of the repaired notebook.md to the VM).
-6. Before editing the deck, read section 4b (file layout, publish/conflict rules, x-embed constraints) and the memory files writing-not-ai-sounding.md and slides-visual-first.md.
+4. All experiments are finished and the data is frozen (tag s3-done). Step 9 report: the deliverable is now `report/main.tex` -> `report/main.pdf` (IEEE two-column, section 4c); the user said 'It looks good' on 2026-11-09. The Claude Doc report (section 4) is superseded and still holds 7 errors fixed only in main.tex. Step 10: slide deck DONE as a draft (section 4b); rehearsals, recording and transcript remain.
+5. Highest-priority open items: OPEN_ITEMS #4a (copy report/main.pdf over evidence/step9-report/E9.1_report.pdf; ask whether captions/tables/refs must also be 12 pt) and #5a - the user should step through the restyled deck (v25) in Present mode (none of the 4 live animations or the click builds have been seen rendered), then rehearse with demo.py. Also still unconfirmed: #1 (VM commit after the report fixes) and #1b (guarded scp of the repaired notebook.md to the VM).
+6. Before editing the deck, read section 4b (file layout, publish/conflict rules, x-embed constraints) and the memory files writing-not-ai-sounding.md and slides-visual-first.md. Before writing any prose (report, notes, transcript), read memory user-writing-voice.md (R14).
 
 ## 1. USER_RULES (must follow)
 
@@ -31,6 +31,8 @@ Last updated: 2026-11-09, night (final report rebuilt as IEEE two-column LaTeX, 
 - R11: When the user asks for a specific host form in a command (on 2026-10-24 they asked for `lucas@vm0.local` instead of `tcpvm` in the ssh/scp notebook command), use it exactly. Why they preferred it is UNKNOWN; `tcpvm` is the configured alias and resolves to lucas@vm0.local.
 - R12: Written deliverables (report, slides, speaker notes, transcript) must not read as AI-generated: vary sentence openings and lengths, no aphoristic 'Label: claim.' openers or chiasmus, some first person ('I measured'), captions in varied shapes. Keep every number exact.
 - R13: Slides: very few on-slide words (target <= ~25 per slide), prefer images, graphs, diagrams and animations; detail goes in speaker notes (<aside>). Every slide must make sense to someone who has not read the proposal or report: no H1-H5 labels, no config ids, define terms (CCA, RTT, BDP, Jain's index) where first used.
+- R14: Prose deliverables use the user's own voice: sample = paragraphs 4-5 (page 2) of project/CMPE 272 Group Reflection.pdf (paragraphs 1-3 are teammates'). Reason-first openings, 'This ...' follow-ups, plain words, first person, no semicolons or em dashes in prose. Details in ~/.claude/projects/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/memory/user-writing-voice.md (memory dir of sessions started in project/, not tcp-congestion/).
+- R15: Report format (user, 2026-11-09): two-column IEEE style, Times New Roman, 12 pt, 6-8 pages.
 - R10: The VM is shared with the user's other work and is brought up and down as needed. Never assume it is running or clean; any VM instruction set starts from the bring-up block (section 3 vm_lifecycle).
 
 ## 2. PROJECT
@@ -70,9 +72,10 @@ mac:
   ram_gb: 8
   shell: zsh            # interactive_comments set by mac.zsh
   project_dir: ~/Desktop/SJSU/cmpe-206-network/project
-  code_dir: ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion   # git repo since 2026-11-09: one commit 96851a7 'Bring project to git', origin https://github.com/LW1N/tcp-congestion (PUBLIC), separate history from the VM repo (VM tags not carried). .gitignore excludes results/ data/ figures/ *.pcap __pycache__/ and, since 2026-11-09, .DS_Store *.pyc *.log (the 3 tracked .DS_Store files were untracked). handoff.md and requirements.md are tracked since 2026-11-09 (commit 6004ee1 on main, fast-forwarded 2026-11-09; main is 1 ahead of origin, not pushed). Secret scan clean (sudo passwords in E3.1 are masked). tcp-push does not copy handoff.md/requirements.md to the VM (explicit rsync list)
+  code_dir: ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion   # git repo, origin https://github.com/LW1N/tcp-congestion (PUBLIC), separate history from the VM repo (VM tags not carried). Commits: 96851a7 'Bring project to git', 6004ee1 handoff+requirements, 9148bbd 'Add IEEE two-column final report (LaTeX)' (report/ + handoff.md). main == origin/main on 2026-11-09 (pushed). .gitignore excludes results/ data/ figures/ *.pcap __pycache__/ .DS_Store *.pyc *.log. Secret scan clean (sudo passwords in E3.1 are masked). tcp-push does not copy handoff.md/requirements.md/report/ to the VM (explicit rsync list)
   wireshark: installed; tshark at /Applications/Wireshark.app/Contents/MacOS/tshark (used for E5.8, E6.3)
-  analysis_venv: /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/16db5c6a-db14-484a-a4dd-6c75e0178c9a/scratchpad/venv/bin/python   # scratch, may vanish; has pandas, scipy, matplotlib, pyyaml, pypdf, pymupdf (checked 2026-10-24); system python lacks yaml
+  analysis_venv: GONE (old scratchpad vanished). Rebuild in the session scratchpad: python3 -m venv <scratch>/venv && <scratch>/venv/bin/pip install pymupdf pandas scipy matplotlib pyyaml pypdf. System python3 3.12 has no yaml/pandas/docx; csv module works for data checks
+  latex: tectonic 0.17.0 (brew, installed 2026-11-09; XeTeX engine; first run downloads its bundle). No pdflatex/pandoc/Word/LibreOffice on the Mac. System fonts include Times New Roman (/System/Library/Fonts/Supplemental)
   claude_ssh_to_vm: refused from Claude's sandbox ('Permission denied (publickey)' for lucas@vm0.local, 2026-10-24); ask the user to run VM checks, e.g. with the `! <command>` prefix
 vm:
   hypervisor: UTM
@@ -97,7 +100,7 @@ vm_lifecycle:   # also in guide Step 10 (rev 110)
 | --- | --- | --- | --- | --- | --- |
 | proposal | https://claude.ai/artifact/MHnQC8nYRexNPwSauG9wwK | a44ea6f5-2c85-42dd-80ed-b60386cd4e56 | 1fda1f0d-2113 | a6564636-68fa | 65 |
 | guide (implementation plan) | https://claude.ai/artifact/BokvUU7o8zuiJZKsWbbiRN | 5782aafa-bbcf-41e2-8797-79b73db5ec59 | 9f63ec6b-914b | 80b14e81-2d18 | 153 |
-| report (Step 9, 8-page version) | https://claude.ai/artifact/7vJiBvAn1QoxLYNaCXatnG | 38082a81-1bd5-4de3-9460-1437f9709115 | e2d990cc-bcbf | 26792df3-7a2c | 64 (4 open suggestions) |
+| report (SUPERSEDED by report/main.tex on 2026-11-09) | https://claude.ai/artifact/7vJiBvAn1QoxLYNaCXatnG | 38082a81-1bd5-4de3-9460-1437f9709115 | e2d990cc-bcbf | 26792df3-7a2c | 69 (4 suggestions accepted) |
 
 ```yaml
 id_prefixes: {guide: mj7hsvwewd5, report: m2wt2066mr5}   # block ids are <prefix>.<n>
@@ -115,6 +118,7 @@ report_blobs:   # uploaded via Artifact publish asset:true to the report URL, th
   E6.1_late_udp_pfifo: 3d2a9116-4e62   # Figure 6, annotated (arrow at UDP join); old unannotated 89df0a15-9ba7
   diagram: embed node/5fdb99cc-093d    # Figure 1
   unused_old: [6a6dd943-8126 F1, be694870-f019 F2, b4555a94-13e5 F3, 9a0b9e8e-dacb F4, 75eff334-1f43 F5, df3dd58a-4510 F6, d2f4b187-e592 F7, 98d88221-5eb7 F8, 235768c7-25f2 E5.1, 74409043-5ac4 E5.3, d8d9eff2-303e E5.7, adaff7dc-2cbb E6.2, d6cc1064-237c E7.1, bff5743d-dc42 E7.2, 6d563730-087b, 3eb7b0b5-2b64, e44663b6-2b95, 148bf9b5-b6f4, 6c9d851c-704e]
+# report_* lines below describe the superseded Claude Doc; see 4c for the live LaTeX report
 report_structure: [Abstract, 1 Intro + research question, 2 Background (inline formulas; latex blocks print as raw source in PDF export), 3 Architecture (diagram), 4 Methodology (Platform / Automation and metrics / Validation and limits), 5 Scenarios (Table 1), 6 Results S1-S3 (Figs 2-5), 7 Analysis (Table 2 verdicts; H1, H2+H3, H4 + Fig 6, H5, testbed lessons), 8 Recommendations (Table 3, 6 rows x 3 cols), 9 Conclusion, 10 References 1-16 (verified 2026-10-24 via web search; RFC 3550 and iperf3 added)]
 report_page_check: Docs export pdf letter = 8 pages at rev 53 (22 at rev 19). Slack is thin: page 7 ~90 pt free, page 8 ~16 pt; paragraphs split across pages but section headings + following text move together, so a few added lines can push References to page 9. Re-check any edit with export + page count (pymupdf). Pre-rewrite wording recoverable via read atRev 43; old long version atRev 19.
 report_style: rewritten 2026-10-24 (revs 44-53) at the user's request so it does not read as AI-generated: varied sentence openings and lengths, no aphoristic 'X: Y' run-in claims (H labels are now 'H1 (utilization).'), some first person ('I measured', 'My first design'), captions not all 'Sx: claim' form. All numbers unchanged. Keep this style in any further edits and in the Step 10 slides.
@@ -167,6 +171,21 @@ quirks:
   - Google Slides route (offered, not chosen): export PPTX, import, overlay GIFs; Claude offered to render the 4 animations as looping GIFs with Python
 ```
 
+## 4c. FINAL REPORT (LaTeX, live deliverable)
+
+```yaml
+source: report/main.tex            # IEEEtran [conference,12pt,letterpaper]; fontspec Times New Roman (fallback TeX Gyre Termes), unicode-math texgyretermes-math.otf
+output: report/main.pdf            # 8 pages letter (page 8 ~half full: refs [2]-[16] + Table III), committed in 9148bbd
+build: "cd report && tectonic main.tex"   # Overleaf: XeLaTeX compiler (no Times New Roman there -> Termes)
+figs: {topology: TikZ in main.tex (Fig 1), F2/F4/F5/F6: report/figs/*.pdf (copies of figures/, which is gitignored), Fig 6: figs/capture_reno_inflight.png (E7.2 cropped, Reno 0.25x BDP 50 ms), Fig 7: figs/capture_late_udp.png (E6.1 cropped, annotated arrow)}
+floats: Table I and III and Figs 2-7 are full-width (table*/figure*); Table II and Fig 1 column-width; float fractions raised in preamble
+font_sizes: body 12 pt; IEEEtran sets captions, tables, references smaller (UNKNOWN whether the instructor requires 12 pt everywhere; forcing it likely exceeds 8 pages)
+references: 16, thebibliography in order of first citation (keys gettys..ware); no BibTeX
+page_check: "<venv python> -c \"import pymupdf; print(pymupdf.open('report/main.pdf').page_count)\""   # regex on PDF bytes does not work (object streams)
+review_2026-11-09: Sonnet subagent checked every number vs CSVs; fixes applied only in main.tex: Reno 150 ms regrowth '>1 min, most trials never finish a cycle' (s3_ss.csv: no halving between ~2 s and teardown at 66 s; old doc said ~40 s), fq_codel 'best on delay and fairness' + small Reno throughput cost (util 94.4/94.6%), 'single BBR flow' builds no standing queue (n2/n4-equal-bbr-pfifo 37/40 ms), UDP model within 0.1 Mbps for CUBIC+Reno only (BBR +0.8-0.9), BBR 25% UDP loss cause hedged (fq_codel also 3.2%), Jain 'about 0.95 or higher' (n4-equal-bbr-pfifo 0.9496), BBR shortfall 2-4%, Fig 2 'lowest', Table I caption notes 3 late-BBR + 2 late-UDP trials
+unverified_text: '±4 ms queue-delay noise' (carried from the old report; not in handoff/notebook; summary CIs ~±1-2 ms)
+```
+
 ## 5. CODE MAP (`tcp-congestion/`)
 
 | path | role |
@@ -185,6 +204,7 @@ quirks:
 | devtools/gen_fake.py | synthetic results for Mac testing (run in a scratch copy) |
 | handoff.md, requirements.md | this file and the course requirements (moved here from the project root 2026-11-09) |
 | notebook.md | Mac mirror of the VM notebook (canonical copy on the VM, R8) |
+| report/main.tex, report/main.pdf, report/figs/ | final report (section 4c) |
 
 ```yaml
 topology:
@@ -251,13 +271,13 @@ results_path: results/<scenario>/<run>/<config-id>/trial_<k>/
 | 7 S3 | DONE | E7.1-E7.5 reviewed; notebook entry present; data freeze |
 | 8 Analysis | DONE | F1-F8 regenerated 2026-10-24 (F18/F19, titles, sizes); verdict table in guide corrected (rev 117); notebook entry present |
 | demo.py dry run | DONE 2026-10-24 | 6 stages OK (fq_codel stage ~16/16/16 Mbps) |
-| 9 Report | DONE pending user read-through (IEEE version) | 2026-11-09: user added format requirements (two-column IEEE, Times New Roman, 12 pt) and asked for their own voice (sample = paragraphs 4-5 of project/CMPE 272 Group Reflection.pdf; memory user-writing-voice.md). Source of truth is now tcp-congestion/report/main.tex (IEEEtran conference, 12pt, fontspec Times New Roman with TeX Gyre Termes fallback, TeX Gyre Termes Math; TikZ topology; figs/ holds copies of F2 F4 F5 F6 PDFs + 2 cropped Wireshark PNGs: capture_reno_inflight (E7.2, new Fig 6) and capture_late_udp (E6.1, Fig 7)). Build: `cd report && tectonic main.tex` (tectonic installed via brew 2026-11-09) -> 8 pages. Sonnet review 2026-11-09 fixed in main.tex (old doc still has these errors): Reno at 150 ms 'about 40 s to regrow' was wrong (s3_ss.csv: no halving between ~2 s and teardown at 66 s, so >1 min), 'fq_codel best in every condition' now limited to delay+fairness (Reno util 94.4/94.6% under fq_codel), 'BBR no standing queue' limited to a single flow (n2/n4-equal-bbr-pfifo 37/40 ms), UDP model match limited to CUBIC+Reno, BBR 25% UDP loss cause hedged (fq_codel also 3.2%), Jain 'about 0.95 or higher' (n4-equal-bbr-pfifo 0.9496), BBR shortfall 2-4%. Old Claude Doc report (rev 69, 4 suggestions accepted) is superseded; E9.1_report.pdf still holds the old single-column export |
+| 9 Report | DONE (user: 'It looks good', 2026-11-09) | IEEE LaTeX report, section 4c; committed + pushed 9148bbd. E9.1_report.pdf still holds the old single-column Docs export (open item 4a) |
 | 10 Presentation | IN_PROGRESS | Deck DONE as draft 2026-10-24 (section 4b): 16 slides, visual-first, 4 slides with live animations, click builds, speaker notes on all. Deck UNVERIFIED rendered (nobody has stepped through it in Present mode). TODO: user review in Present mode, share the deck if graders need the link, 2 rehearsals with demo.py (start with VM bring-up), E10.2 recording, E10.3 transcript (start from speaker notes). UNVERIFIED: demo slide stage 3 'CUBIC shrinks' when BBR joins (based on S1 pfifo 10.6% CUBIC share, not on demo.py output) |
 | git tags | DONE up to analysis-done; commit/tag for the 2026-10-24 report fixes UNKNOWN (open item 1) | tags: step1-done step2-done step3-done step4-done s1-done s2-done s3-done analysis-done. HEAD 73aa38b Analysis complete; b960f62 S3 data freeze; 06739d6 S2; a1cd65f S1; e3d7f8f Step 4 |
 
 ## 9. OPEN_ITEMS (priority order)
 
-0. 2026-11-09 re-review (every report + deck number checked against figures/s*_summary.csv, data/*.csv, code). Fixes validated against data + PDF line slack, then APPLIED 2026-11-09: deck R1(s2 text+notes, close notes) R2 R3 R4 R5 published as version 20, then reviewer wording fixes (s2 notes 'Reno 1.4 to 2 Mbps below CUBIC', close notes 'up to 5.5 percent of Reno's throughput') as versions 21-22 (1794279356-0e5c); report R1(conclusion, 'up to 5.5% of Reno's throughput') R6 R7 R8 ('Two or four BBR flows on pfifo retransmitted 3.6-10.6% of their bytes; Reno and CUBIC under 0.06%' - n1-bbr retransmits ~0%, so not 'BBR-only') laid as 4 SUGGESTIONS (rev 64: sg_4ogqokeq6r abstract, sg_588pw13mzt Reno 99.98, sg_o9km2n10f6 retrans sentence, sg_4qgbeum558 conclusion) awaiting the user's accept. TODO after accept: re-export PDF letter, confirm 8 pages (predicted: abstract +<=1 line on p1 (28 pt free), S1 +1 line on p4 (29 pt free), conclusion no new line (p8 has 16 pt)), overwrite evidence/step9-report/E9.1_report.pdf. Verified OK: all other numbers, bar pixel scales, 4 GB VM (E1.3), 40.2 ms V1, 11-pkt drops (Reno 1135, CUBIC 837, BBR 9529), mixed-RTT shares (Reno 20 ms 37.6%, BBR 80 ms 39.4% vs 6.7%). Findings:
+0. DONE 2026-11-09: re-review fixes. Deck R1-R5 published (versions 20-22). Report suggestions R1 R6 R7 R8 accepted in the doc (rev 69) and carried into report/main.tex; the doc's re-export step is moot (doc superseded). Historical findings kept for reference: Findings:
    - R1 (deck + report): 'fq_codel's only cost is <1 ms UDP jitter' (deck s2 on-slide text, close notes; report §9 'removed all of these effects at a cost of under 1 ms') ignores Reno's loss under fq_codel: S1 n2/n4-equal-reno util 94.4/94.6% vs 99.9-100% on pfifo; S2 Reno fq_codel 33.2-33.9 vs 35.4 Mbps. Report Table 3 caption already says 'Reno loses about 5%'.
    - R2 (deck verdicts notes): H3 'yes on pfifo, and RED didn't change it' is wrong; under RED BBR wins at every buffer (CUBIC 2.2-2.5%). Report says 'Supported on pfifo, not RED'.
    - R3 (deck s2 footer): 'Reno and BBR within 0.9 Mbps of CUBIC' is true on pfifo only; Reno under fq_codel is ~2 Mbps below.
@@ -273,8 +293,9 @@ results_path: results/<scenario>/<run>/<config-id>/trial_<k>/
 1c. DONE 2026-10-24 (guide rev 153): evidence statuses set. In report: E1.1 E1.3 E2.2 E2.4 E3.2 E4.1 E6.1 E6.3 E7.1 E7.2 E8.1 E8.2 E8.3; Captured: all other E1-E9 (E9.1 path updated); Not captured: E10.1-E10.3. All E1-E9 files verified present in tcp-congestion/evidence/. Statuses are cell-level dropdown chips: change one by replacing the cell (kind cell, table mj7hsvwewd5.50640, col 5) with a new dropdown chip (enum f2528a45-54f5).
 2. DONE 2026-10-24: references 1-16 verified (web), note removed from report. Proposal reference list still says 'cited from memory' (proposal is already submitted; leave unless user asks).
 3. DONE 2026-10-24: Figure 6 annotated and swapped in.
-4. DONE 2026-10-24: E9.1_report.pdf (8 pages). Re-export only if the user edits the report; re-check page count.
-4a. TODO (user): read report/main.pdf through. Any edit -> `tectonic main.tex`, confirm <= 8 pages, then copy report/main.pdf over evidence/step9-report/E9.1_report.pdf. Not committed (report/ is untracked; repo remote is public).
+4. DONE 2026-10-24: E9.1_report.pdf (old Docs export, 8 pages). Superseded by 4a.
+4a. TODO: copy the new report into evidence: `cp report/main.pdf evidence/step9-report/E9.1_report.pdf` (from tcp-congestion/), then commit. Also ask the user whether captions/tables/references must be 12 pt too (UNKNOWN). Any report edit -> `tectonic main.tex`, confirm <= 8 pages.
+4b. Optional: the superseded Claude Doc report still has the 7 errors listed in 4c review_2026-11-09; fix only if the user still shares that link.
 5. Step 10 (IN_PROGRESS). Deck built (section 4b, 16 slides rather than the guide's ~10; extra results slides keep one chart each).
 5a. TODO (user): step through the deck in Present mode in a browser; report any overflow, overlap or animation that does not run. Fix by editing the slide file and republishing (section 4b).
 5b. TODO: rehearse demo.py twice (VM bring-up block first) and check slide 15's expected values: stage 2 ~48 Mbps, stage 3 CUBIC shrinks, stage 4 TCP ~0, stage 5 ~16 Mbps each (stage 5 seen in the 2026-10-24 dry run; stages 2-4 values UNVERIFIED).
