@@ -4,3 +4,7 @@ data/
 figures/
 *.pcap
 __pycache__/
+# OS and editor clutter
+.DS_Store
+*.pyc
+*.log
