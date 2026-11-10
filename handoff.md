@@ -202,6 +202,7 @@ unverified_text: '±4 ms queue-delay noise' (carried from the old report; not in
 | demo.py | presentation demo, 6 stages, Enter advances; ran OK on VM 2026-10-24 |
 | helpers/mac.zsh, helpers/vm.sh | shortcuts (section 6) |
 | devtools/gen_fake.py | synthetic results for Mac testing (run in a scratch copy) |
+| README.md | overview + how to run (added 2026-11-09, uncommitted) |
 | handoff.md, requirements.md | this file and the course requirements (moved here from the project root 2026-11-09) |
 | notebook.md | Mac mirror of the VM notebook (canonical copy on the VM, R8) |
 | report/main.tex, report/main.pdf, report/figs/ | final report (section 4c) |
