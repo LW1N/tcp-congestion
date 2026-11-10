@@ -1,0 +1,98 @@
+
+Errors (11)
+=============
+   Frequency      Group           Protocol  Summary
+          11  Malformed             iPerf3  Malformed Packet (Exception occurred)
+
+Warns (275)
+=============
+   Frequency      Group           Protocol  Summary
+         275   Sequence                TCP  Connection reset (RST)
+
+Notes (1005)
+=============
+   Frequency      Group           Protocol  Summary
+          32   Sequence                TCP  Duplicate ACK (#1)
+          32   Sequence                TCP  Duplicate ACK (#2)
+          30   Sequence                TCP  Duplicate ACK (#3)
+          39   Sequence                TCP  This frame is a (suspected) fast retransmission
+          40   Sequence                TCP  This frame is a (suspected) retransmission
+          28   Sequence                TCP  Duplicate ACK (#4)
+          27   Sequence                TCP  Duplicate ACK (#5)
+          27   Sequence                TCP  Duplicate ACK (#6)
+          23   Sequence                TCP  Duplicate ACK (#7)
+          20   Sequence                TCP  Duplicate ACK (#8)
+          20   Sequence                TCP  Duplicate ACK (#9)
+          19   Sequence                TCP  Duplicate ACK (#10)
+          19   Sequence                TCP  Duplicate ACK (#11)
+          19   Sequence                TCP  Duplicate ACK (#12)
+          17   Sequence                TCP  Duplicate ACK (#13)
+          16   Sequence                TCP  Duplicate ACK (#14)
+          15   Sequence                TCP  Duplicate ACK (#15)
+          15   Sequence                TCP  Duplicate ACK (#16)
+          15   Sequence                TCP  Duplicate ACK (#17)
+          14   Sequence                TCP  Duplicate ACK (#18)
+          14   Sequence                TCP  Duplicate ACK (#19)
+          13   Sequence                TCP  Duplicate ACK (#20)
+          13   Sequence                TCP  Duplicate ACK (#21)
+          13   Sequence                TCP  Duplicate ACK (#22)
+          13   Sequence                TCP  Duplicate ACK (#23)
+          13   Sequence                TCP  Duplicate ACK (#24)
+          13   Sequence                TCP  Duplicate ACK (#25)
+          13   Sequence                TCP  Duplicate ACK (#26)
+          11   Sequence                TCP  Duplicate ACK (#27)
+          11   Sequence                TCP  Duplicate ACK (#28)
+          10   Sequence                TCP  Duplicate ACK (#29)
+          10   Sequence                TCP  Duplicate ACK (#30)
+          10   Sequence                TCP  Duplicate ACK (#31)
+          10   Sequence                TCP  Duplicate ACK (#32)
+          10   Sequence                TCP  Duplicate ACK (#33)
+          10   Sequence                TCP  Duplicate ACK (#34)
+          10   Sequence                TCP  Duplicate ACK (#35)
+          10   Sequence                TCP  Duplicate ACK (#36)
+          10   Sequence                TCP  Duplicate ACK (#37)
+          10   Sequence                TCP  Duplicate ACK (#38)
+          10   Sequence                TCP  Duplicate ACK (#39)
+          10   Sequence                TCP  Duplicate ACK (#40)
+          10   Sequence                TCP  Duplicate ACK (#41)
+          10   Sequence                TCP  Duplicate ACK (#42)
+          10   Sequence                TCP  Duplicate ACK (#43)
+          10   Sequence                TCP  Duplicate ACK (#44)
+          10   Sequence                TCP  Duplicate ACK (#45)
+          10   Sequence                TCP  Duplicate ACK (#46)
+          10   Sequence                TCP  Duplicate ACK (#47)
+          10   Sequence                TCP  Duplicate ACK (#48)
+          10   Sequence                TCP  Duplicate ACK (#49)
+          10   Sequence                TCP  Duplicate ACK (#50)
+          10   Sequence                TCP  Duplicate ACK (#51)
+          10   Sequence                TCP  Duplicate ACK (#52)
+          10   Sequence                TCP  Duplicate ACK (#53)
+          10   Sequence                TCP  Duplicate ACK (#54)
+          10   Sequence                TCP  Duplicate ACK (#55)
+          10   Sequence                TCP  Duplicate ACK (#56)
+          10   Sequence                TCP  Duplicate ACK (#57)
+          10   Sequence                TCP  Duplicate ACK (#58)
+          10   Sequence                TCP  Duplicate ACK (#59)
+          10   Sequence                TCP  Duplicate ACK (#60)
+          10   Sequence                TCP  Duplicate ACK (#61)
+          10   Sequence                TCP  Duplicate ACK (#62)
+          10   Sequence                TCP  Duplicate ACK (#63)
+          10   Sequence                TCP  Duplicate ACK (#64)
+          10   Sequence                TCP  Duplicate ACK (#65)
+          10   Sequence                TCP  Duplicate ACK (#66)
+          10   Sequence                TCP  Duplicate ACK (#67)
+          10   Sequence                TCP  Duplicate ACK (#68)
+           4   Sequence                TCP  Duplicate ACK (#69)
+           1   Sequence                TCP  Duplicate ACK (#70)
+           1   Sequence                TCP  Duplicate ACK (#71)
+           1   Sequence                TCP  Duplicate ACK (#72)
+           1   Sequence                TCP  Duplicate ACK (#73)
+           2   Sequence                TCP  This frame initiates the connection closing
+           1   Sequence                TCP  This frame undergoes the connection closing
+
+Chats (7)
+=============
+   Frequency      Group           Protocol  Summary
+           2   Sequence                TCP  Connection establish request (SYN): server port 5201
+           2   Sequence                TCP  Connection establish acknowledge (SYN+ACK): server port 5201
+           3   Sequence                TCP  Connection finish (FIN)

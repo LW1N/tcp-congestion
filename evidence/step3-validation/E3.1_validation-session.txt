@@ -1,0 +1,385 @@
+Script started on 2026-10-22 23:22:27+00:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="202" LINES="51"]
+[?2004h]0;lucas@vm0: ~/tcp-congestion[01;32mlucas@vm0[00m:[01;34m~/tcp-congestion[00m$ [7msudo python3 -u -m topo.dumbbell --rtt 0[27m[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Csudo python3 -u -m topo.dumbbell --rtt 0
+[?2004l[sudo: authenticate] Password: ***********           
+== Topology (bottleneck r1-eth1 on router r1, buffer 2 packets)
+h1 h1-eth0:s1-eth2
+h2 h2-eth0:s1-eth3
+h3 h3-eth0:s1-eth4
+h4 h4-eth0:s1-eth5
+h5 h5-eth0:s2-eth2
+h6 h6-eth0:s2-eth3
+h7 h7-eth0:s2-eth4
+h8 h8-eth0:s2-eth5
+hp hp-eth0:s1-eth6
+hr hr-eth0:s2-eth6
+r1 r1-eth0:s1-eth1 r1-eth1:s2-eth1
+  h1-eth0<->s1-eth2
+  h2-eth0<->s1-eth3
+  h3-eth0<->s1-eth4
+  h4-eth0<->s1-eth5
+  h5-eth0<->s2-eth2
+  h6-eth0<->s2-eth3
+  h7-eth0<->s2-eth4
+  h8-eth0<->s2-eth5
+  hp-eth0<->s1-eth6
+  hr-eth0<->s2-eth6
+  r1-eth1<->s2-eth1
+  s1-eth1<->r1-eth0
+
+== Addresses
+  h1: 10.0.0.1
+  h2: 10.0.0.2
+  h3: 10.0.0.3
+  h4: 10.0.0.4
+  hp: 10.0.0.9
+  h5: 10.0.1.5
+  h6: 10.0.1.6
+  h7: 10.0.1.7
+  h8: 10.0.1.8
+  hr: 10.0.1.10
+  r1: r1-eth0 10.0.0.254, r1-eth1 10.0.1.254
+
+== Bottleneck qdisc and class on r1-eth1
+qdisc htb 1: root refcnt 5 r2q 10 default 0x10 direct_packets_stat 0 direct_qlen 1000
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 20: parent 1:10 limit 2p
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+
+class htb 1:10 root leaf 20: prio 0 rate 50Mbit ceil 50Mbit burst 1600b cburst 1600b
+
+== Path delays on s2
+h5 via s2-eth2: qdisc netem 805b: root refcnt 5 limit 100000 seed 13626250995607293120
+h6 via s2-eth3: qdisc netem 805c: root refcnt 5 limit 100000 seed 799114572777884576
+h7 via s2-eth4: qdisc netem 805d: root refcnt 5 limit 100000 seed 4209333539333625209
+h8 via s2-eth5: qdisc netem 805e: root refcnt 5 limit 100000 seed 7460661476187012409
+hr via s2-eth6: qdisc netem 805f: root refcnt 5 limit 100000 seed 11292753304714894327
+
+== Offloads on h1-eth0
+tcp-segmentation-offload: off
+generic-segmentation-offload: off
+generic-receive-offload: off
+
+== h1 -> h5 ping
+5 packets transmitted, 5 received, 0% packet loss, time 4072ms
+rtt min/avg/max/mdev = 0.150/0.821/2.609/0.944 ms
+
+[?2004h]0;lucas@vm0: ~/tcp-congestion[01;32mlucas@vm0[00m:[01;34m~/tcp-congestion[00m$ [7msudo python3 -u -m topo.dumbbell --cli[27m[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Csudo python3 -u -m topo.dumbbell --cli
+[?2004l== Topology (bottleneck r1-eth1 on router r1, buffer 167 packets)
+h1 h1-eth0:s1-eth2
+h2 h2-eth0:s1-eth3
+h3 h3-eth0:s1-eth4
+h4 h4-eth0:s1-eth5
+h5 h5-eth0:s2-eth2
+h6 h6-eth0:s2-eth3
+h7 h7-eth0:s2-eth4
+h8 h8-eth0:s2-eth5
+hp hp-eth0:s1-eth6
+hr hr-eth0:s2-eth6
+r1 r1-eth0:s1-eth1 r1-eth1:s2-eth1
+  h1-eth0<->s1-eth2
+  h2-eth0<->s1-eth3
+  h3-eth0<->s1-eth4
+  h4-eth0<->s1-eth5
+  h5-eth0<->s2-eth2
+  h6-eth0<->s2-eth3
+  h7-eth0<->s2-eth4
+  h8-eth0<->s2-eth5
+  hp-eth0<->s1-eth6
+  hr-eth0<->s2-eth6
+  r1-eth1<->s2-eth1
+  s1-eth1<->r1-eth0
+
+== Addresses
+  h1: 10.0.0.1
+  h2: 10.0.0.2
+  h3: 10.0.0.3
+  h4: 10.0.0.4
+  hp: 10.0.0.9
+  h5: 10.0.1.5
+  h6: 10.0.1.6
+  h7: 10.0.1.7
+  h8: 10.0.1.8
+  hr: 10.0.1.10
+  r1: r1-eth0 10.0.0.254, r1-eth1 10.0.1.254
+
+== Bottleneck qdisc and class on r1-eth1
+qdisc htb 1: root refcnt 5 r2q 10 default 0x10 direct_packets_stat 0 direct_qlen 1000
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 20: parent 1:10 limit 167p
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+
+class htb 1:10 root leaf 20: prio 0 rate 50Mbit ceil 50Mbit burst 1600b cburst 1600b
+
+== Path delays on s2
+h5 via s2-eth2: qdisc netem 8060: root refcnt 5 limit 100000 delay 40ms seed 8977235351692674659
+h6 via s2-eth3: qdisc netem 8061: root refcnt 5 limit 100000 delay 40ms seed 15487297569317355667
+h7 via s2-eth4: qdisc netem 8062: root refcnt 5 limit 100000 delay 40ms seed 14844286743723466300
+h8 via s2-eth5: qdisc netem 8063: root refcnt 5 limit 100000 delay 40ms seed 10906543377523143217
+hr via s2-eth6: qdisc netem 8064: root refcnt 5 limit 100000 delay 40ms seed 13277413718726829864
+
+== Offloads on h1-eth0
+tcp-segmentation-offload: off
+generic-segmentation-offload: off
+generic-receive-offload: off
+
+== h1 -> h5 ping
+5 packets transmitted, 5 received, 0% packet loss, time 4017ms
+rtt min/avg/max/mdev = 40.167/42.144/44.742/1.536 ms
+
+mininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> [Kmininet> h5 iperf3 -s -D
+mininet> h5 iperf3 -s -D[1P[1@6
+mininet> h6 iperf3 -s -D[1P[1@7
+mininet> h7 iperf3 -s -D[C[1P[1@8
+mininet> h1 ping -c 20 h5
+PING 10.0.1.5 (10.0.1.5) 56(84) bytes of data.
+64 bytes from 10.0.1.5: icmp_seq=1 ttl=63 time=44.3 ms
+64 bytes from 10.0.1.5: icmp_seq=2 ttl=63 time=42.7 ms
+64 bytes from 10.0.1.5: icmp_seq=3 ttl=63 time=41.2 ms
+64 bytes from 10.0.1.5: icmp_seq=4 ttl=63 time=44.7 ms
+64 bytes from 10.0.1.5: icmp_seq=5 ttl=63 time=41.9 ms
+64 bytes from 10.0.1.5: icmp_seq=6 ttl=63 time=40.7 ms
+64 bytes from 10.0.1.5: icmp_seq=7 ttl=63 time=44.9 ms
+64 bytes from 10.0.1.5: icmp_seq=8 ttl=63 time=42.4 ms
+64 bytes from 10.0.1.5: icmp_seq=9 ttl=63 time=41.0 ms
+64 bytes from 10.0.1.5: icmp_seq=10 ttl=63 time=43.3 ms
+64 bytes from 10.0.1.5: icmp_seq=11 ttl=63 time=43.2 ms
+64 bytes from 10.0.1.5: icmp_seq=12 ttl=63 time=42.2 ms
+64 bytes from 10.0.1.5: icmp_seq=13 ttl=63 time=44.8 ms
+64 bytes from 10.0.1.5: icmp_seq=14 ttl=63 time=40.7 ms
+64 bytes from 10.0.1.5: icmp_seq=15 ttl=63 time=42.7 ms
+64 bytes from 10.0.1.5: icmp_seq=16 ttl=63 time=40.2 ms
+64 bytes from 10.0.1.5: icmp_seq=17 ttl=63 time=42.4 ms
+64 bytes from 10.0.1.5: icmp_seq=18 ttl=63 time=43.5 ms
+64 bytes from 10.0.1.5: icmp_seq=19 ttl=63 time=44.6 ms
+64 bytes from 10.0.1.5: icmp_seq=20 ttl=63 time=42.0 ms
+
+--- 10.0.1.5 ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19068ms
+rtt min/avg/max/mdev = 40.245/42.658/44.879/1.447 ms
+mininet> h1 iperf3 -c h5 -u -b 60M -t 20 > /tmp/v2.txt & 
+mininet> r1 sleep 8; tc -s qdisc show dev r1-eth1 | tee evidence/step3-validation/E3.3_qdisc-under-load.txt
+qdisc htb 1: root refcnt 5 r2q 10 default 0x10 direct_packets_stat 0 direct_qlen 1000
+ Sent 107038922 bytes 71871 pkt (dropped 16789, overlimits 71736 requeues 0) 
+ backlog 243Kb 167p requeues 0
+qdisc pfifo 20: parent 1:10 limit 167p
+ Sent 107038922 bytes 71871 pkt (dropped 16789, overlimits 0 requeues 0) 
+ backlog 243Kb 167p requeues 0
+mininet> h1 sleep 14; tail -n 4 /tmp/v2.txt
+[  5]   0.00-20.00  sec   143 MBytes  60.0 Mbits/sec  0.000 ms  0/103593 (0%)  sender
+[  5]   0.00-20.08  sec   116 MBytes  48.4 Mbits/sec  0.081 ms  19613/103593 (19%)  receiver
+
+iperf Done.
+mininet> h1 iperf3 -c h5 -u -b 25M -t 10 
+Connecting to host 10.0.1.5, port 5201
+[  5] local 10.0.0.1 port 40335 connected to 10.0.1.5 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  5]   0.00-1.00   sec  2.98 MBytes  25.0 Mbits/sec  2161  
+[  5]   1.00-2.00   sec  2.98 MBytes  25.0 Mbits/sec  2158  
+[  5]   2.00-3.00   sec  2.98 MBytes  25.0 Mbits/sec  2158  
+[  5]   3.00-4.00   sec  2.98 MBytes  25.0 Mbits/sec  2157  
+[  5]   4.00-5.00   sec  2.98 MBytes  25.0 Mbits/sec  2159  
+[  5]   5.00-6.00   sec  2.98 MBytes  25.0 Mbits/sec  2158  
+[  5]   6.00-7.00   sec  2.98 MBytes  25.0 Mbits/sec  2159  
+[  5]   7.00-8.00   sec  2.98 MBytes  25.0 Mbits/sec  2158  
+[  5]   8.00-9.00   sec  2.98 MBytes  25.0 Mbits/sec  2158  
+[  5]   9.00-10.00  sec  2.98 MBytes  25.0 Mbits/sec  2158  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.00  sec  29.8 MBytes  25.0 Mbits/sec  0.000 ms  0/21584 (0%)  sender
+[  5]   0.00-10.04  sec  29.8 MBytes  24.9 Mbits/sec  0.012 ms  0/21584 (0%)  receiver
+
+iperf Done.
+mininet> h1 iperf3 -c h5 -t 30 -C cubic 
+Connecting to host 10.0.1.5, port 5201
+[  5] local 10.0.0.1 port 35070 connected to 10.0.1.5 port 5201
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec  7.25 MBytes  60.8 Mbits/sec   18    352 KBytes       
+[  5]   1.00-2.00   sec  5.00 MBytes  41.8 Mbits/sec    0    410 KBytes       
+[  5]   2.00-3.00   sec  6.00 MBytes  50.5 Mbits/sec    0    451 KBytes       
+[  5]   3.00-4.00   sec  6.00 MBytes  50.3 Mbits/sec    2    331 KBytes       
+[  5]   4.00-5.00   sec  5.00 MBytes  41.9 Mbits/sec    0    365 KBytes       
+[  5]   5.00-6.00   sec  6.12 MBytes  51.4 Mbits/sec    0    387 KBytes       
+[  5]   6.00-7.00   sec  6.00 MBytes  50.3 Mbits/sec    0    397 KBytes       
+[  5]   7.00-8.00   sec  5.00 MBytes  41.9 Mbits/sec    0    400 KBytes       
+[  5]   8.00-9.00   sec  6.00 MBytes  50.4 Mbits/sec    0    400 KBytes       
+[  5]   9.00-10.00  sec  5.88 MBytes  49.2 Mbits/sec    0    400 KBytes       
+[  5]  10.00-11.00  sec  6.00 MBytes  50.3 Mbits/sec    0    409 KBytes       
+[  5]  11.00-12.00  sec  5.00 MBytes  41.9 Mbits/sec    0    419 KBytes       
+[  5]  12.00-13.00  sec  5.88 MBytes  49.3 Mbits/sec    0    436 KBytes       
+[  5]  13.00-14.00  sec  6.00 MBytes  50.4 Mbits/sec    0    471 KBytes       
+[  5]  14.00-15.00  sec  6.00 MBytes  50.2 Mbits/sec    3    378 KBytes       
+[  5]  15.00-16.00  sec  5.00 MBytes  42.0 Mbits/sec    0    421 KBytes       
+[  5]  16.00-17.00  sec  5.88 MBytes  49.3 Mbits/sec    0    450 KBytes       
+[  5]  17.00-18.00  sec  6.00 MBytes  50.3 Mbits/sec    0    465 KBytes       
+[  5]  18.00-19.01  sec  5.50 MBytes  46.0 Mbits/sec    1    341 KBytes       
+[  5]  19.01-20.00  sec  6.00 MBytes  50.5 Mbits/sec    0    370 KBytes       
+[  5]  20.00-21.00  sec  4.88 MBytes  40.9 Mbits/sec    0    390 KBytes       
+[  5]  21.00-22.00  sec  6.00 MBytes  50.3 Mbits/sec    0    399 KBytes       
+[  5]  22.00-23.00  sec  6.00 MBytes  50.4 Mbits/sec    0    400 KBytes       
+[  5]  23.00-24.00  sec  6.00 MBytes  50.3 Mbits/sec    0    400 KBytes       
+[  5]  24.00-25.00  sec  4.88 MBytes  40.8 Mbits/sec    0    400 KBytes       
+[  5]  25.00-26.00  sec  6.00 MBytes  50.4 Mbits/sec    0    410 KBytes       
+[  5]  26.00-27.00  sec  6.00 MBytes  50.4 Mbits/sec    0    421 KBytes       
+[  5]  27.00-28.00  sec  6.00 MBytes  50.3 Mbits/sec    0    443 KBytes       
+[  5]  28.00-29.00  sec  5.12 MBytes  43.0 Mbits/sec    3    331 KBytes       
+[  5]  29.00-30.00  sec  5.88 MBytes  49.2 Mbits/sec    0    389 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-30.00  sec   172 MBytes  48.2 Mbits/sec   27            sender
+[  5]   0.00-30.07  sec   170 MBytes  47.5 Mbits/sec                  receiver
+
+iperf Done.
+mininet> h1 iperf3 -c h5 -t 5 -C bbr -J | grep congestion 
+		"sender_tcp_congestion":	"bbr",
+		"receiver_tcp_congestion":	"bbr"
+mininet> h1 iperf3 -c h5 -t 15 > /dev/null & 
+mininet> r1 sleep 5; tcpdump -i r1-eth1 -c 500 -nn tcp 2>/dev/null | grep -o 'length [0-9]*' | sort -k2 -n | tail -1; sleep 11
+^C
+mininet> [Kmininet> h1 iperf3 -c h5 -t 15 > /dev/null & 
+mininet> r1 timeout 10 tcpdump -l -i r1-eth1 -c 500 -nn tcp 2>/dev/null | grep -o 'length [0-9]*' | sort -k2 -n | tail -1; sleep 15
+length 1448
+mininet> h1 iperf3 -c h5 -t 30 -C cubic 
+Connecting to host 10.0.1.5, port 5201
+[  5] local 10.0.0.1 port 56244 connected to 10.0.1.5 port 5201
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec  7.25 MBytes  60.8 Mbits/sec   17    352 KBytes       
+[  5]   1.00-2.00   sec  5.00 MBytes  41.9 Mbits/sec    0    409 KBytes       
+[  5]   2.00-3.00   sec  6.00 MBytes  50.4 Mbits/sec    0    448 KBytes       
+[  5]   3.00-4.00   sec  5.00 MBytes  41.9 Mbits/sec    2    337 KBytes       
+[  5]   4.00-5.00   sec  6.12 MBytes  51.5 Mbits/sec    0    363 KBytes       
+[  5]   5.00-6.00   sec  6.00 MBytes  50.3 Mbits/sec    0    385 KBytes       
+[  5]   6.00-7.00   sec  5.88 MBytes  49.3 Mbits/sec    0    396 KBytes       
+[  5]   7.00-8.00   sec  6.00 MBytes  50.3 Mbits/sec    0    400 KBytes       
+[  5]   8.00-9.00   sec  5.00 MBytes  41.9 Mbits/sec    0    400 KBytes       
+[  5]   9.00-10.00  sec  6.00 MBytes  50.4 Mbits/sec    0    400 KBytes       
+[  5]  10.00-11.00  sec  5.88 MBytes  49.2 Mbits/sec    0    407 KBytes       
+[  5]  11.00-12.00  sec  5.38 MBytes  45.2 Mbits/sec    0    419 KBytes       
+[  5]  12.00-13.01  sec  5.00 MBytes  41.8 Mbits/sec    0    434 KBytes       
+[  5]  13.01-14.00  sec  6.00 MBytes  50.5 Mbits/sec    0    467 KBytes       
+[  5]  14.00-15.00  sec  6.00 MBytes  50.4 Mbits/sec    3    373 KBytes       
+[  5]  15.00-16.00  sec  5.00 MBytes  42.0 Mbits/sec    0    419 KBytes       
+[  5]  16.00-17.00  sec  6.00 MBytes  50.4 Mbits/sec    0    447 KBytes       
+[  5]  17.00-18.00  sec  6.00 MBytes  50.3 Mbits/sec    0    465 KBytes       
+[  5]  18.00-19.00  sec  4.88 MBytes  40.9 Mbits/sec    1    337 KBytes       
+[  5]  19.00-20.00  sec  6.00 MBytes  50.3 Mbits/sec    0    369 KBytes       
+[  5]  20.00-21.00  sec  6.00 MBytes  50.3 Mbits/sec    0    389 KBytes       
+[  5]  21.00-22.00  sec  5.88 MBytes  49.3 Mbits/sec    0    397 KBytes       
+[  5]  22.00-23.00  sec  5.00 MBytes  41.9 Mbits/sec    0    400 KBytes       
+[  5]  23.00-24.00  sec  6.00 MBytes  50.3 Mbits/sec    0    400 KBytes       
+[  5]  24.00-25.00  sec  6.00 MBytes  50.3 Mbits/sec    0    400 KBytes       
+[  5]  25.00-26.00  sec  5.88 MBytes  49.3 Mbits/sec    0    410 KBytes       
+[  5]  26.00-27.00  sec  5.00 MBytes  41.8 Mbits/sec    0    421 KBytes       
+[  5]  27.00-28.00  sec  6.00 MBytes  50.3 Mbits/sec    0    440 KBytes       
+[  5]  28.00-29.01  sec  5.00 MBytes  41.9 Mbits/sec    3    365 KBytes       
+[  5]  29.01-30.00  sec  6.00 MBytes  50.4 Mbits/sec    1    383 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-30.00  sec   172 MBytes  48.0 Mbits/sec   27            sender
+[  5]   0.00-30.07  sec   170 MBytes  47.5 Mbits/sec                  receiver
+
+iperf Done.
+mininet> h1 iperf3 -c h5 -t 30 > /dev/null & 
+mininet> h2 iperf3 -c h6 -t 30 > /dev/null & 
+mininet> h3 iperf3 -c h7 -t 30 > /dev/null &
+mininet> h4 iperf3 -c h8 -u -b 50M -t 30 > /dev/null &
+mininet> h1 sleep 10; top -b -n 1 | head -5; sleep 22 
+top - 23:34:03 up  3:21,  3 users,  load average: 0.12, 0.11, 0.09
+Tasks: 174 total,   1 running, 173 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  4.8 sy,  0.0 ni, 92.9 id,  0.0 wa,  0.0 hi,  2.4 si,  0.0 st 
+MiB Mem :   3380.7 total,   1065.9 free,    512.8 used,   1999.5 buff/cache     
+MiB Swap:      0.0 total,      0.0 free,      0.0 used.   2867.9 avail Mem 
+mininet> exit
+[?2004h]0;lucas@vm0: ~/tcp-congestion[01;32mlucas@vm0[00m:[01;34m~/tcp-congestion[00m$ exit
+[?2004lexit
+
+Script done on 2026-10-22 23:34:31+00:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-10-22 23:59:35+00:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="202" LINES="51"]
+[?2004h]0;lucas@vm0: ~/tcp-congestion[01;32mlucas@vm0[00m:[01;34m~/tcp-congestion[00m$ [7msudo python3 -u -m topo.dumbbell --cli[27m[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Csudo python3 -u -m topo.dumbbell --cli
+[?2004l[sudo: authenticate] Password: ***********           
+== Topology (bottleneck r1-eth1 on router r1, buffer 167 packets)
+h1 h1-eth0:s1-eth2
+h2 h2-eth0:s1-eth3
+h3 h3-eth0:s1-eth4
+h4 h4-eth0:s1-eth5
+h5 h5-eth0:s2-eth2
+h6 h6-eth0:s2-eth3
+h7 h7-eth0:s2-eth4
+h8 h8-eth0:s2-eth5
+hp hp-eth0:s1-eth6
+hr hr-eth0:s2-eth6
+r1 r1-eth0:s1-eth1 r1-eth1:s2-eth1
+  h1-eth0<->s1-eth2
+  h2-eth0<->s1-eth3
+  h3-eth0<->s1-eth4
+  h4-eth0<->s1-eth5
+  h5-eth0<->s2-eth2
+  h6-eth0<->s2-eth3
+  h7-eth0<->s2-eth4
+  h8-eth0<->s2-eth5
+  hp-eth0<->s1-eth6
+  hr-eth0<->s2-eth6
+  r1-eth1<->s2-eth1
+  s1-eth1<->r1-eth0
+
+== Addresses
+  h1: 10.0.0.1
+  h2: 10.0.0.2
+  h3: 10.0.0.3
+  h4: 10.0.0.4
+  hp: 10.0.0.9
+  h5: 10.0.1.5
+  h6: 10.0.1.6
+  h7: 10.0.1.7
+  h8: 10.0.1.8
+  hr: 10.0.1.10
+  r1: r1-eth0 10.0.0.254, r1-eth1 10.0.1.254
+
+== Bottleneck qdisc and class on r1-eth1
+qdisc htb 1: root refcnt 5 r2q 10 default 0x10 direct_packets_stat 0 direct_qlen 1000
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 20: parent 1:10 limit 167p
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+
+class htb 1:10 root leaf 20: prio 0 rate 50Mbit ceil 50Mbit burst 1600b cburst 1600b
+
+== Path delays on s2
+h5 via s2-eth2: qdisc netem 8065: root refcnt 5 limit 100000 delay 40ms seed 1178807346589853775
+h6 via s2-eth3: qdisc netem 8066: root refcnt 5 limit 100000 delay 40ms seed 2028996114615160179
+h7 via s2-eth4: qdisc netem 8067: root refcnt 5 limit 100000 delay 40ms seed 11220025545767951693
+h8 via s2-eth5: qdisc netem 8068: root refcnt 5 limit 100000 delay 40ms seed 15877419710776630535
+hr via s2-eth6: qdisc netem 8069: root refcnt 5 limit 100000 delay 40ms seed 9279607413601805131
+
+== Offloads on h1-eth0
+tcp-segmentation-offload: off
+generic-segmentation-offload: off
+generic-receive-offload: off
+
+== h1 -> h5 ping
+5 packets transmitted, 5 received, 0% packet loss, time 4015ms
+rtt min/avg/max/mdev = 40.481/42.021/44.616/1.419 ms
+
+mininet> h5 iperf3 -s -D
+mininet> h5 iperf3 -s -D[C[1P[1@6
+mininet> h6 iperf3 -s -D[1P[1@7
+mininet> h7 iperf3 -s -D[1@8[1P[1P[1@8
+mininet> h1 iperf3 -c h5 -t 30 > /tmp/v9_h1.txt &
+mininet> h2 iperf3 -c h6 -t 30 > /tmp/v9_h2.txt &
+mininet> h3 iperf3 -c h7 -t 30 > /tmp/v9_h3.txt &
+mininet> h4 iperf3 -c h8 -u -b 50M -t 30 > /tmp/v9_h4.txt &
+mininet> h1 sleep 10; top -b -n 2 -d 2 | grep 'Cpu(s)' | tail -1; sleep 20; grep -h receiver /tmp/v9_h*.txt
+%Cpu(s):  0.1 us,  1.1 sy,  0.0 ni, 95.3 id,  0.1 wa,  0.0 hi,  3.3 si,  0.0 st 
+[  5]   0.00-30.33  sec  90.2 MBytes  25.0 Mbits/sec                  receiver
+[  5]   0.00-30.08  sec  22.8 MBytes  6.34 Mbits/sec                  receiver
+[  5]   0.00-30.37  sec  3.62 MBytes  1.00 Mbits/sec                  receiver
+[  5]   0.00-30.09  sec   173 MBytes  48.2 Mbits/sec  0.020 ms  4208/129511 (3.2%)  receiver
+mininet> exut[K[Kit
+[?2004h]0;lucas@vm0: ~/tcp-congestion[01;32mlucas@vm0[00m:[01;34m~/tcp-congestion[00m$ exit
+[?2004lexit
+
+Script done on 2026-10-23 00:01:26+00:00 [COMMAND_EXIT_CODE="0"]

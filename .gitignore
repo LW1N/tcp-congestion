@@ -1,0 +1,6 @@
+# large or generated: kept out of git, copied to the Mac with rsync instead
+results/
+data/
+figures/
+*.pcap
+__pycache__/

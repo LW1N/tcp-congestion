@@ -1,0 +1,66 @@
+== Topology (bottleneck r1-eth1 on router r1, buffer 42 packets)
+h1 h1-eth0:s1-eth2
+h2 h2-eth0:s1-eth3
+h3 h3-eth0:s1-eth4
+h4 h4-eth0:s1-eth5
+h5 h5-eth0:s2-eth2
+h6 h6-eth0:s2-eth3
+h7 h7-eth0:s2-eth4
+h8 h8-eth0:s2-eth5
+hp hp-eth0:s1-eth6
+hr hr-eth0:s2-eth6
+r1 r1-eth0:s1-eth1 r1-eth1:s2-eth1
+  h1-eth0<->s1-eth2
+  h2-eth0<->s1-eth3
+  h3-eth0<->s1-eth4
+  h4-eth0<->s1-eth5
+  h5-eth0<->s2-eth2
+  h6-eth0<->s2-eth3
+  h7-eth0<->s2-eth4
+  h8-eth0<->s2-eth5
+  hp-eth0<->s1-eth6
+  hr-eth0<->s2-eth6
+  r1-eth1<->s2-eth1
+  s1-eth1<->r1-eth0
+
+== Addresses
+  h1: 10.0.0.1
+  h2: 10.0.0.2
+  h3: 10.0.0.3
+  h4: 10.0.0.4
+  hp: 10.0.0.9
+  h5: 10.0.1.5
+  h6: 10.0.1.6
+  h7: 10.0.1.7
+  h8: 10.0.1.8
+  hr: 10.0.1.10
+  r1: r1-eth0 10.0.0.254, r1-eth1 10.0.1.254
+
+== Bottleneck qdisc and class on r1-eth1
+qdisc htb 1: root refcnt 5 r2q 10 default 0x10 direct_packets_stat 0 direct_qlen 1000
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc red 20: parent 1:10 limit 63000b min 10500b max 31500b 
+ Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  marked 0 early 0 pdrop 0 other 0 
+
+class htb 1:10 root leaf 20: prio 0 rate 50Mbit ceil 50Mbit burst 1600b cburst 1600b
+class red 20:1 parent 20: 
+
+== Path delays on s2
+h5 via s2-eth2: qdisc netem 8051: root refcnt 5 limit 100000 delay 40ms seed 15037497616033325727
+h6 via s2-eth3: qdisc netem 8052: root refcnt 5 limit 100000 delay 40ms seed 13402082089281583152
+h7 via s2-eth4: qdisc netem 8053: root refcnt 5 limit 100000 delay 40ms seed 8645171965940920779
+h8 via s2-eth5: qdisc netem 8054: root refcnt 5 limit 100000 delay 40ms seed 5507021338137866877
+hr via s2-eth6: qdisc netem 8055: root refcnt 5 limit 100000 delay 40ms seed 7097131439255009954
+
+== Offloads on h1-eth0
+tcp-segmentation-offload: off
+generic-segmentation-offload: off
+generic-receive-offload: off
+
+== h1 -> h5 ping
+5 packets transmitted, 5 received, 0% packet loss, time 4018ms
+rtt min/avg/max/mdev = 40.899/42.320/44.802/1.431 ms
+

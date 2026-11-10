@@ -1,0 +1,9 @@
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/bottleneck.pcap
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/done
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/h1_tcp.json
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/meta.json
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/ping.txt
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/qdisc.txt
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/sender_h1.pcap
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/srv_5201.json
+/home/lucas/tcp-congestion/results/s1/20261023-001006/n1-cubic/trial_1/ss_h1.txt

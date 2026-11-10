@@ -1,0 +1,33 @@
+{
+  "config": {
+    "rate": 50,
+    "rtt": 40,
+    "buf_bdp": 1.0,
+    "qdisc": "pfifo",
+    "n": 1,
+    "cca": "cubic",
+    "id": "n1-cubic",
+    "capture": true
+  },
+  "flows": [
+    {
+      "kind": "tcp",
+      "src": "h1",
+      "dst": "h5",
+      "port": 5201,
+      "cca": "cubic",
+      "rtt": 40,
+      "start": 0,
+      "duration": 60,
+      "out": "h1_tcp.json"
+    }
+  ],
+  "capture": true,
+  "kernel": "7.0.0-38-generic",
+  "commit": "19dbfd0",
+  "omit": 5,
+  "buffer_pkts": 167,
+  "idle_rtt_ms": 40.599,
+  "traffic_start": 1792714211.6382775,
+  "traffic_end": 1792714277.7339342
+}

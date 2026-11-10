@@ -1,0 +1,3 @@
+pfifo: largest backlog: 833 packets (cumulative drops 38)
+red: largest backlog: 323 packets (cumulative drops 368)
+fq_codel: largest backlog: 299 packets (cumulative drops 0)

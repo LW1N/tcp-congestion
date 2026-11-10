@@ -1,0 +1,37 @@
+s1: 35 configurations x 5 trials = 175 runs, about 3.5 h
+captured configurations: ['n1-reno', 'n1-cubic', 'n1-bbr', 'n2-equal-cubic+bbr-pfifo', 'n2-equal-cubic+bbr-fq_codel', 'n4-mixed-reno-pfifo']
+  n1-reno
+  n1-cubic
+  n1-bbr
+  n2-equal-reno-pfifo
+  n2-equal-reno-fq_codel
+  n2-equal-cubic-pfifo
+  n2-equal-cubic-fq_codel
+  n2-equal-bbr-pfifo
+  n2-equal-bbr-fq_codel
+  n2-equal-cubic+bbr-pfifo
+  n2-equal-cubic+bbr-fq_codel
+  n2-mixed-reno-pfifo
+  n2-mixed-reno-fq_codel
+  n2-mixed-cubic-pfifo
+  n2-mixed-cubic-fq_codel
+  n2-mixed-bbr-pfifo
+  n2-mixed-bbr-fq_codel
+  n2-mixed-cubic+bbr-pfifo
+  n2-mixed-cubic+bbr-fq_codel
+  n4-equal-reno-pfifo
+  n4-equal-reno-fq_codel
+  n4-equal-cubic-pfifo
+  n4-equal-cubic-fq_codel
+  n4-equal-bbr-pfifo
+  n4-equal-bbr-fq_codel
+  n4-equal-cubic+bbr-pfifo
+  n4-equal-cubic+bbr-fq_codel
+  n4-mixed-reno-pfifo
+  n4-mixed-reno-fq_codel
+  n4-mixed-cubic-pfifo
+  n4-mixed-cubic-fq_codel
+  n4-mixed-bbr-pfifo
+  n4-mixed-bbr-fq_codel
+  n4-mixed-cubic+bbr-pfifo
+  n4-mixed-cubic+bbr-fq_codel

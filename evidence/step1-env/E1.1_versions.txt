@@ -1,0 +1,12 @@
+Description:	Ubuntu 26.04.1 LTS
+7.0.0-38-generic
+4
+               total        used        free      shared  buff/cache   available
+Mem:           3.3Gi       464Mi       1.1Gi       5.2Mi       1.9Gi       2.8Gi
+net.ipv4.tcp_available_congestion_control = reno cubic bbr
+2.3.0
+iperf 3.20 (cJSON 1.7.15)
+TShark (Wireshark) 4.6.4.
+tc utility, iproute2-6.19.0, libbpf 1.6.3
+ovs-vsctl (Open vSwitch) 3.7.1
+Python 3.14.4

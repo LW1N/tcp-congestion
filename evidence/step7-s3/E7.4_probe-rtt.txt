@@ -1,0 +1,5 @@
+                                idle_rtt_ms  probe_rtt_p50  probe_rtt_p95  queue_delay_ms
+config                                                                                   
+n4-b4-rtt50-cubic+bbr-fq_codel         54.0           50.2           50.9            -3.7
+n4-b4-rtt50-cubic+bbr-pfifo            52.5          216.9          250.4           164.4
+n4-b4-rtt50-cubic+bbr-red              51.6           99.5          106.2            47.8

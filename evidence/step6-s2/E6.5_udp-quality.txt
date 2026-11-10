@@ -1,0 +1,2 @@
+pfifo: jitter 0.06 ms, loss 3.9%
+fq_codel: jitter 0.24 ms, loss 73.8%

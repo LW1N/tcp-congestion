@@ -1,0 +1,14 @@
+# S3: buffer size and propagation delay (H1, H3, H5)
+scenario: s3
+trials: 5
+duration: 60
+omit: 5
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 1, buf_bdp: [0.25, 1, 4], rtt: [10, 50, 150], cca: [reno, cubic, bbr]}
+  - {n: 4, buf_bdp: [0.25, 1, 4], rtt: 50, cca_mix: cubic+bbr, qdisc: [pfifo, red, fq_codel]}
+capture:
+  - {n: 1, rtt: 50, buf_bdp: 0.25, cca: [reno, cubic]}
+  - {n: 1, rtt: 50, buf_bdp: 4, cca: [cubic, bbr]}
+  - {n: 4, buf_bdp: [0.25, 4], qdisc: pfifo}
+  - {n: 4, buf_bdp: 4, qdisc: fq_codel}

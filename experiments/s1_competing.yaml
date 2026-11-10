@@ -1,0 +1,14 @@
+# S1: competing TCP flows, with the single-flow baseline (H1, H2, H3)
+scenario: s1
+trials: 5
+duration: 60          # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, qdisc: pfifo}
+grid:
+  - {n: 1, cca: [reno, cubic, bbr]}
+  - {n: [2, 4], rtt_mode: [equal, mixed],
+     cca_mix: [reno, cubic, bbr, cubic+bbr], qdisc: [pfifo, fq_codel]}
+capture:              # packet capture in trial 1 of these configurations
+  - {n: 1, cca: [reno, cubic, bbr]}
+  - {n: 2, rtt_mode: equal, cca_mix: cubic+bbr, qdisc: [pfifo, fq_codel]}
+  - {n: 4, rtt_mode: mixed, cca_mix: reno, qdisc: pfifo}

@@ -1,0 +1,26 @@
+s2: 24 configurations x 5 trials = 120 runs, about 2.4 h
+captured configurations: ['udp50-bbr-pfifo', 'udp100-cubic-pfifo', 'udp100-cubic-fq_codel']
+  udp25-reno-pfifo
+  udp25-reno-fq_codel
+  udp25-cubic-pfifo
+  udp25-cubic-fq_codel
+  udp25-bbr-pfifo
+  udp25-bbr-fq_codel
+  udp50-reno-pfifo
+  udp50-reno-fq_codel
+  udp50-cubic-pfifo
+  udp50-cubic-fq_codel
+  udp50-bbr-pfifo
+  udp50-bbr-fq_codel
+  udp75-reno-pfifo
+  udp75-reno-fq_codel
+  udp75-cubic-pfifo
+  udp75-cubic-fq_codel
+  udp75-bbr-pfifo
+  udp75-bbr-fq_codel
+  udp100-reno-pfifo
+  udp100-reno-fq_codel
+  udp100-cubic-pfifo
+  udp100-cubic-fq_codel
+  udp100-bbr-pfifo
+  udp100-bbr-fq_codel

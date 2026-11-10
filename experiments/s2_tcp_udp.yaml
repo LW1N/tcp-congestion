@@ -1,0 +1,11 @@
+# S2: three TCP flows and one UDP flow share the bottleneck (H4)
+scenario: s2
+trials: 5
+duration: 60
+omit: 5
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, n: 3, udp_len: 1200}
+grid:
+  - {udp_pct: [25, 50, 75, 100], cca: [reno, cubic, bbr], qdisc: [pfifo, fq_codel]}
+capture:
+  - {udp_pct: 100, cca: cubic, qdisc: [pfifo, fq_codel]}
+  - {udp_pct: 50, cca: bbr, qdisc: pfifo}
