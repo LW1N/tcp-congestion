@@ -1,7 +1,5 @@
 # large or generated: kept out of git, copied to the Mac with rsync instead
 results/
-data/
-figures/
 *.pcap
 __pycache__/
 # OS and editor clutter
