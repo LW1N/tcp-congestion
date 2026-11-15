@@ -1,0 +1,6 @@
+n,cca,cca_mix,rtt_mode,qdisc,buf_bdp,rtt,udp_pct,rate,config,trial,run,special,buffer_pkts,idle_rtt_ms,probe_rtt_p50,probe_rtt_p95,max_backlog_pkts,mean_backlog_pkts,wire_mbps,drops,queue_delay_ms
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,1,20261115-140132,False,167,40.1,70.3,79.6,167,118.86760563380281,49.99992214174721,100,30.199999999999996
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,2,20261115-140132,False,167,40.1,70.9,79.6,167,123.37464788732395,49.99831106469046,119,30.800000000000004
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,3,20261115-140132,False,167,40.1,70.6,79.7,167,121.56056338028169,49.999816396203485,120,30.499999999999993
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,4,20261115-140132,False,167,40.1,70.4,79.7,167,120.74366197183099,49.99976138290432,132,30.300000000000004
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,5,20261115-140132,False,167,40.1,69.8,79.7,167,119.23098591549295,49.99479668691608,133,29.699999999999996

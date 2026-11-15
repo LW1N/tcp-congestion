@@ -1,0 +1,13 @@
+# S1 follow-up on the WSL testbed: which path each algorithm gets in mixed-RTT mixes.
+# flow_plan gives h1 the first CCA named and the shortest path, so 'cubic+bbr' puts CUBIC on
+# 20 ms (as in the original S1) and 'bbr+cubic' puts BBR there. Running both orders separates
+# the algorithm effect from the path-length effect. The cubic+bbr settings repeat S1 configs
+# and calibrate mixed RTTs on WSL against the VM.
+scenario: s1x
+trials: 5
+duration: 60          # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, qdisc: pfifo}
+grid:
+  - {n: [2, 4], rtt_mode: mixed, cca_mix: [cubic+bbr, bbr+cubic], qdisc: [pfifo, fq_codel]}
+  - {n: 2, rtt_mode: mixed, cca_mix: [reno+cubic, cubic+reno, reno+bbr, bbr+reno], qdisc: pfifo}

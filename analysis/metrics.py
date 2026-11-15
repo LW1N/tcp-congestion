@@ -12,7 +12,8 @@ from scipy import stats
 
 DATA, FIGURES = Path('data'), Path('figures')
 PARAMS = ['n', 'cca', 'cca_mix', 'rtt_mode', 'qdisc', 'buf_bdp', 'rtt', 'udp_pct', 'rate']
-SUMMARY_METRICS = ['utilization_pct', 'tcp_mbps', 'jain', 'cubic_share_pct', 'reno_share_pct', 'retrans_pct',
+SUMMARY_METRICS = ['utilization_pct', 'tcp_mbps', 'jain', 'cubic_share_pct', 'reno_share_pct', 'bbr_share_pct',
+                   'retrans_pct',
                    'probe_rtt_p50', 'queue_delay_ms', 'max_backlog_pkts', 'udp_loss_pct',
                    'udp_jitter_ms']
 

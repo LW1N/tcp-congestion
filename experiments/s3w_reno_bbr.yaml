@@ -1,0 +1,11 @@
+# S3 follow-up on the WSL testbed: 2 Reno + 2 BBR flows across queue sizes, pfifo.
+# The original S3 competition test was 2 CUBIC + 2 BBR only (hypothesis H3). This adds Reno at the
+# same buffers and RTT. The cubic+bbr 4x BDP setting repeats an S3 config to calibrate WSL at 50 ms.
+scenario: s3w
+trials: 5
+duration: 60          # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: [0.25, 1, 4], rtt: 50, cca_mix: reno+bbr, qdisc: pfifo}
+  - {n: 4, buf_bdp: 4, rtt: 50, cca_mix: cubic+bbr, qdisc: pfifo}

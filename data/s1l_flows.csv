@@ -1,0 +1,11 @@
+n,cca,cca_mix,rtt_mode,qdisc,buf_bdp,rtt,udp_pct,rate,config,trial,run,special,src,kind,flow_cca,path_rtt,start,goodput_mbps,retransmits,bytes_sent,retrans_pct,mean_rtt_ms,max_rtt_ms,cca_reported
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,1,20261115-140132,False,h1,tcp,reno,40,0,19.978480956978803,49,450101248,0.01576356437918608,69.213,81.119,reno
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,1,20261115-140132,False,h2,tcp,cubic,40,0,27.839279028889298,46,627703808,0.010611374210430152,69.192,81.056,cubic
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,2,20261115-140132,False,h1,tcp,reno,40,0,16.38543350707588,58,369360896,0.02273765331130234,69.837,81.129,reno
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,2,20261115-140132,False,h2,tcp,cubic,40,0,31.4257969064766,49,707133440,0.010033749782784986,69.716,81.147,cubic
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,3,20261115-140132,False,h1,tcp,reno,40,0,16.9877029693411,61,382074880,0.02311798148048885,69.368,81.004,reno
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,3,20261115-140132,False,h2,tcp,cubic,40,0,30.824784996216902,46,693239808,0.009608219151777274,69.235,81.156,cubic
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,4,20261115-140132,False,h1,tcp,reno,40,0,17.843087011902853,63,402784256,0.022648352968394077,69.246,81.276,reno
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,4,20261115-140132,False,h2,tcp,cubic,40,0,29.9733496567226,56,675282944,0.012008003566576086,69.18,81.164,cubic
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,5,20261115-140132,False,h1,tcp,reno,40,0,19.59565801285103,60,440008704,0.019745063952189456,68.819,81.005,reno
+2,,reno+cubic,equal,pfifo,1.0,40,,50,n2-equal-reno+cubic-pfifo,5,20261115-140132,False,h2,tcp,cubic,40,0,28.214212146998136,71,636092416,0.016162431340794352,68.721,81.318,cubic
