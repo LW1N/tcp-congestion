@@ -19,7 +19,8 @@ Main finding: the queue discipline matters more than the CCA. fq_codel was best 
 - Linux (tested on an Ubuntu 26.04 ARM64 VM) with root access
 - Mininet 2.3, Open vSwitch, iperf3, iproute2 (`tc`), tcpdump
 - Kernel with the `reno`, `cubic` and `bbr` congestion control modules
-- Python 3 with `pyyaml`, `pandas`, `numpy`, `scipy`, `matplotlib`
+- Python 3 with `pyyaml` for the runner (the system Python, since it runs under sudo)
+- [uv](https://docs.astral.sh/uv/) for the analysis: `uv sync` installs `pandas`, `numpy`, `scipy` and `matplotlib` from `pyproject.toml`
 - Wireshark (optional, for viewing captures)
 
 Load BBR and check that all three algorithms are available:
@@ -51,13 +52,13 @@ Useful flags: `--only <config-id>` (repeatable), `--trials N`, `--capture` (pcap
 **Analyze.**
 
 ```bash
-python3 -m analysis.parse s1            # results/ -> data/s1_*.csv  (s1, s2, s3 or all)
-python3 -m analysis.metrics s1          # -> figures/s1_summary.csv (means + 95% CI)
-python3 -m analysis.metrics s1 --check  # flag configs that need more trials
-python3 -m analysis.plots               # figures F1-F8 into figures/
+uv run python -m analysis.parse s1            # results/ -> data/s1_*.csv  (s1, s2, s3 or all)
+uv run python -m analysis.metrics s1          # -> figures/s1_summary.csv (means + 95% CI)
+uv run python -m analysis.metrics s1 --check  # flag configs that need more trials
+uv run python -m analysis.plots               # figures F1-F8 into figures/
 ```
 
-`results/`, `data/` and `figures/` are not tracked in git.
+`results/` is not tracked in git. `data/` and `figures/` are, so the report numbers can be reproduced without the raw results. Running `analysis.parse` without `results/` present rewrites `data/` from nothing.
 
 **Live demo** (presentation, press Enter to move through each stage):
 

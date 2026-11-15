@@ -195,7 +195,7 @@ def parse_scenario(scenario):
                        'drops': drops[-1] - drops[0] if len(drops) > 1 else np.nan})
     if not trials:
         print(f'{scenario}: no completed trials under {RESULTS / scenario}')
-        return
+        return False
     DATA.mkdir(exist_ok=True)
     trials_df = pd.DataFrame(trials)
     trials_df['queue_delay_ms'] = trials_df['probe_rtt_p50'] - trials_df['idle_rtt_ms']
@@ -203,12 +203,14 @@ def parse_scenario(scenario):
         pd.DataFrame(rows).to_csv(DATA / f'{scenario}_{name}.csv', index=False)
     trials_df.to_csv(DATA / f'{scenario}_trials.csv', index=False)
     print(f'{scenario}: {len(trials)} trials, {len(flows)} flows -> {DATA}/{scenario}_*.csv')
+    return True
 
 
 def main():
     scenarios = ['s1', 's2', 's3'] if sys.argv[1:] in ([], ['all']) else sys.argv[1:]
-    for scenario in scenarios:
-        parse_scenario(scenario)
+    found = [parse_scenario(scenario) for scenario in scenarios]
+    if not all(found):
+        sys.exit(1)                                     # so 'parse && metrics' stops here
 
 
 if __name__ == '__main__':

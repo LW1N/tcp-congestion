@@ -2,6 +2,7 @@
 results/
 *.pcap
 __pycache__/
+.venv/
 # OS and editor clutter
 .DS_Store
 *.pyc

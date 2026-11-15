@@ -62,8 +62,9 @@ def load_configs(spec):
 def flow_plan(cfg, duration, staggered=False, udp_delay=0):
     """The flows of one configuration: who sends to whom, with which CCA, RTT and start time."""
     n = cfg.get('n', 1)
-    if cfg.get('cca_mix') == 'cubic+bbr':
-        ccas = ['cubic' if i % 2 == 0 else 'bbr' for i in range(n)]
+    if '+' in cfg.get('cca_mix', ''):                   # 'a+b': flows alternate a, b, a, b
+        pair = cfg['cca_mix'].split('+')
+        ccas = [pair[i % 2] for i in range(n)]
     else:
         ccas = [cfg.get('cca_mix') or cfg.get('cca', 'cubic')] * n
     rtts = MIXED_RTTS[n] if cfg.get('rtt_mode') == 'mixed' else [cfg['rtt']] * n

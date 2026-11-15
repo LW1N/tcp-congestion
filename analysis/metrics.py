@@ -12,7 +12,7 @@ from scipy import stats
 
 DATA, FIGURES = Path('data'), Path('figures')
 PARAMS = ['n', 'cca', 'cca_mix', 'rtt_mode', 'qdisc', 'buf_bdp', 'rtt', 'udp_pct', 'rate']
-SUMMARY_METRICS = ['utilization_pct', 'tcp_mbps', 'jain', 'cubic_share_pct', 'retrans_pct',
+SUMMARY_METRICS = ['utilization_pct', 'tcp_mbps', 'jain', 'cubic_share_pct', 'reno_share_pct', 'retrans_pct',
                    'probe_rtt_p50', 'queue_delay_ms', 'max_backlog_pkts', 'udp_loss_pct',
                    'udp_jitter_ms']
 
@@ -44,8 +44,10 @@ def per_trial(scenario):
                    # all TCP flows together: retransmitted / sent, weighted by bytes sent, so a
                    # starved flow with a few segments in the window cannot dominate the mean
                    retrans_pct=(tcp.retrans_pct * tcp.bytes_sent).sum() / max(tcp.bytes_sent.sum(), 1))
-        if set(tcp.flow_cca) == {'cubic', 'bbr'}:
-            row['cubic_share_pct'] = 100 * tcp[tcp.flow_cca == 'cubic'].goodput_mbps.sum() / tcp.goodput_mbps.sum()
+        mix = g.cca_mix.iloc[0]
+        if isinstance(mix, str) and set(mix.split('+')) == set(tcp.flow_cca) and '+' in mix:  # share of the first CCA in the mix
+            first = mix.split('+')[0]
+            row[f'{first}_share_pct'] = 100 * tcp[tcp.flow_cca == first].goodput_mbps.sum() / tcp.goodput_mbps.sum()
         if len(udp):
             row.update(udp_loss_pct=udp.udp_loss_pct.iloc[0], udp_jitter_ms=udp.udp_jitter_ms.iloc[0])
         rows.append(row)

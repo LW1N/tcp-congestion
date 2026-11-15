@@ -1,0 +1,11 @@
+# S1 on the WSL testbed: Reno head to head with CUBIC and BBR.
+# Its own scenario name, so results/s1w and data/s1w_* never mix with the VM's s1 data.
+# n1-* and n2-equal-cubic+bbr-* repeat S1 configs: they calibrate WSL against the VM.
+scenario: s1w
+trials: 5
+duration: 60          # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, qdisc: pfifo}
+grid:
+  - {n: 1, cca: [reno, cubic, bbr]}
+  - {n: 2, rtt_mode: equal, cca_mix: [cubic+bbr, reno+cubic, reno+bbr], qdisc: [pfifo, fq_codel]}
