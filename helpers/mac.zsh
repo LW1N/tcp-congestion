@@ -29,6 +29,11 @@ trial() {
         { if [ -n "$3" ]; then grep -- "$3"; else grep -v -e staggered -e udpdelay; fi; } | tail -1
 }
 
+# Live demo: stream the VM's /tmp/demo.pcap into Wireshark. Run once demo.py reaches stage 1.
+livecap() {
+    ssh tcpvm 'tail -c +1 -f /tmp/demo.pcap' | /Applications/Wireshark.app/Contents/MacOS/Wireshark -k -i -
+}
+
 # Open a capture in Wireshark:  cap s1 n1-reno sender_h1.pcap   |   cap s2 udp100-cubic-pfifo bottleneck.pcap udpdelay
 cap() {
     local dir

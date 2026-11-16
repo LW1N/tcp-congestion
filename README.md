@@ -71,11 +71,13 @@ uv run python -m analysis.plots               # figures F1-F8 into figures/
 
 `results/` is not tracked in git. `data/` and `figures/` are, so the report numbers can be reproduced without the raw results. Running `analysis.parse` without `results/` present rewrites `data/` from nothing.
 
-**Live demo** (presentation, press Enter to move through each stage):
+**Live demo** (presentation, press Enter to move through each stage). Each second it redraws each flow's rate, the router's queue and the ping RTT, and it writes the router's traffic to `/tmp/demo.pcap`:
 
 ```bash
 sudo python3 -u demo.py
 ```
+
+To watch that capture live in Wireshark on the Mac, run `livecap` (from `helpers/mac.zsh`) once the demo reaches stage 1.
 
 **Report.** Build the PDF with [tectonic](https://tectonic-typesetting.github.io/) (or XeLaTeX on Overleaf):
 
