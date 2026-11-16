@@ -2,381 +2,237 @@
 
 <!--
 Format: optimized for AI agents. Facts are key: value lines or tables with exact identifiers.
-Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. "UNVERIFIED" = implemented but never
-observed working where it matters. "UNKNOWN" = ask the user or check before relying on it.
-Last updated: 2026-11-09, late night (presentation prep artifact 'Bottleneck Talk Prep' built and fact-checked, OPEN_ITEMS 5f; README committed as 948293a). Earlier that night (final report rebuilt as IEEE two-column LaTeX in tcp-congestion/report/, 12pt Times New Roman, in the user's own voice; Sonnet review fixes applied; committed and pushed as 9148bbd; Claude Doc report superseded). Earlier 2026-11-09: deck restyled to Capture Dark + animations (v25); handoff.md/requirements.md moved into tcp-congestion/; re-review of report + deck (OPEN_ITEMS #0). 2026-10-24: deck built; report rewritten for style; F18/F19 fixed; notebook repaired. Update STATE and OPEN_ITEMS when anything changes.
+Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. UNVERIFIED = implemented but never observed
+working where it matters. UNKNOWN = ask the user or check before relying on it.
+Last updated: 2026-11-15 (after the accuracy review: F26-F30, report f35ad61, deck v262, guide v26, demo upgrade a859ed1).
 -->
 
 ## 0. READ_FIRST
 
-1. Read this file fully before acting. It lives at `tcp-congestion/handoff.md` (moved from the project root 2026-11-09; a session started in `project/` must open it explicitly). Then read `requirements.md` (same folder) (course requirements; the report must satisfy its "Final Report" and "Evaluation Criteria" sections).
-2. Doc state may have changed since this file was written. Before editing a doc, read its changes since the last known revision (section 4): `read(ref node <body_node_id>, payload {"kind":"view","sinceRev":<rev>})`.
-3. Do not trust STATUS=UNKNOWN items. Ask the user or check (section 9).
-4. All experiments are finished and the data is frozen (tag s3-done). Step 9 report: the deliverable is now `report/main.tex` -> `report/main.pdf` (IEEE two-column, section 4c); the user said 'It looks good' on 2026-11-09. The Claude Doc report (section 4) is superseded and still holds 7 errors fixed only in main.tex. Step 10: slide deck DONE as a draft (section 4b); rehearsals, recording and transcript remain.
-5. Highest-priority open items: OPEN_ITEMS #4a (copy report/main.pdf over evidence/step9-report/E9.1_report.pdf; ask whether captions/tables/refs must also be 12 pt) and #5a - the user should step through the restyled deck (v25) in Present mode (none of the 4 live animations or the click builds have been seen rendered), then rehearse with demo.py. For talk prep the user has the prep artifact (OPEN_ITEMS 5f); keep its numbers in sync with the deck. Talk length is UNKNOWN (5g). Also still unconfirmed: #1 (VM commit after the report fixes) and #1b (guarded scp of the repaired notebook.md to the VM).
-6. Before editing the deck, read section 4b (file layout, publish/conflict rules, x-embed constraints) and the memory files writing-not-ai-sounding.md and slides-visual-first.md. Before writing any prose (report, notes, transcript), read memory user-writing-voice.md (R14).
+1. Read this file, then `requirements.md` (course requirements: report sections, 6-8 pages, rubric 20/20/20/20/10/10).
+2. Code and docs are edited on the user's Windows PC in WSL2 (`/home/lucas/tcp-congestion`). The live demo runs on the Mac + VM (decided 2026-11-15): code reaches the VM via GitHub -> Mac `git pull` -> `tcp-push`. Claude cannot run sudo; the user runs experiments and demo.py and pastes output.
+3. Deliverables: report `report/main.pdf` (8 pages, section 4c), slide deck (4b, 16 slides), prep guide (4d). Experiments are finished; all data is in git.
+4. Before editing the deck or guide, re-read them (Artifact read): a publish overwrites edits the user made in the editor (F24).
+5. Highest priority: OPEN_ITEMS #1 (user steps through deck version 262 in Present mode; no slide has ever been rendered) and #2 (dry-run the upgraded demo.py with livecap on Mac + VM; never run).
+6. Prose rules: R12, R14 (user's voice). Slide rules: R13. Do not trust UNKNOWN items (section 9 lists them).
 
 ## 1. USER_RULES (must follow)
 
-- R1: Every command is complete and copy-pasteable. No placeholders, no paths/IDs for the user to assemble, no "see above".
-- R2: Label each code block's first line with where it runs: `# Mac` | `# VM` | `# VM, inside tmux s1` | `# VM, outside tmux` | `# mininet>`.
-- R2a: Mininet commands: ONE command per code block, label as a trailing comment (`h1 ping -c 20 h5   # mininet>`). While a foreground command runs, Mininet forwards further pasted lines to its stdin. Bash blocks may hold several one-line commands (no backslash continuations).
-- R3: Prefer helper shortcuts (section 6) over raw paths in instructions.
-- R4: Code lives as real files in `tcp-congestion/` on the Mac; the user pushes with `tcp-push`. Never paste whole programs into a doc.
-- R5: When the user pastes terminal output or says "verify", check it against the current step's "Done when" criteria and look for anomalies (several real bugs were found this way: F9-F14).
+- R1: Every command complete and copy-pasteable. No placeholders, no "see above".
+- R2: Label where each code block runs: `# WSL` (current), `# Mac`, `# VM`, `# mininet>`. Several commands meant to run in order each get their own block.
+- R2a: Mininet CLI commands: one per block (Mininet forwards later pasted lines to stdin).
+- R3: Prefer helper shortcuts (section 6) where they exist (Mac/VM only).
+- R4: SUPERSEDED 2026-11-15. Code used to live on the Mac and reach the VM via `tcp-push`; the WSL repo is now the working copy, pushed to GitHub by the user.
+- R5: When the user pastes terminal output, check it against expectations and look for anomalies (found F9-F14, F21, F22 this way).
 - R6: Refer to the user with they/them.
-- R7: After any code change: run local checks (section 9), tell the user to `tcp-push`, and update the guide doc if commands, file names, interfaces, or addresses changed.
-- R8: notebook.md canonical copy is on the VM (~/tcp-congestion/notebook.md). Default: give notebook entries as a `cat >> notebook.md <<'EOF'` heredoc for the VM; never overwrite it blindly. Exception the user asked for on 2026-10-24: repair the Mac mirror (tcp-congestion/notebook.md) and have the user copy it with a guarded scp that only overwrites if the VM copy's md5 still equals the last pulled copy. tcp-push does NOT carry notebook.md; tcp-pull overwrites the Mac copy. Screenshot links in notebook entries only if the files reach the VM via tcp-push (they do not: evidence/ is not pushed).
-- R9: The user often asks for a "notebook entry" after each step; it should hold measured numbers, mechanisms ("why"), surprises (numbered Surprise N), practical notes, and Next.
-- R11: When the user asks for a specific host form in a command (on 2026-10-24 they asked for `lucas@vm0.local` instead of `tcpvm` in the ssh/scp notebook command), use it exactly. Why they preferred it is UNKNOWN; `tcpvm` is the configured alias and resolves to lucas@vm0.local.
-- R12: Written deliverables (report, slides, speaker notes, transcript) must not read as AI-generated: vary sentence openings and lengths, no aphoristic 'Label: claim.' openers or chiasmus, some first person ('I measured'), captions in varied shapes. Keep every number exact.
-- R13: Slides: very few on-slide words (target <= ~25 per slide), prefer images, graphs, diagrams and animations; detail goes in speaker notes (<aside>). Every slide must make sense to someone who has not read the proposal or report: no H1-H5 labels, no config ids, define terms (CCA, RTT, BDP, Jain's index) where first used.
-- R14: Prose deliverables use the user's own voice: sample = paragraphs 4-5 (page 2) of project/CMPE 272 Group Reflection.pdf (paragraphs 1-3 are teammates'). Reason-first openings, 'This ...' follow-ups, plain words, first person, no semicolons or em dashes in prose. Details in ~/.claude/projects/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/memory/user-writing-voice.md (memory dir of sessions started in project/, not tcp-congestion/).
-- R15: Report format (user, 2026-11-09): two-column IEEE style, Times New Roman, 12 pt, 6-8 pages.
-- R10: The VM is shared with the user's other work and is brought up and down as needed. Never assume it is running or clean; any VM instruction set starts from the bring-up block (section 3 vm_lifecycle).
+- R7: After code changes run local checks (section 9) and a Sonnet subagent review of the diff (user's global CLAUDE.md).
+- R8: notebook.md canonical copy was on the VM; give entries as heredocs, never overwrite blindly. Which copy is canonical now that work moved to WSL is UNKNOWN (open item 7).
+- R9: Notebook entries hold measured numbers, mechanisms, numbered Surprises, practical notes, Next.
+- R10: The VM is shared; never assume it is up or clean (bring-up block in section 3).
+- R11: Use exactly the host form the user asks for in commands (they once asked for `lucas@vm0.local` instead of `tcpvm`).
+- R12: Deliverables must not read as AI-generated: varied sentence openings and lengths, no aphoristic 'Label: claim.' openers, some first person, exact numbers.
+- R13: Slides: few on-slide words (~25), visuals and animations preferred, details in speaker notes (<aside>), no H1-H5 labels or config ids on slides, define CCA, RTT, BDP, Jain where first used, easy for an audience seeing it once.
+- R14: Prose in the user's voice: reason-first openings, 'This ...' follow-ups, plain words, first person, no semicolons or em dashes. Sample: paragraphs 4-5 of `CMPE 272 Group Reflection.pdf` (on the Mac); memory file user-writing-voice.md lives in the Mac session memory dir, not here.
+- R15: Report: two-column IEEE, Times New Roman, 12 pt, 6-8 pages (keep at 8).
+- R16: Do not start experiment runs unless asked ("DO NOT RUN" when preparing); prepare files and give run commands.
+- R17: The user commits with messages Claude drafts (`/commit-message`, no Co-Authored-By trailer). Give multi-line messages as `git commit -F - <<'EOF' ... EOF`; quoting them with -m broke once (F25).
+- R18: Hedge mechanisms that were not measured ("likely", "consistent with"); state cross-machine comparisons as such.
 
 ## 2. PROJECT
 
 ```yaml
-user: Lucas Nguyen (solo; no team)
-course: CMPE 206, SJSU
-option: TCP Congestion and Network Performance Analysis
-required_tools: [Mininet, iperf3, Wireshark]
-requirements_file: ./requirements.md
-scenarios:              # 3 = minimum allowed by requirements
-  S1: competing TCP flows, single-flow baseline folded in   # tests H1, H2, H3
-  S2: 3 TCP + 1 UDP on one bottleneck                       # tests H4
-  S3: buffer size x propagation delay                       # tests H1, H3, H5
-dropped: [random loss scenario, bandwidth sweep, parking-lot extension]   # parking lot = future work in report
-comparison_axes: {cca: [reno, cubic, bbr], qdisc: [pfifo, red, fq_codel], buffer_x_bdp: [0.25, 1, 4]}
-configs: {S1: 35, S2: 24, S3: 36, total: 95}
-trials_analyzed: {S1: 175 + 3 staggered, S2: 129 + 2 late-UDP, S3: 183, total: 492}
-trial_time_s: 75        # measured
-schedule: {data_freeze: done 2026-10-24 (tag s3-done), submission: 2026-12-11 ASSUMED}
-hypotheses_and_verdicts:
-  H1: {claim: ">90% util at >=1x BDP; 0.25x BDP Reno ~85-90%, CUBIC near full, BBR unaffected", verdict: PARTLY (10 ms / 11-pkt buffer collapse to 23% unpredicted)}
-  H2: {claim: "same CCA+RTT Jain >0.95; mixed RTT favors short RTT more under Reno than CUBIC", verdict: SUPPORTED (+ BBR reverses bias: long RTT wins)}
-  H3: {claim: "BBR beats CUBIC in shallow buffers; CUBIC recovers in deep", verdict: SUPPORTED on pfifo (RED keeps BBR dominant)}
-  H4: {claim: "UDP >=100% starves TCP; fq_codel restores fairness", verdict: SUPPORTED (TCP < 0.1 Mbps beside 100% UDP after F18; cost: UDP jitter 0.6-0.8 ms at 75-100% load)}
-  H5: {claim: "deep pfifo adds ~drain time under loss-based; fq_codel/BBR low", verdict: SUPPORTED for CUBIC (80-86% of drain), PARTLY for Reno (64-71% at 10/50 ms = 2.5-5 BDP cycle model 69%; 41% at 150 ms, cannot regrow in 60 s)}
-headline: queue discipline matters more than CCA; fq_codel best or tied-best in every tested condition
+user: Lucas Nguyen (solo)
+course: CMPE 206, SJSU; option: TCP Congestion and Network Performance Analysis; tools: Mininet, iperf3, Wireshark
+scenarios: {S1: competing TCP flows + single-flow baseline, S2: 3 TCP + 1 UDP, S3: buffer (router queue size) x delay}
+dropped: [random-loss scenario, bandwidth sweep (bandwidth fixed at 50 Mbps), parking-lot topology (future work)]
+axes: {cca: [reno, cubic, bbr v1], qdisc: [pfifo, red, fq_codel], buffer_x_bdp: [0.25, 1, 4], rtt_ms: [10..150]}
+main_study (VM): {configs: 95, trials: 492, run: 2026-10-23..24, tag on VM: s3-done}
+follow_ups (WSL, own scenario names): {configs: 29 (23 S1, 6 S3), trials: 145, calibration: 10 configs repeat VM settings, CIs overlap except 5 small gaps (largest 10 ms / 5% loaded RTT at 4x BDP)}
+framing: loss-based (Reno, CUBIC) vs model-based (BBR v1) vs unresponsive (UDP); results follow that split
+headline: the router queue matters more than the CCA; fq_codel best or tied-best on delay and fairness everywhere
+schedule: {submission: 2026-12-11 ASSUMED (UNKNOWN), report submitted: UNKNOWN}
 ```
 
-Key numbers (5-trial means, CI mostly <1%): n1 util Reno/CUBIC 99.98%, BBR 97.5%; n1 queue delay CUBIC 27.9, Reno 22.6, BBR 0.8 ms; CUBIC share vs BBR pfifo 10.6% (S1 n2), 1.4/1.8/58.9% at 0.25/1/4x (S3 n4), fq_codel 48-50%; S2 (after F18, window 5-60 s) pfifo TCP 35.5/23.1/10.7/0.05 Mbps at UDP 25/50/75/100% (model: (50 - 1.035 x UDP payload rate) x 1448/1514 = 35.4/23.1/10.7/0), fq_codel 35.1-35.4 (Reno 33.2-33.9), UDP loss at 100% pfifo 3.6%; staggered S1: CUBIC ~5.1 Mbps after BBR joins, BBR ~42; H1 model: 0.25x BDP predicts Reno 89% (meas 86.7), CUBIC 98% (98.2); S3 4x BDP CUBIC queue delay 34.5/162/494 ms at RTT 10/50/150; 4-flow 4x BDP pfifo 164, RED 48, fq_codel ~0 ms.
+Hypotheses (proposal) and verdicts: H1 utilization at >=1x BDP: PARTLY (11-packet buffer at 10 ms collapses Reno/CUBIC to 23%). H2 Reno favors short RTT more than CUBIC: SUPPORTED, BBR favors long RTT. H3 BBR wins shallow buffers, CUBIC recovers in deep: SUPPORTED on pfifo; deep (4x BDP) settles at an even split (F22); RED keeps BBR on top. H4 line-rate UDP starves TCP, fq_codel fixes it: SUPPORTED (0.05 -> 35 Mbps). H5 deep FIFO adds its drain time: CUBIC yes (80-86% full), Reno partly (64-71%, 41% at 150 ms).
+
+Key numbers (main study, pfifo unless noted): single flow util Reno/CUBIC 99.98/99.97%, BBR 97.5%; queue delay CUBIC 27.9, Reno 22.6, BBR 0.8 ms; CUBIC vs BBR 1+1 same RTT 10.6%, 2+2 1.9-3.3%, fq_codel 48-50%; S3 2+2 CUBIC 1.4 / 1.8 / 58.9% at 0.25/1/4x (60 s; settles ~51% at 4x); 4x BDP single-flow delay CUBIC 34.5/162/494 ms, Reno 28/127/245 at 10/50/150 ms; S2 pfifo TCP 35.5/23.1/10.7/0.05 Mbps at UDP 25-100%, fq_codel ~35.
+
+| follow-up (scenario, file) | result (share of the loss-based CCA) |
+| --- | --- |
+| s1w `experiments/s1w_reno_wsl.yaml` | Reno vs BBR equal 40 ms: 10.0% pfifo, 43.8% fq_codel; Reno vs CUBIC 60 s 47.9 +/- 11% (inconclusive) |
+| s1x `experiments/s1x_rtt_swap.yaml` | path order swapped (F21): CUBIC on 80 ms vs BBR on 20 ms 46.8% (10.4% other order); Reno 55.6% vs 12.7%; 2+2 BBR wins either order (1.8 / 2.9%) |
+| s1l `experiments/s1l_long_reno_cubic.yaml` | Reno vs CUBIC 180 s: Reno 38.0 +/- 4.1% (~49% first 30 s, then 34-37%) |
+| s3w `experiments/s3w_reno_bbr.yaml` | 2 Reno + 2 BBR: 1.9 / 2.3% at 0.25/1x; 4x: 55.3% at 60 s |
+| slong `experiments/slong_steady_state.yaml` | 180 s reruns (F22), settled 65-185 s: CUBIC vs BBR 4x 51.1 +/- 1.1%; Reno vs BBR 4x 48.1 +/- 1.5%; BBR 20 ms vs CUBIC 80 ms 47.0 +/- 7.9% |
 
 ## 3. ENVIRONMENT
 
 ```yaml
-mac:
-  chip: Apple M2
-  ram_gb: 8
-  shell: zsh            # interactive_comments set by mac.zsh
-  project_dir: ~/Desktop/SJSU/cmpe-206-network/project
-  code_dir: ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion   # git repo, origin https://github.com/LW1N/tcp-congestion (PUBLIC), separate history from the VM repo (VM tags not carried). Commits: 96851a7 'Bring project to git', 6004ee1 handoff+requirements, 9148bbd 'Add IEEE two-column final report (LaTeX)' (report/ + handoff.md), e81205d 'update handoff', 948293a 'Add README with project overview and run instructions'. main == origin/main at 7e2bece 'handoff update' (checked 2026-11-14). 2026-11-14: data/ (35 MB) and figures/ (1 MB) un-ignored and committed so a clone can reproduce the report numbers (no secrets found in them); user moving work to another computer. Still not in git: results/ 2.6 GB (46 pcaps = 1.3 GB; full copy also on the VM), plus ~/.zshrc line sourcing helpers/mac.zsh, ~/.ssh/config Host tcpvm, and the Claude memory dir of project/ (6 files). .gitignore excludes results/ *.pcap __pycache__/ .DS_Store *.pyc *.log. Secret scan clean (sudo passwords in E3.1 are masked). tcp-push does not copy handoff.md/requirements.md/report/ to the VM (explicit rsync list)
-  wireshark: installed; tshark at /Applications/Wireshark.app/Contents/MacOS/tshark (used for E5.8, E6.3)
-  analysis_venv: GONE (old scratchpad vanished). Rebuild in the session scratchpad: python3 -m venv <scratch>/venv && <scratch>/venv/bin/pip install pymupdf pandas scipy matplotlib pyyaml pypdf. System python3 3.12 has no yaml/pandas/docx; csv module works for data checks
-  latex: tectonic 0.17.0 (brew, installed 2026-11-09; XeTeX engine; first run downloads its bundle). No pdflatex/pandoc/Word/LibreOffice on the Mac. System fonts include Times New Roman (/System/Library/Fonts/Supplemental)
-  claude_ssh_to_vm: refused from Claude's sandbox ('Permission denied (publickey)' for lucas@vm0.local, 2026-10-24); ask the user to run VM checks, e.g. with the `! <command>` prefix
-vm:
-  hypervisor: UTM
-  os: Ubuntu 26.04.1 LTS ARM64, kernel 7.0.0-38-generic, 4 vCPU, 3.3 GiB visible
-  hostname: vm0; user: lucas; ssh alias: tcpvm (works: tcp-push/pull, scp used 2026-10-23)
-  project_dir: ~/tcp-congestion   # git repo; canonical notebook.md
-  versions: {mininet: 2.3.0, iperf3: 3.20, tshark: 4.6.4, iproute2: 6.19.0, ovs: 3.7.1, python: 3.14.4}
-  ccas: [reno, cubic, bbr (v1)]
-  disk: 9.8 GB total, 1.4 GB free (86% used) on 2026-10-24; no more experiment runs planned; `sudo apt clean` frees some if needed
-  quirk: VM tshark cannot read the pcaps ("permission denied", even with sudo, files are 644 lucas) - cause unconfirmed; run tshark on the Mac and scp results to VM
-  system_side_effects: none persistent (host sysctls are per Mininet namespace; r1 ip_forward reset on stop); leftovers after a crash = OVS bridges, veths, stray iperf3/tcpdump/ping -> `sudo mn -c`
-  bbr_autoload_at_boot: DONE (/etc/modules-load.d/bbr.conf contains tcp_bbr, checked 2026-10-24); modprobe in bring-up is now redundant but harmless
-vm_lifecycle:   # also in guide Step 10 (rev 110)
-  teardown: [tmux ls, tmux kill-server, sudo mn -c, 'pgrep -af "mininet|iperf3|tcpdump|run.py|demo.py"  (expect nothing)', sudo poweroff]
-  bring_up: ["# Mac: ssh tcpvm 'echo connected to $(hostname)'", "# VM: cd ~/tcp-congestion && sudo -v", sudo mn -c, sudo modprobe tcp_bbr, "sysctl net.ipv4.tcp_available_congestion_control  (expect reno cubic bbr)", quit heavy workloads before the demo]
-  demo: ["# VM: cd ~/tcp-congestion && sudo python3 -u demo.py", "# Mac: cap s1 n1-reno sender_h1.pcap  + filter tcp.analysis.duplicate_ack || tcp.analysis.fast_retransmission"]
+wsl_pc (current):
+  host: Windows PC, AMD Ryzen 5 5600X, 15 GB RAM; Ubuntu 26.04.1 in WSL2, kernel 6.18.58.1-microsoft-standard-WSL2, systemd on
+  repo: /home/lucas/tcp-congestion (origin https://github.com/LW1N/tcp-congestion, PUBLIC); main == origin/main at a859ed1 (2026-11-15)
+  apt: {mininet: 2.3.0-1.1build1, openvswitch-switch: 3.7.1-2, iperf3: 3.20-2, tcpdump: 4.99.6-1, iproute2: 6.19.0}
+  python: system 3.14.4 (has yaml; runner runs under sudo with it); analysis via uv 0.13.7 (~/.local/bin/uv, pyproject.toml + uv.lock, .venv/)
+  latex: tectonic 0.17.0 (~/.local/bin); needs Times New Roman via fontconfig (F23)
+  modules: not loaded at boot; after every WSL restart run the bring-up below
+  raw_results: results/{s1w,s1x,s1l,s3w,slong} 478 MB, gitignored, only on this PC (no backup)
+  limits: sudo needs the user's password; no node/JS engine; pip/uv installs of JS tools (esprima, quickjs) denied by the auto-mode classifier; Claude in Chrome not connected (list_connected_browsers empty, no render checks); JS checked only by a bracket/string tokenizer (was <scratchpad>/jstok.py, may be wiped); root-owned __pycache__ in topo/ traffic/ from sudo runs (harmless)
+  scratchpad: /tmp/claude-1000/-home-lucas-tcp-congestion/<session>/scratchpad, wiped on WSL restart
+bring_up_wsl: "# WSL: sudo modprobe -a tcp_bbr sch_htb sch_red sch_fq_codel sch_netem openvswitch && sudo systemctl enable --now openvswitch-switch && cat /proc/sys/net/ipv4/tcp_available_congestion_control   (expect reno cubic bbr)"
+mac (demo machine): Apple M2, zsh, repo ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion (update with git pull); holds results/ 2.6 GB of the main study (46 pcaps); Wireshark + tshark; Wireshark binary assumed at /Applications/Wireshark.app/Contents/MacOS/Wireshark (UNVERIFIED)
+vm (original testbed, demo host): UTM, Ubuntu 26.04.1 ARM64, kernel 7.0.0-38-generic, 4 vCPU, 3.3 GiB; host vm0, user lucas, alias tcpvm; ~/tcp-congestion; 1.4 GB free; same tool versions as WSL; tcp_bbr autoloads
+vm_bring_up: ["# Mac: ssh tcpvm 'echo connected to $(hostname)'", "# VM: cd ~/tcp-congestion && sudo -v && sudo mn -c"]
 ```
 
 ## 4. DOCS (Claude Docs on claude.ai)
 
-| key | url | project_id | tab_file_id | body_node_id | last_known_rev |
+| key | url | project_id | body_node_id | last_known_rev | status |
 | --- | --- | --- | --- | --- | --- |
-| proposal | https://claude.ai/artifact/MHnQC8nYRexNPwSauG9wwK | a44ea6f5-2c85-42dd-80ed-b60386cd4e56 | 1fda1f0d-2113 | a6564636-68fa | 65 |
-| guide (implementation plan) | https://claude.ai/artifact/BokvUU7o8zuiJZKsWbbiRN | 5782aafa-bbcf-41e2-8797-79b73db5ec59 | 9f63ec6b-914b | 80b14e81-2d18 | 153 |
-| report (SUPERSEDED by report/main.tex on 2026-11-09) | https://claude.ai/artifact/7vJiBvAn1QoxLYNaCXatnG | 38082a81-1bd5-4de3-9460-1437f9709115 | e2d990cc-bcbf | 26792df3-7a2c | 69 (4 suggestions accepted) |
+| proposal | https://claude.ai/artifact/MHnQC8nYRexNPwSauG9wwK | a44ea6f5-2c85-42dd-80ed-b60386cd4e56 | a6564636-68fa | 65 | submitted |
+| guide (implementation plan) | https://claude.ai/artifact/BokvUU7o8zuiJZKsWbbiRN | 5782aafa-bbcf-41e2-8797-79b73db5ec59 | 80b14e81-2d18 | 153 | stale: Mac/VM era, no follow-ups, says .gitignore excludes data/ and figures/ (tracked since 1539d5d) |
+| report doc | https://claude.ai/artifact/7vJiBvAn1QoxLYNaCXatnG | 38082a81-1bd5-4de3-9460-1437f9709115 | 26792df3-7a2c | 69 | SUPERSEDED by report/main.tex |
+
+Doc quirks: read changes since last rev before editing (`read(ref node <body_node_id>, payload {"kind":"view","sinceRev":<rev>})`); whole-block replace needs ifHash + ifRev; guide evidence chips: replace the cell (table mj7hsvwewd5.50640, col 5, enum f2528a45-54f5).
+
+## 4b. SLIDE DECK (Slides artifact)
 
 ```yaml
-id_prefixes: {guide: mj7hsvwewd5, report: m2wt2066mr5}   # block ids are <prefix>.<n>
-widgets:
-  proposal_architecture_diagram: df5ad008-e35c   # pub 6
-  report_topology_diagram: 5fdb99cc-093d         # copy of the proposal diagram, subtitle changed
-  guide_schedule_timeline: 4aa33b88-6411
-enums:
-  guide_evidence_status: f2528a45-54f5           # Not captured | Captured | In report
-report_blobs:   # uploaded via Artifact publish asset:true to the report URL, then create object=blob. In use at rev 43:
-  F2_fairness: 6a35212c-8523        # Figure 2 (legend below, no 'F2.' title prefix, height 2.8)
-  F4_s2: c893260d-fd64              # Figure 3 (F18-corrected S2 numbers)
-  F5_util: 52aa4c66-bc61            # Figure 4
-  F6_share: c32a279d-3962           # Figure 5
-  E6.1_late_udp_pfifo: 3d2a9116-4e62   # Figure 6, annotated (arrow at UDP join); old unannotated 89df0a15-9ba7
-  diagram: embed node/5fdb99cc-093d    # Figure 1
-  unused_old: [6a6dd943-8126 F1, be694870-f019 F2, b4555a94-13e5 F3, 9a0b9e8e-dacb F4, 75eff334-1f43 F5, df3dd58a-4510 F6, d2f4b187-e592 F7, 98d88221-5eb7 F8, 235768c7-25f2 E5.1, 74409043-5ac4 E5.3, d8d9eff2-303e E5.7, adaff7dc-2cbb E6.2, d6cc1064-237c E7.1, bff5743d-dc42 E7.2, 6d563730-087b, 3eb7b0b5-2b64, e44663b6-2b95, 148bf9b5-b6f4, 6c9d851c-704e]
-# report_* lines below describe the superseded Claude Doc; see 4c for the live LaTeX report
-report_structure: [Abstract, 1 Intro + research question, 2 Background (inline formulas; latex blocks print as raw source in PDF export), 3 Architecture (diagram), 4 Methodology (Platform / Automation and metrics / Validation and limits), 5 Scenarios (Table 1), 6 Results S1-S3 (Figs 2-5), 7 Analysis (Table 2 verdicts; H1, H2+H3, H4 + Fig 6, H5, testbed lessons), 8 Recommendations (Table 3, 6 rows x 3 cols), 9 Conclusion, 10 References 1-16 (verified 2026-10-24 via web search; RFC 3550 and iperf3 added)]
-report_page_check: Docs export pdf letter = 8 pages at rev 53 (22 at rev 19). Slack is thin: page 7 ~90 pt free, page 8 ~16 pt; paragraphs split across pages but section headings + following text move together, so a few added lines can push References to page 9. Re-check any edit with export + page count (pymupdf). Pre-rewrite wording recoverable via read atRev 43; old long version atRev 19.
-report_style: rewritten 2026-10-24 (revs 44-53) at the user's request so it does not read as AI-generated: varied sentence openings and lengths, no aphoristic 'X: Y' run-in claims (H labels are now 'H1 (utilization).'), some first person ('I measured', 'My first design'), captions not all 'Sx: claim' form. All numbers unchanged. Keep this style in any further edits and in the Step 10 slides.
-guide_edits_this_period: {111-117: review fixes in Step 8 verdict table (H3 staggered ~5 Mbps, H4 F18 numbers + jitter, H5 Reno mechanism) and Step 9 rec table (TCP 33-35 / <0.1 Mbps, BBR +0.9, queue delay 28-35 ms at 50 ms and 43-105 ms at 150 ms, up to 105 ms), 118-153: evidence checklist statuses + E9.1 path, 103-106: Step 5 E5.1/E5.2/E5.4/E5.7 expectations + NaN note, 107: E7.4 expectation, 108: Step 8 verdict table filled, 109: Step 9 recommendation table filled, 110: Step 10 VM teardown + bring-up block (mn -c, tmux kill-server, poweroff; ssh check, modprobe tcp_bbr, optional modules-load.d) before "Rehearse twice"}
-open_doc_threads:
-  - proposal comment on "Stretch goal: a parking-lot extension": user said "unsure yet"; now out of scope (data frozen) - suggest replying "future work"
-user_decisions_on_docs:
-  - report: references verified 2026-10-24 and the 'cited from memory' note removed; proposal list still carries the note (proposal already submitted, leave)
-  - report target: <= 8 pages in the Docs PDF export (letter); no template was given by the user (requirements only say 6-8 pages)
-editing_quirks:
-  - find targets are case-insensitive; use nth when ambiguous
-  - "as":"text" find/replace works for small edits; whole-block replace needs ifHash + ifRev (rev of the READ, not an ack)
-  - two inserts after the same anchor in one call are refused (same_anchor)
-  - full guide read exceeds tool output; it is saved to a file - parse with python (json -> text, unicode_escape)
-  - export tool (format pdf) result is too large for output and is saved to a file: json data.bytes_b64 -> base64-decode to PDF; count pages with pypdf, render pages with pymupdf (helper scripts pdfpages.py and sheet.py in /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/ba0b8331-7fc9-408c-b344-2325bd99d6e5/scratchpad, may vanish)
-  - PDF export prints ```latex code blocks as raw TeX; tables render at ~60% page width and tall; images ~0.3-0.4 page each; ~350-400 words per page
-  - dropdown chips (e.g. evidence Status) cannot be targeted by id (unknown_id); replace the whole cell: target {kind: cell, table, row, col} + ifRev, with markdown '<?claude block st?>' and blocks {st: {type: dropdown, enum, index}}
-  - multi-block replace: target several ids + ifRev alone (no ifHash); a media block is replaced with markdown '![alt](blob/<id>)'
-  - a blocks target must be the paragraph id, not a <text> run id (refusal bad_request wrong_kind names the holder block); whole-paragraph replace with as:markdown keeps **bold**/*italic*/`code` that the markdown re-spells (the 'dropped' notices list only the old runs)
-  - report PDF helper scripts this session: /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/410e567a-c031-4e3f-9d25-980027b610d9/scratchpad/decode.py <export.txt> <out.pdf> (base64 decode) and /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/410e567a-c031-4e3f-9d25-980027b610d9/scratchpad/layout.py <pdf> (per-page first/last block and bottom y; content area ends ~736 pt on letter)
-```
-
-## 4b. SLIDE DECK (Step 10, Slides artifact)
-
-```yaml
-url: https://claude.ai/artifact/2GZMMEVvtSyVmNHZ44rzys
-type: Slides artifact type (type_url https://claude.ai/artifact/8jTsAFQMFDb2oA8MsPJ2eL, contract 0.2.47); private until the user shares it (Share menu; Claude cannot)
-last_published_version: 1794798183-7e90 (version 256, 16 slides, 2026-11-15; see OPEN_ITEMS 5j-5r for 244-256). Before: 1794735652-2998 (version 243, 2026-11-15: Reno follow-up added to s1 (new bottom row 'Reno + BBR' 10.0% pfifo / 43.8% fq_codel at top 812/854, title 'On a FIFO, BBR takes the link from CUBIC and Reno', dashed 50% line height 570, footer notes second test machine), scenarios S1 chip 'BBR vs CUBIC, Reno', notes on s1/scenarios/recommendations; built on user's version 1794709446-1729 (user had renamed scenarios notes '3 Experiment Scenarios' and footer 'BDP = Bandwidth × RTT'); local copy scratchpad/deck-reno (publish root); rendered look UNVERIFIED. Earlier: 1794707899-ebce (version 236; 235 = 1794707813-1969), 2026-11-14, Linux session; review fixes of OPEN_ITEMS 5h applied to all 15 slides on top of the user's edited version 1794705631-e2f5; local copy /tmp/claude-1000/-home-lucas-tcp-congestion/de99d4be-fcc9-4793-b493-f4bd5b18d87a/scratchpad/artifact-files/0a453b6c-87ae-4860-be64-30974f20809e/project/, may vanish). Before: 1794286061-ba86 (version 25, 2026-11-09; Sonnet review fixes: queue colors amber/cyan/violet kept only where they mean pfifo/fq_codel/RED on results + queue labels; verdict rows now white = held up, grey = partly; demo circles white except 4 pink, 5 cyan; layout fixes). v24 1794285687-90fb = FULL RESTYLE to 'Capture Dark' + more animation (see 5e). Before that: 1794279356-0e5c (version 22, review fixes). Earlier: 1792880062-08fe (version 17, 2026-10-24) by Claude; live version on 2026-11-09 is 1794277945-48f3 (changed after Claude's last publish, probably the editor re-save; content reviewed 2026-11-09)
-local_files (v24): /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/df40ab0d-e2fa-428c-aada-92e679e3c577/scratchpad/deck-dark/project/ (publish root = .../scratchpad/deck-dark); may vanish -> Artifact read. Older: GONE (old scratchpad 410e567a... vanished). 2026-11-09 copy of version 1794277945-48f3: /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/df40ab0d-e2fa-428c-aada-92e679e3c577/scratchpad/artifact-files/0a453b6c-87ae-4860-be64-30974f20809e/project/  (may vanish too -> Artifact read with paths project/deck.json, project/slides/<id>.html); publish root = that folder's parent
-publish: Artifact publish url=<deck>, root=/private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/410e567a-c031-4e3f-9d25-980027b610d9/scratchpad/deck, file_path=<one changed file abs path>, files={"project/slides/x.html": "project/slides/x.html", ...}; send deck.json only when order/sections/faces/title change
-order: [cover, problem, compare, topology, implementation, scenarios, renocubic, s1, s2, capture, s3share, s3delay, verdicts, recommendations, demo, close]   # slides 1-16 since 2026-11-15 (renocubic added, moved to slide 7; user removed routerfix before 2026-11-14); footers 'n / 16', eyebrows 01-15, progress width 104*n
-sections: {intro: cover, design: topology, experiments: scenarios, results: s1, conclusions: verdicts}
-faces: [Schibsted Grotesk (text), IBM Plex Mono (labels/eyebrows/data)]   # since v24; was IBM Plex Sans + JetBrains Mono
-palette_v24_capture_dark: {bg: '#111019', card: '#1C1B27', card2: '#24223A', rule: '#34324A', text: '#F4F3F7', body: '#C9C7D6', muted: '#A9A7BB', footer: '#8A889C', eyebrow/TCP/RED: '#A78BFA', fq_codel/TCP2: '#4FD1E0', pfifo/TCP3: '#FFB23E', UDP: '#FF5C8A', drop: '#FF6B6B', yes-row: '#13303A', partly-row: '#3A2A12'}   # old light palette below is superseded
-  palette_old: {ink: '#14202B', paper: '#F5F4EF', card: '#FBFAF7', rule: '#DCD8CE', body: '#4A5361', muted: '#5F6673', eyebrow: '#1F63B8', accent_slide_bg: '#1D3F6B', fq_codel: '#2A78D6', pfifo: '#EB6834', RED: '#1BAF7A', single_series_bars: '#3E5468'}   # categorical trio validated with dataviz validate_palette.js on #F5F4EF (contrast WARN -> every bar has a value label)
-assets: {E6.1_wireshark_late_udp: /_blob/26f9d284fb17188ee7d3b17b017637c2}   # slide 10
-live_animations (x-embed canvas, browser only; PDF/PPTX export freezes them; Google Slides cannot run them):
-  slide2 problem: 3 TCP + 1 UDP senders -> router queue (12 slots) -> slow link; drops fall; TCP halves on drop, UDP never
-  slide3 compare: two embeds - rate-over-time curves for Reno/CUBIC/BBR drawn live (dashed capacity line, orange loss dots); live pfifo / RED / fq_codel queues
-  slide4 topology: packets flow h1-h4 -> s1 -> r1 queue strip (10 slots inside r1 box) -> orange bottleneck -> s2 -> h5-h8; drops before r1; white probe dot; appears on build step 6
-  slide7 scenarios: one small embed per card (S1 converging TCP flows, S2 dense UDP + dropped TCP, S3 buffer cycling 0.25x/1x/4x BDP)
-click_builds (data-build-in on pinned children): topology 1-6, implementation 1-6, scenarios 1-4, s1 1-3, s2 1-4, capture 1-3, s3share 1-4, s3delay 1-4, verdicts 1-5, recommendations 1-3, demo 1-6
-charts: hand-built pinned divs from figures/s*_summary.csv (F18-corrected); pixel scales: s1 15 px/%, s2 10 px/Mbps, s3share 6 px/%, s3delay 1.8 px/ms
-speaker_notes: every slide, first person, written to R12; base for the E10.3 transcript
-render_check: NONE done - type instructions say never verify unless the user asks; layout heights were budgeted by hand (content area y 128-920 with footer, 952 without)
-quirks:
-  - opening the deck in its editor re-saves (normalizes) slide files; the next publish of such a file is refused until you Artifact-read it. 2026-10-24 conflict on problem.html was only reformatting, replaced intentionally
-  - x-embed JS is written with no '<' and no '&' characters (comparisons reversed, nested ifs) to avoid HTML parsing problems; each embed must stay <= 16 KB, be a direct pinned child of <section>, text >= 24px
-  - table cells take plain text only (no <b>); pinned text needs a width; at most 200 elements per slide
-  - Google Slides route (offered, not chosen): export PPTX, import, overlay GIFs; Claude offered to render the 4 animations as looping GIFs with Python
+url: https://claude.ai/artifact/2GZMMEVvtSyVmNHZ44rzys   # private until the user shares it
+type_url: https://claude.ai/artifact/8jTsAFQMFDb2oA8MsPJ2eL (contract 0.2.47)
+last_published: 1794808871-4524 (version 262, 2026-11-15; v256 copies kept in <scratchpad>/deck-v256-backup until wiped)
+order: [cover, problem, compare, topology, implementation, scenarios, renocubic, s1, s2, capture, s3share, s3delay, verdicts, recommendations, demo, close]
+numbering: footer 'n / 16' (none on cover/close), eyebrow 'NN ·' = n-1 (01-15), progress bar width 104*n px at top 1040
+local_copy: <scratchpad>/deck-rc/project (publish root <scratchpad>/deck-rc); may vanish -> Artifact read with paths project/deck.json, project/slides/<id>.html
+publish: Artifact publish url=<deck>, root=<copy root>, file_path=<changed slide>, files={"project/slides/<id>.html": ...}; include project/deck.json when order changes
+style: Capture Dark (bg #111019, card #1C1B27, text #F4F3F7, muted #A9A7BB, footer #8A889C); queues amber pfifo #FFB23E, violet RED #A78BFA, cyan fq_codel #4FD1E0; slide 7 algorithms Reno #A78BFA, CUBIC #4FD1E0, BBR #FF5C8A; drop #FF6B6B; fonts Schibsted Grotesk + IBM Plex Mono
+slides_of_note:
+  3 compare: chips 'loss-based' (Reno, CUBIC) and 'model-based' (BBR) at top 470; BBR caption 'paces to bandwidth, not loss'; notes explain bandwidth + min RTT model and ~2x in-flight cap; fq_codel drops drawn red
+  7 renocubic: 'Reno trails CUBIC. Against BBR, both lose'; left panel 'Same family: CUBIC ahead'; two x-embed toy sketches (dashed link, grey total, red loss) + measured bars Reno 38 / CUBIC 62*, CUBIC 11 / BBR 89, Reno 10* / BBR 90; JS UNVERIFIED (never executed)
+  8 s1: 5 rows at 118 px, 15 px per %; swapped-path row 46.8/46.9* (label inside the amber bar); side card 'delay added on the FIFO' 27.9 (1 CUBIC) / 0.8 (1 BBR) / 37–40 ms (2–4 BBR, red) + grey '2–4 CUBIC flows: 32–34 ms'
+  11 s3share: pfifo 4x bar = solid 51%* (settled, slong) inside dashed 59% outline (first minute), note 'dashed = 1st minute'; RED card 'BBR still wins'; card 'At 4× BDP: about even', 'Reno*: same pattern'
+  6 scenarios: S2 sketch drops packets from every flow (30%), only TCP halves; line 'Reno, CUBIC, BBR on pfifo and fq_codel (S3: fq_codel only with 4 flows) · RED in S3'
+  13 verdicts: H1 '≥ 1× BDP keeps the link busy; 0.25× costs Reno 10–15%' / 'Partly · 0.25× at 10 ms fell to 23%'; H3 'Yes on pfifo · large = even split'; H5 'Partly · CUBIC 81–86% of it, Reno 41–71%'
+  12 s3delay: 4 mixed flows 164 / 48 / '≈ 10 ms*' (fq_codel = TCP flows' own RTT; footer says a new flow waits ≈ 0)
+  14 recommendations: FIFO boxes 'Small: BBR* keeps it busy, Reno doesn't' / 'About 1×: 25–40 ms with 2–4 flows, any algorithm' / 'Large: shrink it (CUBIC adds up to 494 ms)'; footer '*tested alone; beside CUBIC or Reno, BBR takes ~90%'
+  15 demo: stage 6 'Wireshark' / 'loss → resend'; caption 'Live: each flow’s rate · the router’s queue · ping RTT · Wireshark I/O graph'; notes give expected ping 68 -> 40 ms
+  16 close: fq_codel card 'fair everywhere, delay under 12 ms'
+animations: x-embed canvases on slides 1, 2, 3 (x2), 4, 6 (x3), 7 (x2), 12; frozen in PDF/PPTX export, not in Google Slides
+embed_rules: no '<' or '&' in embed JS, <= 16 KB each, direct pinned child of <section>, canvas text >= 24 px; <= 200 elements per slide
+render_check: NONE ever done (OPEN_ITEMS 1)
 ```
 
 ## 4c. FINAL REPORT (LaTeX, live deliverable)
 
 ```yaml
-source: report/main.tex            # IEEEtran [conference,12pt,letterpaper]; fontspec Times New Roman (fallback TeX Gyre Termes), unicode-math texgyretermes-math.otf
-output: report/main.pdf            # 8 pages letter; 2026-11-15 Reno follow-up added (abstract clause, Platform paragraph on the WSL machine + calibration, Table I caption, Scenarios sentence, S1 results, H2/H3 paragraph, Table III row 'Reno 10.0%'); page 8 now full (bottom y 716 of ~736): NO slack left. Built on this PC with FONTCONFIG_FILE pointing at a scratch fonts.conf that adds Windows Times New Roman (/mnt/c/Windows/Fonts/times*.ttf; copy them to <scratch>/fonts and write a fonts.conf that includes /etc/fonts/fonts.conf plus <dir><scratch>/fonts</dir>; the scratchpad is wiped on WSL restart, recreate it); without it the build fails (no Times New Roman or TeX Gyre Termes system font here). Uncommitted
-build: "cd report && tectonic main.tex"   # Overleaf: XeLaTeX compiler (no Times New Roman there -> Termes)
-figs: {topology: TikZ in main.tex (Fig 1), F2/F4/F5/F6: report/figs/*.pdf (copies of figures/, which is gitignored), Fig 6: figs/capture_reno_inflight.png (E7.2 cropped, Reno 0.25x BDP 50 ms), Fig 7: figs/capture_late_udp.png (E6.1 cropped, annotated arrow)}
-floats: Table I and III and Figs 2-7 are full-width (table*/figure*); Table II and Fig 1 column-width; float fractions raised in preamble
-font_sizes: body 12 pt; IEEEtran sets captions, tables, references smaller (UNKNOWN whether the instructor requires 12 pt everywhere; forcing it likely exceeds 8 pages)
-references: 16, thebibliography in order of first citation (keys gettys..ware); no BibTeX
-page_check: "<venv python> -c \"import pymupdf; print(pymupdf.open('report/main.pdf').page_count)\""   # regex on PDF bytes does not work (object streams)
-review_2026-11-09: Sonnet subagent checked every number vs CSVs; fixes applied only in main.tex: Reno 150 ms regrowth '>1 min, most trials never finish a cycle' (s3_ss.csv: no halving between ~2 s and teardown at 66 s; old doc said ~40 s), fq_codel 'best on delay and fairness' + small Reno throughput cost (util 94.4/94.6%), 'single BBR flow' builds no standing queue (n2/n4-equal-bbr-pfifo 37/40 ms), UDP model within 0.1 Mbps for CUBIC+Reno only (BBR +0.8-0.9), BBR 25% UDP loss cause hedged (fq_codel also 3.2%), Jain 'about 0.95 or higher' (n4-equal-bbr-pfifo 0.9496), BBR shortfall 2-4%, Fig 2 'lowest', Table I caption notes 3 late-BBR + 2 late-UDP trials
-unverified_text: '±4 ms queue-delay noise' (carried from the old report; not in handoff/notebook; summary CIs ~±1-2 ms)
+source: report/main.tex   # IEEEtran conference 12pt letter; fontspec Times New Roman, fallback TeX Gyre Termes
+output: report/main.pdf   # 8 pages, page 8 full (bottom y 716.2 of 736); committed in f35ad61
+build_wsl: see F23; check pages with the scratch venv (pymupdf): page_count must be 8
+page_budget: none left; one extra abstract line pushes figures to a 9th page; trade text when adding
+content_2026-11-15 (2nd pass, F26/F27): abstract 'added delay under 12 ms', Table III rows (~1x BDP: no CCA fixes delay; deep: shrink; flows' delay <=12 ms), H5 adds multi-BBR vs CUBIC/Reno delay and probe-vs-flow delay under fq_codel, conclusion reworded; trims kept 8 pages (bottom y 716.2)
+content_2026-11-15: follow-ups in Platform, Table I caption (29 configs, 145 trials), S1 swap + 180 s, S3 Reno + 180 s head start, H3 'even split', limitations caveat (mostly 60 s flows, no ECN, one RED setting)
+not_in_report: negative queue-delay explanation (did not fit; in prep guide Q&A)
+UNKNOWN: whether captions/tables/references must also be 12 pt
 ```
 
-## 5. CODE MAP (`tcp-congestion/`)
+## 4d. PREP GUIDE (plain HTML artifact)
+
+```yaml
+url: https://claude.ai/artifact/AMpb8QkfwK4J3n4SqsSi3d   # 'Bottleneck Talk Prep', private
+last_published: 1794808955-4270 (version 26, 2026-11-15)
+local_copy: <scratchpad>/prep/bottleneck-prep.html (publish that path); if gone, Artifact read path index.html and strip the skeleton before <body> and the trailing </body></html>
+views: Start here, Practice the talk (SLIDES array, one entry per slide in deck order, timer, default 15 min), Q&A (sl: = slide number, st:1 starred, f:1 'your call' tag, nos:1 not on slides), Demo, Reference
+sync_rule: NOTES array = deck speaker notes per slide, re-extracted from the deck (split <aside> on <br>, html-unescape, nbsp -> space, strip); keep SLIDES order and sl: numbers in step with deck order
+checks: bracket/string balance of the <script> block (no JS engine available); publishing needs a full Read of the live file first (Artifact read without path saves it; ~1253 lines, read in chunks)
+demo_runbook: Mac + VM (CMDS: ssh tcpvm, sudo mn -c, modprobe, demo.py, livecap; stage cards with expected ping/queue readings; loss filter for stage 6)
+```
+
+## 5. CODE MAP (`/home/lucas/tcp-congestion`)
 
 | path | role |
 | --- | --- |
-| topo/shaping.py | (docstring fixed to say router r1, 2026-10-24) bdp_packets; apply_bottleneck (htb root + child pfifo/red/fq_codel; RED min=limit/6, max=limit/2); apply_path (netem delay). |
-| topo/dumbbell.py | Topology + config report. `sudo python3 -u -m topo.dumbbell [--cli] [--rate] [--rtt] [--buf-bdp] [--qdisc]`. Router r1, static ARP, offloads off, IPv6 off. Exports IP, bottleneck(net), configure(), start(). |
-| traffic/iperf.py | start_server (-1 -J), start_client (TCP -C cca -O omit; UDP -u -b -l 1200; optional start delay). |
-| traffic/probes.py | ping -D -i 0.2; ss -tin every 0.1 s; tc -s qdisc every 0.5 s; tcpdump -Z root -s 96 -U. |
-| run.py | YAML runner. Flags: --dry-run --only (repeatable) --trials --staggered --udp-delay --capture --resume --seed. Shuffled configs, interleaved trials, idle-RTT check (min, max(10%, 2 ms)), 3 attempts, cleanup() = pkill iperf3/tcpdump/ping + mn -c (so never run two scenarios at once, F15). |
-| experiments/s1_competing.yaml, s2_tcp_udp.yaml, s3_buffer_delay.yaml | grids + capture lists (16 captured configs: 6/3/7) |
-| analysis/parse.py | -> data/<s>_{flows,trials,series,ss,ping}.csv; newest copy wins per (config, trial); parse_qdisc returns 4-tuples (t, backlog, drops, sent_bytes). Window = time every flow is measured: measured(flow, omit) per flow, window = (max start, min end) = 5-65 s, 5-60 s in S2 (F18); parse_flow(path, flow, window, omit) recomputes a flow measured longer than the window from in_window() intervals, goodput/loss/jitter receiver side from srv_<port>.json; ping/qdisc/wire_mbps use the same window; flows.csv has bytes_sent |
-| analysis/metrics.py | utilization = 100*wire_mbps/R (F9), Jain, queue delay, CUBIC share, retrans_pct weighted by bytes_sent (F19), mean + 95% CI -> figures/<s>_summary.csv; check(min_abs_ci=1.0) (F11); --check, --flagged; convergence |
-| analysis/plots.py | F1-F8 (PNG + PDF); F4 has 3 panels incl. UDP jitter, F1 titles 2 decimals (F14); titles have no 'Fn.' prefix, F2 legend below the plot, heights F2 2.8 / F4 3.0 / F5 2.7 / F6 2.7 in (2026-10-24, to fit the 8-page report) |
-| demo.py | presentation demo, 6 stages, Enter advances; ran OK on VM 2026-10-24 |
-| helpers/mac.zsh, helpers/vm.sh | shortcuts (section 6) |
-| devtools/gen_fake.py | synthetic results for Mac testing (run in a scratch copy) |
-| README.md | overview + how to run (committed 948293a) |
-| handoff.md, requirements.md | this file and the course requirements (moved here from the project root 2026-11-09) |
-| notebook.md | Mac mirror of the VM notebook (canonical copy on the VM, R8) |
-| report/main.tex, report/main.pdf, report/figs/ | final report (section 4c) |
+| topo/dumbbell.py, topo/shaping.py | Mininet dumbbell (router r1, bottleneck r1-eth1, netem on s2 receiver ports); htb + pfifo/red/fq_codel; RED min limit/6, max limit/2, p 0.1, no ecn flag |
+| traffic/iperf.py, traffic/probes.py | iperf3 clients/servers; ping, ss, tc, tcpdump probes |
+| run.py | YAML runner (`sudo python3 -u run.py <yaml> [--dry-run --only ID --trials N --staggered --udp-delay S --capture --resume DIR]`); `a+b` cca_mix alternates flows, first-named CCA gets h1 and the shortest mixed RTT |
+| experiments/*.yaml | s1/s2/s3 main grids; follow-ups s1w, s1x, s1l, s3w, slong (section 2) |
+| analysis/parse.py | results/<scenario> -> data/<scenario>_*.csv; newest copy wins per (config, trial); exits 1 if a scenario has no trials (writes nothing) |
+| analysis/metrics.py | figures/<scenario>_summary.csv (mean + 95% CI); <first CCA>_share_pct for any 'a+b' mix (cubic/reno/bbr); --check |
+| analysis/plots.py | F1-F8 for s1-s3 only (follow-ups have no plots) |
+| demo.py | 6-stage live demo (CUBIC + BBR equal RTT, UDP 100%, fq_codel switch); per-second in-place block (rate bars, child-queue backlog x/167, hp->hr ping RTT); tcpdump of r1-eth1 to /tmp/demo.pcap (pre-created 644, ~40 MB/min); stage-6 LOSS_FILTER = dup_ack OR retransmission OR out_of_order; Ctrl+C-safe cleanup (F30); committed a859ed1; UNVERIFIED in the VM (parsing + redraw tested offline only) |
+| devtools/gen_fake.py | fake results for pipeline tests (run in a scratch copy: it writes results/) |
+| pyproject.toml, uv.lock | analysis deps for `uv run` |
+| README.md | overview, follow-up table, WSL bring-up, demo + livecap, limitations; line ~72 wrongly says parse without results/ rewrites data/ (it exits 1, writes nothing) |
+| helpers/mac.zsh, helpers/vm.sh | Mac and VM shell helpers (section 6) |
+| report/ | main.tex, main.pdf, figs/ |
+| data/, figures/ | tracked CSVs for all 8 scenarios (40 data files) |
+| notebook.md, evidence/ | lab notebook (no follow-up entries) and step evidence |
 
-```yaml
-topology:
-  bottleneck: {node: r1, intf: r1-eth1, direction: r1 -> s2}
-  delay: netem on s2 receiver ports; ACK path unshaped
-  addresses: {h1-h4: 10.0.0.1-4, hp: 10.0.0.9, h5-h8: 10.0.1.5-8, hr: 10.0.1.10, r1-eth0: 10.0.0.254, r1-eth1: 10.0.1.254}
-  mixed_rtts_ms: {2_flows: [20, 80], 4_flows: [20, 40, 60, 80]}
-  cubic+bbr_mix: h1, h3 cubic; h2, h4 bbr
-results_runs:
-  s1: {main: 20261023-002910, staggered: 20261023-045729-staggered, step4_test: 20261023-001006}
-  s2: {main: 20261023-062503, late_udp: [20261023-191437-udpdelay20, 20261023-191808-udpdelay20], rerun: 20261023-192941}
-  s3: {main: 20261023-222128, rerun: 20261024-022002}
-results_path: results/<scenario>/<run>/<config-id>/trial_<k>/
-```
+## 6. SHORTCUTS
 
-## 6. SHORTCUTS (one-time setup DONE)
-
-| name | host | usage | effect |
-| --- | --- | --- | --- |
-| tcp-push | Mac | `tcp-push` | rsync code to tcpvm:~/tcp-congestion (not evidence/) |
-| tcp-pull | Mac | `tcp-pull` | rsync evidence, results, data, figures, notebook.md back; never deletes |
-| shot | Mac | `shot step5-s1/E5.1_s1-reno-inflight.png` | move NEWEST ~/Desktop/Screenshot*.png into evidence/ (take the screenshot first) |
-| cap | Mac | `cap s2 udp100-cubic-pfifo bottleneck.pcap udpdelay` | open trial-1 capture in Wireshark |
-| trial | Mac, VM | `trial s1 n1-reno` | newest trial_1 folder |
-| lastblock / maxbacklog / udpq / probertt / done_count | VM | see guide | qdisc/backlog/UDP/RTT summaries; maxbacklog fixed (F13) |
-| rerun_flagged | VM | `rerun_flagged s1` | parse, rerun --flagged configs x8, re-parse (F12) |
+| name | where | usage |
+| --- | --- | --- |
+| analysis | WSL | `cd ~/tcp-congestion && uv run python -m analysis.parse <scen> && uv run python -m analysis.metrics <scen> --check` |
+| tcp-push / tcp-pull | Mac | rsync code to / results back from tcpvm (original workflow) |
+| cap, trial, shot | Mac | open trial-1 capture in Wireshark, newest trial folder, file screenshot into evidence/ |
+| livecap | Mac | `ssh tcpvm 'tail -c +1 -f /tmp/demo.pcap' \| Wireshark -k -i -`; run after demo.py reaches stage 1 (earlier = stale or missing file) |
+| rerun_flagged, lastblock, maxbacklog, udpq, probertt | VM | helpers/vm.sh |
 
 ## 7. FINDINGS (cause -> fix -> status)
 
-| id | symptom (measured) | cause | fix | status |
+| id | symptom | cause | fix | status |
 | --- | --- | --- | --- | --- |
-| F1 | UDP through switch-port bottleneck: 48.7 Mbps, 0% loss | skbs keep socket ownership across veth + OVS; queue pushes back on sender; TSQ caps TCP queue | bottleneck moved to router r1 | DONE (V2: 48.4 Mbps, 19% loss; V3: 167p, 16,789 drops). In report §3 |
-| F2 | first ping ~82 ms at 40 ms | ARP crosses delayed path | static ARP | DONE |
-| F3 | pings 0.3-5 ms above configured delay | VM latency (0.82 ms avg at --rtt 0) + late netem timers | idle-RTT check uses min, max(10%, 2 ms); per-trial idle subtraction | DONE. In report §4 |
-| F4 | mininet> commands printed nothing | setLogLevel('warning') | setLogLevel('output') | DONE |
-| F5 | pcaps empty (predicted) | tcpdump drops privileges | tcpdump -Z root | DONE |
-| F6 | pasted "# comment" fails in zsh | interactive_comments off | setopt in mac.zsh | DONE |
-| F7 | rerun_flagged one argument from many IDs | word splitting | array | DONE |
-| F8 | --check missed configs with no trials | summary only had data configs | compare with YAML | DONE |
-| F9 | goodput 47.8 (TCP) / 48.6 (UDP) at R=50 | htb counts L2 bytes (1514 B per 1448 B segment) | utilization = wire bytes / (R x t) | DONE. In report §4 |
-| F10 | saturated link read 98.8% | window included teardown | window ends at last flow end | DONE |
-| F11 | udp100-*-pfifo flagged even after 8 trials (2 +/- 0.5 Mbps) | relative CI meaningless near zero | check ignores CI < 1.0 absolute | DONE |
-| F12 | second --check after rerun read stale CSVs | rerun_flagged did not re-parse | re-parse at end | DONE |
-| F13 | maxbacklog: "too many values to unpack" | parse_qdisc gained 4th value (F9) | `t, b, d, _` | DONE |
-| F14 | F4 lacked UDP jitter; F1 titles "+/- 0.0" | plotting gaps | 3rd panel; 2 decimals | DONE |
-| F15 | user ran S2 and S3 in parallel | cleanup() kills all iperf3 + mn -c each trial | deleted both, ran sequentially | DONE; rule: one scenario at a time |
-| F16 | n1-b0.25-rtt10 Reno/CUBIC util 23% (cwnd median 11 vs BDP 42), BBR 97% | unpaced bursts overflow 11-pkt queue; likely amplified by VM batching | none (result); report caveat | DONE (report §7.1) |
-| F17 | udp100 pfifo util 95-96% | UDP stops at 60 s, TCP runs 65 s (-O 5); starved TCP regrows slowly | superseded by F18: with the 5-60 s window util is 99.8-99.9% | DONE (report 'Testbed lessons' now describes F18) |
-| F18 | S2 TCP goodput includes 5 s with no UDP: per-second series, TCP while UDP is on vs reported (CUBIC pfifo): udp25 35.3 vs 36.5, udp50 22.9 vs 25.1, udp75 10.7 vs 13.1, udp100 0.02 vs 2.2 Mbps; fq_codel ~34.9 vs 36.1 | UDP client has no -O (runs 0-60 s); TCP runs 0-65 s with summary 5-65 s, so 60-65 s is UDP-free (tail TCP 25-48 Mbps) | recompute S2 TCP metrics over the overlap window 5-60 s from s2_series.csv (no reruns needed); update report §6.2, abstract, Fig 4, rec table, §7.6 | DONE 2026-10-24 on Mac (parse.py overlap window; s2 TCP now 35.5/23.1/10.7/0.05 CUBIC pfifo; S1/S3 summaries unchanged except retrans) |
-| F20 | notebook.md had 12 truncated/garbled passages (e.g. '167 maxnsmits', 'Replong bias', 'CUBIC's shrops') | likely text lost during heredoc pastes into the VM terminal (cause UNVERIFIED) | rebuilt from data/context on the Mac 2026-10-24; pre-repair copy /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project/ba0b8331-7fc9-408c-b344-2325bd99d6e5/scratchpad/notebook_before_repair.md | DONE on Mac; VM copy UNVERIFIED (open item 1b) |
-| F19 | s2_summary retrans_pct_mean up to 2,365,104% (udp100 pfifo) | retrans_pct = mean of per-flow ratios; starved flow sends ~0 bytes in window (max(bytes,1)) | aggregate: sum(retransmits)*MSS / sum(bytes) per trial; not cited in report text | DONE 2026-10-24 (metrics.py bytes-weighted) |
+| F1 | switch-port bottleneck: UDP 48.7 Mbps, 0% loss | socket ownership kept across veth + OVS | bottleneck on router r1 | DONE |
+| F2-F8 | ARP delay, idle-RTT noise, CLI silent, empty pcaps, zsh comments, word splitting, missing-config check | see git history of this file | fixed | DONE |
+| F9 | goodput 47.8 Mbps at 50 Mbps | htb counts L2 bytes | utilization from wire bytes | DONE |
+| F10-F14 | teardown in window, near-zero CI flags, stale re-parse, unpack error, plot gaps | analysis bugs | fixed | DONE |
+| F15 | parallel S2 + S3 runs | cleanup() kills all iperf3 + mn -c | one scenario at a time | DONE (rule) |
+| F16 | 11-packet buffer at 10 ms: Reno/CUBIC 23% util, BBR 97% | unpaced bursts, likely VM batching | reported as a result | DONE |
+| F17/F18 | S2 TCP counted 5 s without UDP | UDP 0-60 s, TCP 0-65 s | overlap window 5-60 s | DONE |
+| F19 | retrans_pct 2,365,104% | mean of per-flow ratios | bytes-weighted | DONE |
+| F20 | notebook.md garbled passages | heredoc pastes into VM terminal (UNVERIFIED cause) | rebuilt on the Mac | DONE on Mac; VM copy UNVERIFIED |
+| F21 | mixed-RTT CCA mixes always gave the first-named CCA the 20 ms path | flow_plan assigns CCAs and RTTs in the same order | s1x runs both orders; slide 8 labels the path order | DONE |
+| F22 | 60 s competition shares still moving at the end (4x BDP CUBIC 72.6 -> 50.8 -> 50.8% by 20 s block) | deep queue / long path converges slowly | 180 s reruns (slong); report, slides, guide corrected; most other results steady after 25 s; minor drift left: S1 n4-mixed-bbr 20 ms flow 6.7% published vs ~5% settled | DONE |
+| F23 | tectonic fails on WSL: fontspec cannot find TeX Gyre Termes | no Times New Roman or Termes system font | `cp /mnt/c/Windows/Fonts/times*.ttf <scratch>/fonts/`, fonts.conf including /etc/fonts/fonts.conf + `<dir><scratch>/fonts</dir>`, build with `FONTCONFIG_FILE=<scratch>/fonts.conf tectonic -o <scratch>/rep main.tex`, then copy main.pdf | DONE (recreate after WSL restart) |
+| F24 | publish would overwrite user edits; editor re-saves slide files | Slides artifact keeps one live version | Artifact read every file you will publish, edit that copy | DONE (rule) |
+| F25 | `git commit -m "..."` failed with a pathspec error | message contained double quotes | `git commit -F - <<'EOF'` | DONE |
+| F26 | review 2026-11-15: 'BBR for delay at ~1x BDP if every sender runs BBR' (report Table III + conclusion, slide 14, guide Q&A) | evidence is single-flow (0.8 ms); S1 all-BBR pfifo measured 37-40 ms queue (CUBIC 32-34, Reno 25-29) and 3.6-10.6% retrans | report, slides 8/14/16, guide reworded 2026-11-15 | DONE |
+| F28 | guide 'three numbers' card and takeaway: one CUBIC flow 494 ms -> '≈0 with fq_codel' | S3 single-flow runs were pfifo only; fq_codel was never run with one flow | replaced by measured 4 mixed flows 164 ms -> ≈10 ms (flows' RTT) | DONE |
+| F29 | Wireshark at the router shows no dropped packets; resend may be labelled out-of-order, not fast retransmission | tcpdump on r1-eth1 sees packets after the qdisc, drops happen at enqueue | stage-6 filter `tcp.analysis.duplicate_ack \|\| tcp.analysis.retransmission \|\| tcp.analysis.out_of_order`; rehearse on real data | UNVERIFIED |
+| F30 | Ctrl+C during node.cmd() skips demo cleanup (tcpdump, ping, iperf3, netns left) | Mininet sendCmd asserts `not self.waiting` | finally: waitOutput() on waiting nodes, then try stop probes / finally net.stop() | DONE (code), UNVERIFIED in VM |
+| F27 | review 2026-11-15: 'fq_codel ~0 ms delay' | probe pair is a sparse flow that fq_codel serves first; bulk flows' iperf3 mean_rtt sits 2-15 ms above path RTT under fq_codel (includes startup) | clean number: TCP flows' per-second sender RTT 15-60 s minus path = 0.7-11.9 ms (series.csv); report/slides/guide say 'under 12 ms' for flows, '≈ 0' for a new flow | DONE |
 
-## 8. STATE (by guide step)
+## 8. STATE
 
 | step | status | notes |
 | --- | --- | --- |
-| 1 Environment | DONE | E1.1-E1.3 |
-| one-time setup | DONE | tcpvm, helpers, Wireshark in use |
-| 2 Topology | DONE | router r1 topology; E2.1-E2.4 |
-| 3 Validation | DONE | V1-V9 PASS (report §4 table) |
-| 4 Automation | DONE | E4.1, E4.2 |
-| 5 S1 | DONE | E5.1-E5.8 reviewed; notebook entry present (Mac copy) |
-| 6 S2 | DONE | E6.1-E6.5 reviewed; notebook entry present |
-| 7 S3 | DONE | E7.1-E7.5 reviewed; notebook entry present; data freeze |
-| 8 Analysis | DONE | F1-F8 regenerated 2026-10-24 (F18/F19, titles, sizes); verdict table in guide corrected (rev 117); notebook entry present |
-| demo.py dry run | DONE 2026-10-24 | 6 stages OK (fq_codel stage ~16/16/16 Mbps) |
-| 9 Report | DONE (user: 'It looks good', 2026-11-09) | IEEE LaTeX report, section 4c; committed + pushed 9148bbd. E9.1_report.pdf still holds the old single-column Docs export (open item 4a) |
-| 10 Presentation | IN_PROGRESS | Prep artifact DONE 2026-11-09 (OPEN_ITEMS 5f). Deck DONE as draft 2026-10-24 (section 4b): 16 slides, visual-first, 4 slides with live animations, click builds, speaker notes on all. Deck UNVERIFIED rendered (nobody has stepped through it in Present mode). TODO: user review in Present mode, share the deck if graders need the link, 2 rehearsals with demo.py (start with VM bring-up), E10.2 recording, E10.3 transcript (start from speaker notes). UNVERIFIED: demo slide stage 3 'CUBIC shrinks' when BBR joins (based on S1 pfifo 10.6% CUBIC share, not on demo.py output) |
-| git tags | DONE up to analysis-done; commit/tag for the 2026-10-24 report fixes UNKNOWN (open item 1) | tags: step1-done step2-done step3-done step4-done s1-done s2-done s3-done analysis-done. HEAD 73aa38b Analysis complete; b960f62 S3 data freeze; 06739d6 S2; a1cd65f S1; e3d7f8f Step 4 |
+| 1-8 environment, topology, validation, automation, S1-S3, analysis | DONE | main study frozen 2026-10-24 |
+| follow-ups s1w, s1x, s1l, s3w, slong | DONE | 2026-11-15 on WSL; data and summaries committed |
+| 9 report | DONE (UNVERIFIED whether submitted) | 8 pages; F26/F27 corrections committed f35ad61 |
+| 10 presentation | IN_PROGRESS | deck v262 (16 slides) and prep guide v26 published; never rendered; upgraded demo committed a859ed1, never run; recording/transcript TODO |
+| git | DONE | main == origin/main at a859ed1; only handoff.md uncommitted (user commits it as 'update handoff') |
 
 ## 9. OPEN_ITEMS (priority order)
 
-0. DONE 2026-11-09: re-review fixes. Deck R1-R5 published (versions 20-22). Report suggestions R1 R6 R7 R8 accepted in the doc (rev 69) and carried into report/main.tex; the doc's re-export step is moot (doc superseded). Historical findings kept for reference: Findings:
-   - R1 (deck + report): 'fq_codel's only cost is <1 ms UDP jitter' (deck s2 on-slide text, close notes; report §9 'removed all of these effects at a cost of under 1 ms') ignores Reno's loss under fq_codel: S1 n2/n4-equal-reno util 94.4/94.6% vs 99.9-100% on pfifo; S2 Reno fq_codel 33.2-33.9 vs 35.4 Mbps. Report Table 3 caption already says 'Reno loses about 5%'.
-   - R2 (deck verdicts notes): H3 'yes on pfifo, and RED didn't change it' is wrong; under RED BBR wins at every buffer (CUBIC 2.2-2.5%). Report says 'Supported on pfifo, not RED'.
-   - R3 (deck s2 footer): 'Reno and BBR within 0.9 Mbps of CUBIC' is true on pfifo only; Reno under fq_codel is ~2 Mbps below.
-   - R4 (deck verdicts): H1 'Mostly' vs report 'Partly'.
-   - R5 (deck s3share): RED 1x label '2.4%' should be '2.3%' (2.348).
-   - R6 (report abstract): 'On a plain FIFO, BBR took 89-99% of the link from CUBIC' omits that at 4x BDP CUBIC took 58.9%; add 'at buffers up to 1x BDP' or similar.
-   - R7 (report §6 S1): 'Reno and CUBIC 99.97%': Reno is 99.98%.
-   - R8 (requirements gap): 'TCP retransmissions' metric barely appears (only the 21% in the capture). Candidate sentence: on pfifo BBR retransmitted 3.6-10.6% of bytes (S1 n2/n4-equal-bbr) vs CUBIC <= 0.05%. Report page slack is thin (§4 report_page_check): re-export + page count after any addition. Do not cite S2 udp100 pfifo retrans (89-117%, starved-flow artifact).
-   - R9 DONE 2026-11-09: .DS_Store untracked and ignored.
-
-1. VM sync: user ran tcp-push + analysis + tcp-pull (2026-10-24 00:33); pulled summaries match the Mac run to 1e-12. UNVERIFIED: VM commit/tag (suggested `git add -A && git commit -m "Report fixes: S2 measurement window, retrans weighting, figure layout" && git tag report-fixes`). Ask the user for `git status --short && git log --oneline | head -3 && git tag | tail -3` output.
-1b. DONE on Mac 2026-10-24: notebook.md's 12 garbled passages rebuilt from data/context (pre-repair copy in this session's scratchpad: notebook_before_repair.md, md5 d89e35e39fa111c63a01d77ba345e40f = VM copy as of the 00:33 pull) and a '2026-10-24: Step 9 report review, S2 window fix' entry appended (Surprise 8 = F18, F19 bug, corrections to earlier entries). User was given the guarded copy command with host lucas@vm0.local (R11): `[ "$(ssh lucas@vm0.local 'md5sum < ~/tcp-congestion/notebook.md' | cut -d' ' -f1)" = d89e35e39fa111c63a01d77ba345e40f ] && scp ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion/notebook.md lucas@vm0.local:~/tcp-congestion/notebook.md && echo "copied" || echo "STOP: VM notebook changed since the pull, tell Claude"`, then a VM commit of notebook.md. UNVERIFIED until the user reports 'copied' (if STOP: re-pull, re-apply the repairs and the new entry).
-1c. DONE 2026-10-24 (guide rev 153): evidence statuses set. In report: E1.1 E1.3 E2.2 E2.4 E3.2 E4.1 E6.1 E6.3 E7.1 E7.2 E8.1 E8.2 E8.3; Captured: all other E1-E9 (E9.1 path updated); Not captured: E10.1-E10.3. All E1-E9 files verified present in tcp-congestion/evidence/. Statuses are cell-level dropdown chips: change one by replacing the cell (kind cell, table mj7hsvwewd5.50640, col 5) with a new dropdown chip (enum f2528a45-54f5).
-2. DONE 2026-10-24: references 1-16 verified (web), note removed from report. Proposal reference list still says 'cited from memory' (proposal is already submitted; leave unless user asks).
-3. DONE 2026-10-24: Figure 6 annotated and swapped in.
-4. DONE 2026-10-24: E9.1_report.pdf (old Docs export, 8 pages). Superseded by 4a.
-4a. TODO: copy the new report into evidence: `cp report/main.pdf evidence/step9-report/E9.1_report.pdf` (from tcp-congestion/), then commit. Also ask the user whether captions/tables/references must be 12 pt too (UNKNOWN). Any report edit -> `tectonic main.tex`, confirm <= 8 pages.
-4b. Optional: the superseded Claude Doc report still has the 7 errors listed in 4c review_2026-11-09; fix only if the user still shares that link.
-5. Step 10 (IN_PROGRESS). Deck built (section 4b, 16 slides rather than the guide's ~10; extra results slides keep one chart each).
-5a. TODO (user): step through the deck in Present mode in a browser; report any overflow, overlap or animation that does not run. Fix by editing the slide file and republishing (section 4b).
-5b. TODO: rehearse demo.py twice (VM bring-up block first) and check slide 15's expected values: stage 2 ~48 Mbps, stage 3 CUBIC shrinks, stage 4 TCP ~0, stage 5 ~16 Mbps each (stage 5 seen in the 2026-10-24 dry run; stages 2-4 values UNVERIFIED).
-5c. TODO: E10.2 screen recording and E10.3 transcript; then set guide evidence rows E10.1-E10.3 (Not captured -> Captured).
-5e. DONE 2026-11-09 (deck v24): user chose 'Capture Dark' and asked for animation wherever possible (audience: students + professor; easy to follow but technical). Applied to all 16 slides: every slide data-transition="magic" with a progress bar (#progress width 104*n px, top 1040) morphing between slides; shared ids tag-s1 (scenarios -> s1), lg-pf/lg-fq legends (s1 -> s2), tag-s3 (s3share -> s3delay); auto build cascades on cover, implementation, close, recommendations leaves; click builds kept for narrated reveals. New x-embed animations: cover (live packet-list capture scroll), routerfix (2 embeds: switch port pauses sender vs router drops), s3delay (CUBIC buffer 70-100% full vs BBR near empty, 50 ms path); recolored: problem, compare x2, topology, scenarios x3 (rewritten). Capture slide image inverted via CSS filter (white = TCP, red = UDP) with build overlays (UDP-join marker, 'TCP starved for 40 s' band). Speaker notes updated for new colors and builds. Checks run: format limits, no '<'/'&' in embed JS, node syntax + 600-frame runtime smoke test of all 11 scripts (0 errors). Known tradeoff left as designed: per-host flow colors (h1 violet, h2 cyan, h3 amber, h4 pink) reuse the queue hues on cover/problem/topology/scenarios slides. UNVERIFIED: rendered look in Present mode (no render check per type rules) and whether 'N auto' build syntax behaves as assumed. Theme exploration history: Blueprint, Transit map rejected; Packet list purples too similar; Capture too dull;  User finds the current palette boring. Rejected: Blueprint, Transit map. Liked Packet list but its purples were hard to tell apart (flow colors worst-pair dE 5). New candidate 'Capture' = Packet list layout (Schibsted Grotesk + IBM Plex Mono, bg #F4F3F7, ink #17161F, packet-row cover, dark #17161F statement/closing slides) with one hue per component: TCP violet #6741D9 / cyan #0089A8 / amber #B86E00, UDP and RED pink #C2255C, pfifo amber #B86E00, fq_codel cyan #0089A8, drop #E03131 (all >= 3:1 on bg; worst pair dE 25 incl. simulated CVD). Comparison page https://claude.ai/artifact/6TZ1ntkudevUbSQQkqxCoG (version 4: Packet list | Capture | Oscilloscope, 8 slides each + measured table); generator scratchpad/themes/gen4.py in session df40ab0d. User then said Capture looked washed out (cause measured: cyan #0089A8 and amber #B86E00 low OKLCH chroma 0.11/0.14). Version 5 adds 'Capture Vivid': bg #FFFFFF, ink #17161F, muted #56546B, flows violet #7048E8 / azure #069CE4 / tangerine #DC7D12 / UDP rose #E8336D, pfifo orange #F3680F, fq_codel azure #069CE4, RED violet, dark slides #141320 with neon accents #FF5C8A #4CC9F0 #FF9F43; each color = max chroma at its hue with >= 3:1 on white; mean chroma 0.181 vs 0.149; worst pair dE 30-31. Generator scratchpad/themes/gen5.py. Version 6 (user asked for a dark variant; dislikes only Oscilloscope's grid): 'Capture Dark' = Packet list layout on plain #111019 (no grid), card #1C1B27, text #F4F3F7, muted #A9A7BB, rule #34324A; flows violet #A78BFA / cyan #4FD1E0 / amber #FFB23E / UDP rose #FF5C8A; pfifo amber, fq_codel cyan, RED violet; drop #FF6B6B; glow on bars; worst pair dE 28/33; columns Capture Vivid | Capture Dark | Oscilloscope (grid removed). Generator gen6.py. Awaiting the user's pick, then restyle all 16 slides + 6 x-embed animations (colors in JS) + deck.json faces.
-5f. UPDATED 2026-11-14 (version 4, 1794708762-fd2a = version 3 1794708590-6866 + Sonnet-review fixes: keyboard only in one-slide mode and not on focused links/summaries, focus kept after re-render, no aria-live, scroll-margin under sticky header, rail aria-labels, star-filter empty message, .q CSS collision): reworked for ease of use (user's goal). Five views: Start here (thesis, 5-step prep checklist saved in localStorage bt-steps, 3 numbers, story, mechanisms, soft spots incl. router fix now off-slide), Practice the talk (merged Run sheet + Rehearse: slide rail, one-slide stage with pace timer, notes toggle, All-slides mode), Q&A (defaults to starred), Demo, Reference (numbers, concepts, searchable glossary, grading). Synced to the 15-slide deck: slide numbers renumbered, speaker notes copied verbatim from deck version 1794708158-1a0c into a NOTES array. Built by scratchpad/prep/build.py from the old source (session de99d4be scratchpad, may vanish). JS not executed (no node; pip install blocked), only bracket-balance and id checks; rendered look UNVERIFIED. If deck notes change, re-run the build or edit NOTES. Original 2026-11-09 entry: presentation prep artifact 'Bottleneck Talk Prep' https://claude.ai/artifact/AMpb8QkfwK4J3n4SqsSi3d (private). Tabs: Brief, Run sheet (beats/numbers/bridges + full deck notes per slide), Rehearse (pace timer, 10/12/15/20 min, demo fixed 3:00 - talk length UNKNOWN), Concepts (sawtooth toy model, UDP-vs-TCP model, BDP and Jain calculators, glossary), Numbers, Q&A drill (~75 questions; 'your call' tag = rationale not in project notes), Demo runbook. Source file: session scratchpad d6353b2b.../scratchpad/prep/bottleneck-prep.html (may vanish -> Artifact read); images from report/figs. If deck numbers or notes change, update the SLIDES/QA arrays there too. Published version 2 (1794293616-dd7e) after a Sonnet fact-check; fixes: V2 validation used 1448 B UDP payload in 1490 B frames (not 1200/1242, which is only S2 + demo), pfifo UDP jitter <= 0.11 ms only at 75-100% load (0.18-0.23 ms at 25-50%), fq_codel UDP loss measured 0.03/49/66/74% at 25/50/75/100% (slider model shows ~3% at 25%, labeled as artifact), Rehearse timer now starts on slide 1. Rendered look UNVERIFIED (no preview tool in this session; script passes node --check). Q&A answers tagged 'your call' carry rationale not in the project notes (e.g. why 50 Mbps, RED thresholds, no random-loss scenario); user should confirm them.
-5i. OPTION B (Reno head-to-head: reno+cubic, reno+bbr, n2 equal 40 ms, pfifo + fq_codel, 5 trials) proposed 2026-11-14, not started. Environment checked (read-only, no sudo): user now has WSL2 on a Windows PC (AMD Ryzen 5 5600X, 12 threads, 15 GB RAM, 929 GB free; Ubuntu 26.04.1, kernel 6.18.58.1-microsoft-standard-WSL2, systemd on). Kernel has htb, red, fq_codel, netem, tcp_bbr, openvswitch as modules (not loaded; available CCAs now reno cubic). Missing: mininet, openvswitch-switch, iperf3, tcpdump, python3-yaml/pandas/scipy/matplotlib; apt candidates match the VM versions (mininet 2.3.0, OVS 3.7.1, iperf3 3.20, iproute2 6.19.0). Different from the VM: x86 vs ARM, kernel 6.18 WSL vs 7.0 generic, Hyper-V vs UTM, so anchor reruns of existing configs are needed before mixing results. sudo needs the user's password (Claude cannot run it). Code changes needed: run.py flow_plan (only 'cubic+bbr' mix), metrics.py line 47 (share only for {cubic,bbr}). 2026-11-14 user chose WSL ('Yes, prepare it'). PREPARED, uncommitted, not run: run.py flow_plan handles any 'a+b' mix (flows alternate a, b); metrics.py computes <first CCA>_share_pct for any '+' mix (cubic_share_pct unchanged, new reno_share_pct in SUMMARY_METRICS); new experiments/s1w_reno_wsl.yaml, scenario 's1w' (own results/s1w, data/s1w_*, figures/s1w_summary.csv, so the frozen VM s1 data is never overwritten; NOTE results/ is not on this PC, so running 'analysis.parse s1' here would rewrite data/s1_* from nothing): 9 configs x 5 = 45 runs, ~0.9 h: calibration n1-reno/cubic/bbr + n2-equal-cubic+bbr-{pfifo,fq_codel}, new n2-equal-reno+cubic-* and reno+bbr-* on pfifo and fq_codel. Dry-run OK; flow_plan verified for all s1/s2/s3/s1w configs (existing unchanged). metrics change VERIFIED 2026-11-14 with scratchpad test_s1w.sh (fake s1w data -> parse -> metrics; reno/cubic shares only on mix configs; frozen s1/s3 summaries identical), run with analysis libs from a uv venv (uv 0.13.7 is in ~/.local/bin; system python3 3.14.4 already has yaml, not pandas). Plan: apt only for mininet/openvswitch-switch/iperf3/tcpdump (run.py under sudo needs only yaml + mininet, both system); analysis via uv. 2026-11-15 DONE, uncommitted: pyproject.toml (virtual project, deps pyyaml pandas numpy scipy matplotlib, requires-python >=3.12) + uv.lock; .venv/ in .gitignore; `uv sync` ran here, so ~/tcp-congestion/.venv exists. README analysis commands now `uv run python -m analysis.*`; README stale line 'data/ and figures/ are not tracked' corrected. Verified with .venv: test_s1w.sh passes and analysis.plots writes all 8 figures (on a scratch copy). helpers/vm.sh still calls system python3 (VM only, unchanged). 2026-11-15: tools installed on WSL (mn, iperf3, tcpdump, ovs-vsctl present) but modules NOT loaded (CCAs still reno cubic) and NO s1w runs yet. analysis/parse.py now exits 1 when a scenario has no completed trials, so 'parse && metrics' stops instead of metrics crashing on a missing CSV (uncommitted). 2026-11-15 RUN DONE on WSL: results/s1w/20261115-003048 (45/45 trials) + 20261115-002923 (smoke test, n1-cubic trial 1, superseded); data/s1w_*.csv and figures/s1w_summary.csv written (untracked). Quality: all trials kernel 6.18.58.1-microsoft-standard-WSL2, idle RTT 40.1 ms in every trial, flow CCAs = iperf3-reported CCAs, buffer 167 pkts. CALIBRATION PASSED: all 5 repeated configs overlap the VM CIs on every metric except n1-bbr probe RTT p50 (41.84 vs 42.32 ms, -0.5 ms; VM idle RTT jitter 40.05-44.55); e.g. cubic+bbr pfifo CUBIC share 10.9 +/- 0.7 vs VM 10.6 +/- 0.3, Jain 0.62 both; n1-cubic queue delay 28.0 vs 27.9 ms. So WSL results can sit beside VM results (label the testbed). RENO RESULTS (n2 equal 40 ms, 1x BDP): reno+bbr pfifo Reno share 10.0 +/- 0.3 % (Jain 0.61), same as CUBIC vs BBR -> BBR's FIFO takeover is not CUBIC-specific. reno+bbr fq_codel Reno 43.8 +/- 0.02 % (Jain 0.98; BBR ~6000-6900 retransmits vs Reno 28) vs CUBIC 49.0 % against BBR -> fq_codel fixes most, not all. reno+cubic pfifo Reno 47.9 +/- 11.0 % (per trial 33.6/46.4/49.7/53.8/56.1; Jain 0.98 +/- 0.05; only 14-24 loss events per flow per minute, so 60 s does not converge) -> no clear winner. reno+cubic fq_codel Reno 47.5 +/- 0.1 %, Jain 1.00, utilization 95.5 % (VM reno-reno fq_codel 94.4, cubic-cubic 98.0). --check passes but only checks utilization/throughput CIs, not shares. 2026-11-15 DONE (user: 'Yes, add them'): report/main.tex + main.pdf (section 4c), deck version 243 (section 4b), prep guide version 7 (1794735653-146d; NOTES re-synced from deck 243, s1/scenarios/recs beats, Reference S1 note, 2 new Q&A: 'How does Reno do against BBR and against CUBIC?' (starred, slide 7) and 'Why were the Reno pairs run on a different machine?'; edited the built HTML directly, so prep/build.py is now stale). Sonnet review applied: calibration wording 'every metric except BBR probe RTT (0.5 ms)', Reno+CUBIC spread cause hedged ('likely'), BBR ~90% claim limited to 'CUBIC up to 1x BDP, or Reno at 1x BDP', 'suggests it barely slowed down'. Not changed on purpose: '492 runs'/'95 settings' totals (main study; follow-up described separately), no new matplotlib figure. 2026-11-15 FINDING (S1 design confound, existing VM data): in mixed-RTT CCA mixes flow_plan alternates CCAs AND assigns MIXED_RTTS in order, so CUBIC always got the shorter paths (n2-mixed-cubic+bbr: CUBIC 20 ms 4.84 Mbps, BBR 80 ms 41.84; n4-mixed: CUBIC 20/60 ms 0.63/0.26, BBR 40/80 ms 26.7/19.3). BBR alone favors long paths (n2-mixed-bbr: 20 ms 11.7, 80 ms 35.2), so the mixed-RTT CUBIC shares (10.4% on slide 7, 1.9% in report) mix the CCA effect with the RTT effect. Fix = run the swapped order (cca_mix bbr+cubic puts BBR on 20 ms; works with current flow_plan, needs bbr_share_pct or reading 100-share). Advised user 2026-11-15 on a fuller S1 (swapped-RTT mixes, Reno pairs at n4 + mixed RTT, longer Reno+CUBIC run); no decision yet. Also explained S3 'buffer' = hard limit of the single bottleneck queue on r1-eth1 (pfifo/fq_codel limit N pkts, RED limit N*1500 B), k x BDP / 1500 B = 11-2,500 pkts; host socket buffers are 32 MB and never limit. Uncommitted: code, uv files, data/s1w_*, figures/s1w_summary.csv, report. VM anchors to compare: n1-cubic queue delay 27.9 +/- 0.6 ms, n1-reno 22.6 +/- 1.7 ms, n2-equal-cubic+bbr-pfifo CUBIC share 10.6 +/- 0.3 %, Jain 0.62, fq_codel share 48.7 +/- 0.2 %. Not done: a plot for the Reno pairs (plots.py hard-codes cubic+bbr), slide/report updates; wait for data.
-5r. TWO-FAMILIES SLIDE REDESIGNED AND MOVED 2026-11-15 (user: 'Reno vs CUBIC slide needs work, focus on making it easy to understand ... placement should be before S1 results'). Supersedes the 5q card slide. Deck order now: cover, problem, compare, topology, implementation, scenarios, renocubic, s1, s2, capture, s3share, s3delay, verdicts, recommendations, demo, close (renocubic = slide 7, s1 = 8 ... s3delay = 12; verdicts 13 onward unchanged). Deck version 256 (1794798183-7e90); local copy scratchpad/deck-rc. Slide 7 'Reno vs CUBIC is close. Against BBR, both lose' (60px title), eyebrow '06 · Two families': two panels (cards 280-900) 'Same family: a close fight' (Reno + CUBIC · both loss-based) and 'Different families: one-sided' (CUBIC + BBR · loss-based vs model-based), each with an x-embed toy-model sketch (window over time, dashed = link, grey = total, red = loss; Reno +0.12/s and halves, CUBIC cubic regrowth K = 1.6 s and 0.7 cut, BBR 0.95 with probes and a ProbeRTT dip; tuned so the sketch gives ~36/64 and ~12/88) and measured stacked bars: Reno 38% / CUBIC 62%*, CUBIC 11% / BBR 89%, Reno 10%* / BBR 90%; bottom line 'Alone, CUBIC keeps a small buffer busier (98% vs 87%) but queues a bit more (27.9 vs 22.6 ms)'; footer 'pfifo · bars: 2 flows, 40 ms · *second test machine · Reno vs CUBIC from 3-minute runs'. Builds: left 1, right 2, bottom line 3. JS NOT EXECUTED (no JS engine; installing quickjs via uv was denied by the auto-mode classifier): checked by bracket balance, no '<'/'&', and a Sonnet read-through (no syntax/runtime errors; its hand calculation matches the tuned splits). Prep guide version 21: entry moved to slide 7, Q&A sl remapped (7-11 -> 8-12, 12 -> 7), '(S3, slide 12)', bridges scenarios -> renocubic -> s1, s3delay -> predictions. Implementation notes now 'slides 7, 8 and 11'. Rendered look and animation UNVERIFIED.
-5q. REFRAME DONE 2026-11-15 (user: 'Reframe it. Somewhere in the slides it should show Reno vs CUBIC, and highlight that they are loss-based and BBR is model-based'). DECK NOW 16 SLIDES: order cover, problem, compare, topology, implementation, scenarios, s1, s2, capture, s3share, s3delay, renocubic, verdicts, recommendations, demo, close; footers 'n / 16', eyebrows 01-15, progress width 104*n. Deck version 254 (1794795637-b893), built on the live version 252 read fresh (several files had been re-saved by the editor). Local copy scratchpad/deck-rc (publish root). Changes: slide 3 (compare) chips at top 470 'loss-based' (left 500, 990, color #a9a7bb) and 'model-based' (left 1430, #f4f3f7) + notes paragraph on the two families and UDP; NEW slide 12 'renocubic' 'Reno vs CUBIC: same signal, different curve', line 'Both loss-based · Reno halves and grows per round trip · CUBIC cuts to 70% and grows with time', four cards (brighter = better): head to head 2 flows 40 ms 3-min runs* Reno 38% / CUBIC 62%; small buffer 0.25× BDP 50 ms 87% / 98%; queueing delay one flow 1× BDP 40 ms 22.6 / 27.9 ms; Jain 4 same-CCA flows 20-80 ms 0.88 / 0.95; notes with hedged mechanisms. Prep guide version 19 (1794795651-942e): 16 slide entries, NOTES synced, Q&A sl renumbered (old 12-15 -> 13-16), brand line '16 slides, live demo on slide 15', new Q&A 'Is this really traditional vs modern algorithms?' (starred, slide 3) and 'Why does CUBIC beat Reno?' (slide 12). Sonnet review: numbering, overlap and syntax clean; setups added to cards and mechanisms hedged. Rendered look UNVERIFIED. Talk is now one slide longer (5g talk length UNKNOWN). Report not changed for this (framing only).
-5p. README + LIMITATIONS DONE 2026-11-15 (user: 'README and limitations'), uncommitted. README: follow-up table (s1w, s1x, s1l, s3w, slong with repeated-setting counts), testbeds (UTM ARM64 VM + WSL2 x86), module/OVS commands (`modprobe -a ...`, `systemctl enable --now openvswitch-switch`, repeat after every WSL restart), parse accepts follow-up names, report font requirement, new Limitations section (one 50 Mbps link, BBRv1, ECN never negotiated, one RED setting, 60 s flows with three 180 s reruns, VM timing). Report Design Recommendations caveat now 'BBRv1, mostly 60 s flows, no ECN, and one RED setting' (8 pages; a negative-delay clause did not fit and went to the guide). Deck version 252 (1794794855-49f0): slide 13 footer '... BBR version 1, no ECN · ...' and caveat note; slide 10 RED note 'with the one setting I tested'. Prep guide version 16 (1794794856-e27c): new Q&A 'Was ECN on?' (your call), 'Would RED do better with other settings?' (your call), 'Why are some queueing delays slightly negative?', updated 'Are 60-second flows realistic?'. Sonnet review: ECN wording 'never negotiated / no ECN' instead of 'turned off' (Linux default tcp_ecn=2 never requests ECN on outgoing connections; RED spec has no ecn flag); applied.
-5o. COMPREHENSIVE REVIEW 2026-11-15 (after 5n corrections). Checked: report has all 10 required sections, 8 pages, no LaTeX warnings; every follow-up number in report/slides/guide matches the CSVs (Sonnet reviews x2); all 8 scenarios pass metrics --check; all modules parse; 40 data CSVs tracked. Remaining, by priority:
-   - Before presenting: deck never rendered (Chrome extension not connected; slides 5, 6, 7, 10, 12 changed most); demo.py never run on WSL, stage 2-4 values unverified (5b); commit report changes.
-   - Minor drift left unpublished-impact: S1 n4-mixed-bbr-pfifo 20 ms flow 10.0 / 5.0 / 5.2% by 20 s block (report says 6.7%, settled ~5%); n2-mixed-cubic-pfifo 20 ms share 65.4 / 46.1 / 40.6% (not quoted, shown only via Fig 2 Jain). Other RTT-bias results stable.
-   - Gaps a grader may raise: bandwidth fixed at 50 Mbps (requirements scenario 4 says bandwidth and delay); follow-up results prose only, no figure; RED one parameter set and ECN off, not stated; negative queue-delay means (BBR -0.8/-1.2 ms, fq_codel -3.75 ms) shown as ≈0 (idle-median subtraction noise).
-   - Docs: README says tested on ARM64 VM only, no WSL/follow-up instructions; notebook has no follow-up entries; evidence E9.1 stale (4a); Claude Docs guide not updated; WSL raw results/ not backed up; root-owned __pycache__ from sudo runs.
-   - UNKNOWN: report submitted?, talk length (5g), deadline (assumed 2026-12-11), Google Slides requirement (5d).
-5n. STEADY-STATE RERUNS: RUN DONE 2026-11-15 by the user (results/slong/20261115-155828 15/15; 20261115-155813 is an empty false start, 0 done, ignored by parse; data/slong_*, figures/slong_summary.csv untracked). Quality: WSL kernel, idle 40.1/50.1 ms, buffers 167/834, CCAs as planned. RESULTS (share of the loss-based CCA; 'settled' = 65-185 s, after the first minute): 2 CUBIC + 2 BBR 4x BDP: full run 54.2 +/- 0.7, settled 51.1 +/- 1.1 (per trial 49.9-52.0), 30 s blocks 65.4 / 53.2 / 50.3 / 52.7 / 50.7 / 50.7, Jain 0.99, queue 155.8 ms -> CUBIC's 58.9% (60 s, VM) is a head start; settled it is an even split. 2 Reno + 2 BBR 4x BDP: full 50.1 +/- 1.5, settled 48.1 +/- 1.5, blocks 63.6 / 42.5 / 48.8 / 49.5 / 47.3 / 46.9, Jain 1.00, queue 125.1 ms -> about even, BBR slightly ahead; the 60 s 55.3% was a head start, and the 41% last block of the 60 s run did not continue. BBR 20 ms + CUBIC 80 ms: full 47.4 +/- 7.0, settled 47.0 +/- 7.9 (per trial 40.0-56.2), blocks 43-52 with no trend -> the 46.8% result holds (noisy). 2026-11-15 CORRECTED (user: 'Correct slides, report, and guide'): report (145 trials, 29 configs (23 S1, 6 S3); Validation adds the 20 s block check and the three 180 s reruns; S3 'That 58.9% likely includes a head start, since 180 s runs on the second machine settled at an even 51.1%. Reno against BBR did the same (1.9% and 2.3%, then 48.1% once settled)'; H3 analysis 'CUBIC catches up and the two settle near an even split. Reno did the same'; swap sentence '46.8% (47.0% over 180 s)'; verdict table H3 'CUBIC recovers in deep ones / Supported on pfifo (even split), not RED'; still 8 pages). Deck version 250 (1794794355-0f5e): slide 10 card 'At 4× BDP: about even', note 'settles near 51%*' beside the 58.9% bar (top 452, left 1080), footer '*second test machine', notes rewritten; slide 12 verdict 3 'BBR wins small buffers, CUBIC recovers in large ones' / 'Yes on pfifo · large = even split'; slide 7 notes (47% held over 3 min); slides 5/6 notes 145 runs. Local copy scratchpad/deck-fix. Prep guide version 14 (1794794356-9128). Sonnet review applied (cross-machine hedge, mixed 60 s/180 s series, restored 'longer Reno vs CUBIC runs', third rerun result stated, 'near even'). Was: PREPARED, NOT RUN.
-   - experiments/slong_steady_state.yaml, scenario slong, 3 configs x 5 trials, 180 s flows (omit 5), ~50 min: n4-b4-rtt50-cubic+bbr-pfifo, n4-b4-rtt50-reno+bbr-pfifo, n2-mixed-bbr+cubic-pfifo (BBR on 20 ms, CUBIC on 80 ms). Settings identical to the originals (s3/s3w, s1x) apart from duration. No code changes.
-   - Verified: dry-run, flow plans, fake-data pipeline (185 s series per flow).
-   - Run plan (WSL; never two scenarios at once):
-     # WSL, after any restart: sudo modprobe -a tcp_bbr sch_htb sch_red sch_fq_codel sch_netem openvswitch && sudo systemctl enable --now openvswitch-switch && cat /proc/sys/net/ipv4/tcp_available_congestion_control
-     # WSL (~50 min, keep Windows awake): cd ~/tcp-congestion && sudo python3 -u run.py experiments/slong_steady_state.yaml
-     # WSL: cd ~/tcp-congestion && uv run python -m analysis.parse slong && uv run python -m analysis.metrics slong --check
-   - Analysis to do: share per 30 s block (as done for s1l), full-run mean, and the mean after the first 30-60 s; decide whether each settles. Then reword: slide 10 card 'At 4× BDP: CUBIC wins' and 'Reno*: same pattern', report S3 results ('58.9%', Reno 55.3%) + H3 analysis ('CUBIC wins with 58.9%', Reno line), verdict 3 notes, slide 7 swapped row (46.8%) + notes, report S1 swap sentence and abstract clause, prep guide (slides 7/10 entries, Q&A 'Does BBR always win on a FIFO?', 'Then why does CUBIC win with a 4× BDP buffer?', S3 Reno Q). Keep the report at 8 pages.
-5m. PROJECT AUDIT 2026-11-15 (user asked 'find any holes'). Findings, none fixed yet:
-   - HIGH, steady state: 60 s runs do not reach steady state when loss-based flows fill a deep queue or long path. Share by 20 s block (5-25 / 25-45 / 45-65 s): S3 n4-b4 cubic+bbr pfifo CUBIC 72.6 / 50.8 / 50.8 (VM; WSL 76.8 / 48.9 / 50.3), so the published '58.9%, CUBIC wins at 4x' is mostly startup and settles near an even split; s3w reno+bbr b4 Reno 72.5 / 49.7 / 41.4 (still falling); s1x n2-mixed-bbr+cubic CUBIC 54.7 / 48.4 / 38.5 (BBR still rising, so 46.8% is optimistic); s1w reno+cubic equal 54.0 / 46.0 / 43.9 (the 180 s run already covers it); s1x mixed reno pairs settle after the first block. Stable within 1 point: every BBR-dominated pfifo result, every fq_codel and RED result, S1 equal/mixed cubic+bbr. Suggested fix: 180 s reruns of n4-b4-rtt50-cubic+bbr-pfifo, n4-b4-rtt50-reno+bbr-pfifo, n2-mixed-bbr+cubic-pfifo (~50 min WSL), then reword slide 10 'At 4x BDP: CUBIC wins', report 'CUBIC wins with 58.9%', verdict 3 and the swap claims.
-   - HIGH, reproducibility: data/s1x_*, s1l_*, s3w_*, figures/s1x/s1l/s3w_summary.csv and experiments/s1x/s1l/s3w YAMLs are untracked; WSL raw results/ exist only on this PC (gitignored, no backup). Report numbers cannot be reproduced from git until committed.
-   - MEDIUM: bandwidth never varied (50 Mbps only) although requirements list 'different bandwidth and propagation-delay configurations'; BDP-relative buffers partly cover it, absolute effects (11-packet collapse) do not.
-   - MEDIUM: follow-up findings (path swap, 180 s, S3 Reno) are prose only, no figure or table; rubric favors graphs; page 8 full.
-   - MEDIUM: RED tested with one parameter set (min 1/6, max 1/2, p 0.1) and no ECN anywhere; report does not say ECN was off.
-   - MEDIUM: demo.py never run on WSL and stage 2-4 values unverified (5b); presentation is 10% of the grade.
-   - LOW: S3 Reno at 0.25x/1x compared with VM CUBIC (cross-machine; only 4x has a same-machine CUBIC run); capture '0.3 s'/'21%' not reproducible from git; README says tested on ARM64 VM, no WSL/uv/follow-up instructions; notebook has no follow-up entries; evidence E9.1 PDF stale (4a); guide doc not updated.
-5l. S3 RENO + BBR FOLLOW-UP: RUN DONE 2026-11-15 by the user (results/s3w/20261115-150705, 20/20; data/s3w_*, figures/s3w_summary.csv, untracked). Quality: WSL kernel, idle RTT 50.1 ms, buffers 53/209/834 pkts (= VM), CCAs as planned. CALIBRATION (n4-b4-rtt50-cubic+bbr-pfifo) mostly passed: CUBIC 59.7 +/- 1.7 vs VM 58.9 +/- 1.4, Jain 0.94 vs 0.95, util 100 vs 99.8, queue delay 156.7 +/- 4.5 vs 164.4 +/- 5.3 ms, backlog 833 vs 833; only gap loaded probe RTT p50 206.8 vs 216.9 ms (10 ms, ~5%, just outside CI overlap). RESULTS 2 Reno + 2 BBR, 50 ms, pfifo: Reno 1.9 +/- 0.2% / 2.3 +/- 0.4% / 55.3 +/- 1.8% at 0.25 / 1 / 4x BDP (VM CUBIC 1.4 / 1.8 / 58.9; WSL CUBIC at 4x 59.7); Jain 0.52 / 0.52 / 0.97; queue delay 11.6 / 47.5 / 144.8 ms (CUBIC 9.2 / 45.7 / 164.4 VM, 156.7 WSL); retrans 6.3 / 3.4 / 0.07%. MEANING: H3 holds for Reno too (BBR wins up to 1x, loss-based wins at 4x); at 4x Reno ~4 points below CUBIC (55.3 vs 59.7 same machine, CIs apart) and ~12 ms less queue delay, consistent with Reno keeping the buffer less full. 2026-11-15 DOCS UPDATED (user: 'Yes add them'): report (Platform: 130 trials, ten calibration configs, five gaps, largest 10 ms (5%) loaded RTT at 4x BDP; Table I caption 26 configs (22 S1, 4 S3) / 130 trials; Scenarios '(and Reno~+~BBR on pfifo in the follow-up)'; S3 results 1.9/2.3/55.3; H3 analysis 'kept a little less at 4x (55.3 vs 59.7 same machine)'; Sonnet fixes: abstract now '(90% from Reno in a follow-up) unless one BBR flow had the shorter path', swap mechanism hedged 'should get a small in-flight cap, although I did not measure it and BBR still won the 2 + 2 runs', repeated 'Reno against BBR followed the same pattern' sentence dropped; still 8 pages, float layout is fragile: one extra abstract line pushes it to 9). Deck version 248 (1794785931-ece2): slide 10 card line 'Reno*: same pattern', footer '*2 Reno + 2 BBR, second test machine', notes on slides 5/6/10/12 (130 runs, ten settings). Prep guide version 12 (1794785960-6211): NOTES synced, slide 10 entry, new Q&A 'Why wasn’t Reno in the S3 queue-size competition?', calibration Q updated. Was: PREPARED, NOT RUN (user: 'Yes, prepare it').
-   - Why: S3's competition test was 2 CUBIC + 2 BBR only (built for H3, which names only CUBIC and BBR; no other reason recorded). Reno is in S3's single-flow runs only.
-   - experiments/s3w_reno_bbr.yaml, scenario s3w, 4 configs x 5 = 20 runs, ~25 min: n4-b{0.25,1,4}-rtt50-reno+bbr-pfifo (Reno on h1/h3, BBR on h2/h4, all 50 ms) + n4-b4-rtt50-cubic+bbr-pfifo (identical to the S3 config; calibrates WSL at 50 ms / 4x BDP). No code changes (reno_share_pct already in metrics).
-   - Verified: dry-run, flow plans, fake-data pipeline in a scratch copy.
-   - VM calibration target n4-b4-rtt50-cubic+bbr-pfifo: CUBIC 58.91 +/- 1.37%, Jain 0.95, util 99.8%, queue delay 164.4 +/- 5.3 ms, probe RTT p50 216.9 ms.
-   - Compare Reno with VM CUBIC shares 1.4 / 1.8 / 58.9% at 0.25 / 1 / 4x BDP. Expectation (inference, not measured): small buffers like CUBIC; at 4x below 58.9% since single Reno keeps the buffer 64-71% full vs CUBIC 80-86%.
-   - Run plan (WSL; never two scenarios at once):
-     # WSL, after any restart: sudo modprobe -a tcp_bbr sch_htb sch_red sch_fq_codel sch_netem openvswitch && sudo systemctl enable --now openvswitch-switch && cat /proc/sys/net/ipv4/tcp_available_congestion_control
-     # WSL (~25 min): cd ~/tcp-congestion && sudo python3 -u run.py experiments/s3w_reno_bbr.yaml
-     # WSL: cd ~/tcp-congestion && uv run python -m analysis.parse s3w && uv run python -m analysis.metrics s3w --check
-   - After data: calibrate, then slide 10 (add a Reno row or callout; footer '* second test machine'), report S3 results + H3 paragraph (page 8 full: trade text), prep guide, this file.
-5k. DECK REVIEW 2026-11-15 of version 245 (1794781697-d5b8), source only (Claude in Chrome not connected, no render). Every on-slide number re-checked against figures/*_summary.csv: all match. ALL APPLIED (user: 'Apply all') in deck version 246 (1794783509-231a) + Sonnet-review follow-ups in version 247 (1794783601-298c); local copy scratchpad/deck-review (publish root). Changes: capture footer '3 CUBIC + 1 UDP at full speed, pfifo, UDP started late'; s1 back to 5 rows at 118 px (dropped '2 CUBIC + 2 BBR, 20–80 ms'; 1.9/2.9% only in notes), notes 'about 3% when 2 of each compete', 'within about three points of the fifty percent line', 'a quarter of a percentage point', typo fixed; implementation chip '+ follow-ups: Ubuntu in WSL on a Windows PC' + note (110 runs, nine settings, within 0.5 ms / 0.25 points); scenarios S3 card 'Router queue size and distance' / 'Does queue size change who wins?', line 'Reno, CUBIC, BBR · pfifo vs fq_codel (in S3 only with 4 flows, plus RED) · 5+ runs per setting', footer adds 'buffer = router queue size'; s3share eyebrow 'Queue size', title 'Queue size decides who wins on a FIFO'; problem chip 'the round-trip time (RTT)'; s2 card 'pfifo: TCP gets the link minus UDP’s rate', notes first line; typos s3delay/recommendations. Prep guide version 11 (1794783602-5070): NOTES re-synced from deck 247, summaries for slides 5/6/7/8/10 updated. Rendered look still UNVERIFIED. Original findings:
-   - Accuracy: capture footer shows config id 'udp100-cubic-pfifo' (R13); s1 notes 'every CUBIC case lands right on the fifty percent line' but swapped row fq_codel is 46.9%; s1 notes 'a third of a percent' (gap was 0.24 points); implementation slide says only 'Ubuntu VM on Apple M2', '95 settings in three config files' while slide 7 shows '* second test machine' rows with no setup context; scenarios footer 'Each one: pfifo vs fq_codel · Reno, CUBIC, BBR' overstates S3 (single flows pfifo only; queue comparison CUBIC+BBR only).
-   - Clarity: S3 says 'buffer' without tying it to the router queue (user asked what it means); RTT abbreviation first used on topology slide, never expanded on a slide (problem chip says 'round-trip time'); slide 7 densest (91 words, 6 rows x 2 bars + delay card), row '2 CUBIC + 2 BBR, 20–80 ms' hides which CCA had which path and repeats the same-RTT row's story; s2 card '±0.1 Mbps / pfifo TCP vs “link minus UDP”' is cryptic.
-   - Notes typos (user's text): s1 'This a comparison'; s3delay '1CUBIC flow'; recommendations 'and answer depends'; s2 first line not a sentence.
-   - Still unverifiable: capture '0.3 s' and '21%' (pcaps not in git). Demo stages 2-4 values unverified and demo.py never run on WSL (5b).
-5j. FOCUSED S1 EXTENSION: RUN DONE 2026-11-15 by the user on WSL (results/s1x/20261115-124654 60/60, results/s1l/20261115-140132 5/5; data/s1x_*, data/s1l_*, figures/s1x_summary.csv, figures/s1l_summary.csv written, untracked). Quality: all 65 trials on the WSL kernel, idle RTT 40.1 ms, buffer 167, CCA and path per flow as planned. CALIBRATION PASSED (4 mixed-RTT cubic+bbr configs vs VM): CUBIC share 10.42/50.29/1.76/49.49 vs VM 10.38/50.38/1.91/49.47; only gaps util n2 pfifo 97.80 vs 97.56 and probe RTT 40.12 vs 40.20 ms (VM CI 0). RESULTS (share of the loss-based CCA, pfifo unless noted): 1 CUBIC + 1 BBR: CUBIC on 20 ms 10.4 +/- 0.3% (Jain 0.61) vs BBR on 20 ms -> CUBIC 46.8 +/- 6.9% (per trial 39.8-55.1, Jain 0.99); fq_codel 50.3 vs 46.9. 2 CUBIC + 2 BBR: CUBIC on 20/60 1.8 +/- 0.3% vs on 40/80 2.9 +/- 0.3% (BBR wins either way; BBR at 60 ms alone took 34.3 Mbps); fq_codel 49.5 vs 48.1. Reno + BBR: Reno on 20 ms 12.7 +/- 0.9% vs BBR on 20 ms -> Reno 55.6 +/- 0.4% (Jain 0.99). Reno + CUBIC: Reno on 20 ms 46.7 +/- 8.3% vs Reno on 80 ms 36.3 +/- 8.1%. 180 s equal-RTT Reno + CUBIC: Reno 38.0 +/- 4.1% (per trial 34.3-41.8, Jain 0.94, 46-71 retransmits per flow); per 30 s block mean Reno 49.1% in the first block, then 33.6-36.8%, so the 60 s runs (47.9 +/- 11.0) mostly measured startup; CUBIC beats Reno ~62/38 once settled. MEANING: BBR's FIFO takeover holds at equal RTTs, when BBR has the longer path, and in 2+2 mixes in either order; a single BBR flow on a much shorter path (20 vs 80 ms) no longer dominates (CUBIC 47%, Reno 56%), consistent with the report's existing H2/H3 explanation (BBR caps in-flight data from its own min RTT). Existing claims affected: slide 7 row '1 CUBIC + 1 BBR, 20/80 ms 10.4%' is true only with CUBIC on 20 ms (label it, add swapped row); report S1 Reno+CUBIC sentence (47.9%, 'too few losses') should become the 180 s result; report '1.9-3.3% in a 2+2 mix' still holds (2.9 swapped). 2026-11-15 DOCS UPDATED (user: 'Yes, update them'): report/main.tex + main.pdf (still 8 pages, page 8 full): abstract 'unless BBR had the much shorter path'; Platform now 110 trials, nine calibration configs, 'four small gaps of at most 0.5 ms in delay and 0.3 points in utilization'; Table I caption 22 configs/110 trials; Scenarios sentence lists both path orders + 180 s runs; S1 results: 180 s Reno averaged 38.0% (49% first 30 s, then 34-37%), swapped paths CUBIC 46.8 vs 10.4, Reno 55.6 vs 12.7 (follow-up), 2+2 BBR wins either order (1.8/2.9); H2/H3 'swapped-path runs are consistent with' BBR's min-RTT in-flight cap; fq_codel Reno-vs-BBR paragraph shortened (retransmit sentence dropped) to fit. Deck version 245 (1794781697-d5b8): s1 title 'On a FIFO, BBR usually takes the link', 6 rows at 100 px spacing (bars top 332+100k, fq +42; rows: same RTT 10.6/48.7, CUBIC 20 ms + BBR 80 ms 10.4/50.4, BBR 20 ms + CUBIC 80 ms* 46.8/46.9 (pfifo label inside bar, dark text), 2+2 same RTT 3.3/48.9, 2+2 20-80 ms 1.9/49.5, Reno + BBR same RTT* 10.0/43.8), dashed 50% line top 320 height 590, footer '* second test machine'; notes on s1/scenarios (110 runs)/recommendations ('unless BBR is the one on a much shorter path'). Local copy scratchpad/deck-swap (publish root). Rendered look UNVERIFIED. Prep guide version 9 (1794781698-d7ca): NOTES re-synced for slides 6/7/13, s1 entry (title, screen, beats, nums), scenarios nums '+110 follow-up runs', recs beat, Reference S1 note with path-order + 180 s numbers, Q&A: new starred 'Does BBR always win on a FIFO?' (slide 7), updated Reno Q and 'different machine' Q (nine settings, four tiny gaps). Local copy scratchpad/prep/bottleneck-prep.html (rebuilt from the live page after the scratchpad was wiped by a WSL restart). Sonnet review applied: 38.0% is the full-run mean (not 'settled'), cause hedged ('suggests', 'likely'), 'consistent with' instead of 'tested directly', Reno 12.7 baseline attributed to the follow-up, swapped-row pfifo label moved inside the bar. Uncommitted. Original prep notes follow. Was: PREPARED 2026-11-15, NOT RUN (user: 'Proceed with focused, update handoff, DO NOT RUN').
-   - Why: S1 mixed-RTT CCA mixes always put the first-named CCA on the shortest path (see 5i FINDING), and Reno vs CUBIC on pfifo was inconclusive at 60 s (34-56% per run).
-   - experiments/s1x_rtt_swap.yaml, scenario s1x, 12 configs x 5 = 60 runs, ~1.2 h: n2/n4 mixed x {cubic+bbr, bbr+cubic} x {pfifo, fq_codel}; n2 mixed pfifo x {reno+cubic, cubic+reno, reno+bbr, bbr+reno}. First-named CCA = h1 = shortest path (n2: 20 vs 80 ms; n4: first CCA on 20+60, second on 40+80). Defaults identical to s1_competing.yaml, so the 4 cubic+bbr configs calibrate mixed RTTs on WSL against the VM.
-   - experiments/s1l_long_reno_cubic.yaml, scenario s1l, n2-equal-reno+cubic-pfifo, 180 s flows (omit 5), 5 trials, ~0.3 h. Only one host order (Reno on h1); optional: add cubic+reno if a host-order bias is suspected (equal-RTT same-CCA pairs show Jain 0.98-0.99, so unlikely).
-   - Code: metrics.py SUMMARY_METRICS gains bbr_share_pct (bbr+cubic / bbr+reno write it). No run.py change (flow_plan already handles any 'a+b').
-   - Verified: dry-runs, flow plans printed per config, fake-data pipeline for s1x and s1l in a scratch copy (shares in the right columns, s1l series 185 s per trial), s1/s3/s1w summaries unchanged. Sonnet review: no bugs; notes kept: compare the two orders, never read one order alone (n4 orders differ in mean RTT per CCA, 40 vs 60 ms); share column follows the first-named CCA, so convert with 100 - x when comparing orders.
-   - VM calibration targets (s1_summary): n2-mixed-cubic+bbr-pfifo CUBIC 10.4 +/- 0.3%, Jain 0.61, queue 22.8 ms; n2-mixed-cubic+bbr-fq_codel 50.4 +/- 0.2%; n4-mixed-cubic+bbr-pfifo 1.9 +/- 0.6%, Jain 0.50, queue 38.6 ms; n4-mixed-cubic+bbr-fq_codel 49.5 +/- 0.2%.
-   - Run plan (user runs; never two scenarios at once, F15):
-     # WSL, after any restart: sudo modprobe -a tcp_bbr sch_htb sch_red sch_fq_codel sch_netem openvswitch && sudo systemctl enable --now openvswitch-switch && cat /proc/sys/net/ipv4/tcp_available_congestion_control
-     # WSL (~1.5 h, keep Windows awake): cd ~/tcp-congestion && sudo python3 -u run.py experiments/s1x_rtt_swap.yaml && sudo python3 -u run.py experiments/s1l_long_reno_cubic.yaml
-     # WSL: cd ~/tcp-congestion && uv run python -m analysis.parse s1x s1l && uv run python -m analysis.metrics s1x --check && uv run python -m analysis.metrics s1l --check
-   - After data: calibrate (4 cubic+bbr configs vs targets above); then per pair compare both orders; update report S1 (page 8 is full: replace S1 prose with a compact table), slide 7 labels (say which CCA had the short path) + one row, prep guide (NOTES, Q&A), and this file.
-5h-b. DONE 2026-11-14: scenarios slide (6) cards got one question line each (S1 'Who wins when TCP flows compete?', S2 'What if one flow never slows down?', S3 'Does the buffer change who wins?'); cards 500 -> 530 px tall, 'Each one' line 830 -> 850 px. Deck version 239 (1794709214-302a); prep guide slide 6 synced (version 5). Rendered look UNVERIFIED.
-5h. DONE 2026-11-14: all fixes below applied and published as version 235 (1794707813-1969), plus Sonnet-review follow-ups in version 236 (1794707899-ebce); rendered look UNVERIFIED (no Present-mode check). (Review of live deck version 1794705631-e2f5): the user edited the deck since v25. routerfix slide REMOVED (15 slides now) and speaker notes rewritten in note form. Review findings (all applied in version 235): footers still 'n / 16' and skip 6; eyebrow numbers skip 06; progress bar jumps 520 -> 728 px; implementation says '95 settings in one config file' (there are 3 YAML files); recommendations recommend BBR on FIFOs without the report's 'as long as every sender uses it' condition; s3share 'Small buffer: BBR wins' also holds at 1x BDP; s3delay notes say fq_codel drops any packet waiting > 5 ms (CoDel: over 5 ms for 100 ms); capture notes say CUBIC halves (cuts to 70%); s3share notes 'Random Early Drops' (Detection); s1 notes Jain 'at least 0.95' (0.9496 exists); BDP/CCA never defined on a slide; s1 title Title Case and not a takeaway; garbled notes on s2 and s3share; '50 mb' typo. Re-checked 2026-11-14 against figures/*_summary.csv and data/ (now tracked, commit 1539d5d): every number on slides and in notes matches (s1 10.4% = 10.377, fq_codel 48.7/50.4/48.9/49.5; s3delay CUBIC 10 ms 34.47 -> '34 ms' is correct; BBR 2.74/-0.83/-1.20 ms; Reno fq_codel gap 1.36-2.00 Mbps; 91 configs x 5 + 4 x 8 trials + 5 late runs = 492; CI < 1% of mean for 170/187 metrics). Capture slide: s2_series late-UDP run shows TCP 46 -> 6 -> 0 Mbps at 20-22 s and recovery at 61-65 s, consistent with '22 s' and '40 s'. Still unverifiable without pcaps (results/ not in git): '0.3 s' and '21%' (taken from the report).
-5g. UNKNOWN: the presentation time limit. Prep page defaults to 15 min (options 10/12/15/20; demo fixed 3:00). Ask the user; if known, set the default (targetMin) in the prep page.
-5d. UNKNOWN: whether the presentation must be in Google Slides. If yes: export PPTX, import, and replace the 4 frozen animations with GIFs (Claude offered to generate them); click builds may not carry over.
-6. Reply to proposal parking-lot comment thread: out of scope, future work.
-7. DONE 2026-11-09: stale 0-byte project/notebook.md deleted (moving it would have overwritten the real mirror tcp-congestion/notebook.md).
-8. Optional: free ~1.1 GB on the VM by deleting ~/tcp-congestion/results after confirming the Mac copy is complete (Mac copy has 514 `done` files, counted 2026-10-24: S1 180 incl. 2 Step-4 test + 3 staggered, S2 146 incl. 2 late-UDP + 24 rerun, S3 188 incl. 8 rerun; VM also has 514 (checked 2026-10-24), so the Mac copy is complete; demo does not need results). User has not asked for the commands yet.
+1. TODO (user): step through deck version 262 in Present mode; check slides 3, 5, 6 (S2 sketch now drops every flow's packets), 7 (both animations must move: lines, grey total, red dots), 8 (3-number side card), 11 (dashed outline bar), 12, 13, 14 for overflow, overlap or wrapped titles. Fix by editing the slide file and republishing (4b).
+2. TODO (user runs, Mac + VM): `# Mac: cd ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion && git pull && tcp-push && source helpers/mac.zsh`, then `# VM: cd ~/tcp-congestion && sudo mn -c && sudo python3 -u demo.py`, then at stage 1 `# Mac: livecap`. Build the Wireshark I/O graph once and save as profile 'demo' (tcp.dstport==5201, tcp.dstport==5202, udp.dstport==5204; bits; 100 ms). Expected: stage 2 ~48 Mbps, queue ~65-167/167, ping ~68 ms; 3 CUBIC falls toward ~5; 4 TCP ~0, ping ~73; 5 ~16 each, ping ~40. Check the stage-6 filter finds packets (F29) and the in-place redraw works in Terminal.app. Dry-run twice; paste output for R5 checks.
+3. UNKNOWN (ask): talk length (prep timer default 15 min; deck now 16 slides), whether the report was already submitted, the deadline (2026-12-11 assumed), whether the deck must be in Google Slides (then GIFs replace the animations), whether captions/tables must be 12 pt.
+4. TODO: copy the final report into evidence: `cp report/main.pdf evidence/step9-report/E9.1_report.pdf`, then commit.
+5. TODO: rehearse twice with the prep guide, then E10.2 screen recording and E10.3 transcript (from speaker notes); set guide evidence rows E10.1-E10.3.
+6. TODO (optional): back up WSL results/ (478 MB) somewhere outside WSL.
+7. TODO: notebook entries for the follow-ups (R9); decide with the user which notebook copy is canonical now.
+8. Optional gaps, only if the user asks: report figure fonts too small (F4 axis/legend ~5 pt; F6 legend over fq_codel bars; fix font sizes in analysis/plots.py, no page room for bigger figures); README line ~72 parse claim; bandwidth sweep (future work), a figure for follow-up results (no page room), RED/ECN variants, slide 8 / report BBR 20 ms flow 6.7% vs settled ~5%.
+9. Old, low priority: VM commit/tag after 2026-10-24 fixes UNVERIFIED; guarded scp of the repaired notebook to the VM UNVERIFIED; reply 'future work' to the proposal parking-lot comment; free ~1.1 GB on the VM by deleting results/ (Mac copy complete); superseded report doc still has 7 old errors (ignore unless shared).
 
 ```bash
-# Local checks after code changes (Mac, from tcp-congestion/)
-python3 -m py_compile topo/*.py traffic/*.py analysis/*.py run.py demo.py
-bash -n helpers/vm.sh
-zsh -n helpers/mac.zsh
-# Analysis on real pulled data (Mac): copy data/ analysis/ experiments/ run.py topo/ to a scratch dir, then
-#   <venv python> -m analysis.metrics s1 --check ; <venv python> -m analysis.plots F1 F4
-#   (needs pyyaml, pandas, matplotlib, numpy, scipy)
+# WSL: code checks (syntax only; __pycache__ is root-owned so py_compile fails)
+cd ~/tcp-congestion && python3 -c "import ast,glob; [ast.parse(open(f).read(),f) for f in glob.glob('topo/*.py')+glob.glob('traffic/*.py')+glob.glob('analysis/*.py')+['run.py','demo.py']]; print('ok')"
+```
 
-# Report page check (Mac): Docs export pdf letter -> decode data.bytes_b64 -> <venv python> pdfpages.py <export.txt> <out.pdf>  (pypdf page count)
+```bash
+# WSL: data checks for every scenario, on a throwaway copy (metrics rewrites figures/)
+rm -rf /tmp/tcpcheck && mkdir /tmp/tcpcheck && cd ~/tcp-congestion && cp -r run.py analysis experiments data figures topo /tmp/tcpcheck/ && cd /tmp/tcpcheck && for s in s1 s2 s3 s1w s1x s1l s3w slong; do uv run --project ~/tcp-congestion python -m analysis.metrics $s --check; done
+```
 
-# State checks to ask the user to run
-#   VM:  cd ~/tcp-congestion && git status --short && git tag && git log --oneline | head -5 && df -h ~
-#   VM:  md5sum ~/tcp-congestion/notebook.md   (after the scp it should be de8672eeddc20e65f1533d8f5205dcee = repaired Mac copy, 340 lines, 2026-10-24)
+```bash
+# WSL: repo state
+cd ~/tcp-congestion && git status -sb && git log --oneline -3
 ```
