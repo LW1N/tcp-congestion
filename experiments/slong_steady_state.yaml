@@ -1,0 +1,14 @@
+# Follow-up on the WSL testbed: 180 s reruns of the three competition results that had not
+# settled by the end of a 60 s run (share still moving between the 25-45 s and 45-65 s blocks,
+# or far from the first block). Same settings as the originals, three times longer.
+#   n4-b4-rtt50-cubic+bbr-pfifo  S3, CUBIC 72.6 -> 50.8 -> 50.8%
+#   n4-b4-rtt50-reno+bbr-pfifo   S3 follow-up, Reno 72.5 -> 49.7 -> 41.4%
+#   n2-mixed-bbr+cubic-pfifo     S1 path swap, CUBIC 54.7 -> 48.4 -> 38.5%
+scenario: slong
+trials: 5
+duration: 180         # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: 4, rtt: 50, cca_mix: [cubic+bbr, reno+bbr], qdisc: pfifo}
+  - {n: 2, rtt_mode: mixed, cca_mix: bbr+cubic, qdisc: pfifo}
