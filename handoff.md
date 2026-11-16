@@ -4,7 +4,7 @@
 Format: optimized for AI agents. Facts are key: value lines or tables with exact identifiers.
 Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. UNVERIFIED = implemented but never observed
 working where it matters. UNKNOWN = ask the user or check before relying on it.
-Last updated: 2026-11-15 (after the accuracy review: F26-F30, report f35ad61, deck v262, guide v26, demo upgrade a859ed1).
+Last updated: 2026-11-15 (/handoff refresh: deck v272 after the user's reorder + slide 12 normalized (F31), guide v33, git 1 commit ahead of origin).
 -->
 
 ## 0. READ_FIRST
@@ -12,8 +12,8 @@ Last updated: 2026-11-15 (after the accuracy review: F26-F30, report f35ad61, de
 1. Read this file, then `requirements.md` (course requirements: report sections, 6-8 pages, rubric 20/20/20/20/10/10).
 2. Code and docs are edited on the user's Windows PC in WSL2 (`/home/lucas/tcp-congestion`). The live demo runs on the Mac + VM (decided 2026-11-15): code reaches the VM via GitHub -> Mac `git pull` -> `tcp-push`. Claude cannot run sudo; the user runs experiments and demo.py and pastes output.
 3. Deliverables: report `report/main.pdf` (8 pages, section 4c), slide deck (4b, 16 slides), prep guide (4d). Experiments are finished; all data is in git.
-4. Before editing the deck or guide, re-read them (Artifact read): a publish overwrites edits the user made in the editor (F24).
-5. Highest priority: OPEN_ITEMS #1 (user steps through deck version 262 in Present mode; no slide has ever been rendered) and #2 (dry-run the upgraded demo.py with livecap on Mac + VM; never run).
+4. Before editing the deck or guide, re-read them (Artifact read): the user edits text and reorders slides in the Slides editor, and a publish overwrites anything you did not read (F24). Diff the live files against your local copy first.
+5. Highest priority: OPEN_ITEMS #1 (user steps through deck version 272 in Present mode; no slide has ever been rendered; slides 3-8 and 12 are new, moved or reworked) and #2 (dry-run the upgraded demo.py with livecap on Mac + VM; never run).
 6. Prose rules: R12, R14 (user's voice). Slide rules: R13. Do not trust UNKNOWN items (section 9 lists them).
 
 ## 1. USER_RULES (must follow)
@@ -37,6 +37,8 @@ Last updated: 2026-11-15 (after the accuracy review: F26-F30, report f35ad61, de
 - R16: Do not start experiment runs unless asked ("DO NOT RUN" when preparing); prepare files and give run commands.
 - R17: The user commits with messages Claude drafts (`/commit-message`, no Co-Authored-By trailer). Give multi-line messages as `git commit -F - <<'EOF' ... EOF`; quoting them with -m broke once (F25).
 - R18: Hedge mechanisms that were not measured ("likely", "consistent with"); state cross-machine comparisons as such.
+- R19: Never present an effect built into the setup as a finding (user caught this on slide 12: buffers are sized in BDPs, so delay grows with RTT by construction). Normalize instead (e.g. % of buffer filled) and say what is by design.
+- R20: The user wants slides critically checked for accuracy and for an audience seeing them once; after slide or guide changes, run a Sonnet review of the diff too (extends R7).
 
 ## 2. PROJECT
 
@@ -70,7 +72,7 @@ Key numbers (main study, pfifo unless noted): single flow util Reno/CUBIC 99.98/
 ```yaml
 wsl_pc (current):
   host: Windows PC, AMD Ryzen 5 5600X, 15 GB RAM; Ubuntu 26.04.1 in WSL2, kernel 6.18.58.1-microsoft-standard-WSL2, systemd on
-  repo: /home/lucas/tcp-congestion (origin https://github.com/LW1N/tcp-congestion, PUBLIC); main == origin/main at a859ed1 (2026-11-15)
+  repo: /home/lucas/tcp-congestion (origin https://github.com/LW1N/tcp-congestion, PUBLIC); main at 8802b81, 1 commit ahead of origin/main (unpushed 'update handoff'), 2026-11-15
   apt: {mininet: 2.3.0-1.1build1, openvswitch-switch: 3.7.1-2, iperf3: 3.20-2, tcpdump: 4.99.6-1, iproute2: 6.19.0}
   python: system 3.14.4 (has yaml; runner runs under sudo with it); analysis via uv 0.13.7 (~/.local/bin/uv, pyproject.toml + uv.lock, .venv/)
   latex: tectonic 0.17.0 (~/.local/bin); needs Times New Roman via fontconfig (F23)
@@ -99,24 +101,28 @@ Doc quirks: read changes since last rev before editing (`read(ref node <body_nod
 ```yaml
 url: https://claude.ai/artifact/2GZMMEVvtSyVmNHZ44rzys   # private until the user shares it
 type_url: https://claude.ai/artifact/8jTsAFQMFDb2oA8MsPJ2eL (contract 0.2.47)
-last_published: 1794808871-4524 (version 262, 2026-11-15; v256 copies kept in <scratchpad>/deck-v256-backup until wiped)
-order: [cover, problem, compare, topology, implementation, scenarios, renocubic, s1, s2, capture, s3share, s3delay, verdicts, recommendations, demo, close]
-numbering: footer 'n / 16' (none on cover/close), eyebrow 'NN ·' = n-1 (01-15), progress bar width 104*n px at top 1040
-local_copy: <scratchpad>/deck-rc/project (publish root <scratchpad>/deck-rc); may vanish -> Artifact read with paths project/deck.json, project/slides/<id>.html
+last_published: 1794813221-8835 (version 272, 2026-11-15; user reorder + renumber + slide 12 rework; v262 copies in <scratchpad>/deck-v262-backup until wiped)
+order: [cover, problem, topology, ccas, queues, scenarios, families, s1, s2, capture, s3share, s3delay, verdicts, recommendations, close, demo]   # user reordered 2026-11-15 (families now slide 7, the bridge into results); compare, implementation, renocubic removed
+sections: intro(cover), design(topology), background(ccas), experiments(scenarios), results(s1), conclusions(verdicts)
+numbering: footer 'n / 16' (none on cover/close), eyebrow 'NN ·' = n-1 (01-15), progress bar width 104*n px at top 1040; renumber all three when order changes
+local_copy: <scratchpad>/deck-rc/project (publish root <scratchpad>/deck-rc); may vanish or be stale -> Artifact read with paths project/deck.json, project/slides/<id>.html (all 16) into a fresh folder and diff before editing
+user_edits_seen: 2026-11-15 the user reordered (families after scenarios) and rewrote two lines (ccas click text, families 'UDP just keeps going'); keep their wording
 publish: Artifact publish url=<deck>, root=<copy root>, file_path=<changed slide>, files={"project/slides/<id>.html": ...}; include project/deck.json when order changes
-style: Capture Dark (bg #111019, card #1C1B27, text #F4F3F7, muted #A9A7BB, footer #8A889C); queues amber pfifo #FFB23E, violet RED #A78BFA, cyan fq_codel #4FD1E0; slide 7 algorithms Reno #A78BFA, CUBIC #4FD1E0, BBR #FF5C8A; drop #FF6B6B; fonts Schibsted Grotesk + IBM Plex Mono
+style: Capture Dark (bg #111019, card #1C1B27, text #F4F3F7, muted #A9A7BB, footer #8A889C); queues amber pfifo #FFB23E, violet RED #A78BFA, cyan fq_codel #4FD1E0; slide 7 sketches Reno #A78BFA, CUBIC #4FD1E0, BBR #FF5C8A; drop #FF6B6B; fonts Schibsted Grotesk + IBM Plex Mono
 slides_of_note:
-  3 compare: chips 'loss-based' (Reno, CUBIC) and 'model-based' (BBR) at top 470; BBR caption 'paces to bandwidth, not loss'; notes explain bandwidth + min RTT model and ~2x in-flight cap; fq_codel drops drawn red
-  7 renocubic: 'Reno trails CUBIC. Against BBR, both lose'; left panel 'Same family: CUBIC ahead'; two x-embed toy sketches (dashed link, grey total, red loss) + measured bars Reno 38 / CUBIC 62*, CUBIC 11 / BBR 89, Reno 10* / BBR 90; JS UNVERIFIED (never executed)
-  8 s1: 5 rows at 118 px, 15 px per %; swapped-path row 46.8/46.9* (label inside the amber bar); side card 'delay added on the FIFO' 27.9 (1 CUBIC) / 0.8 (1 BBR) / 37–40 ms (2–4 BBR, red) + grey '2–4 CUBIC flows: 32–34 ms'
-  11 s3share: pfifo 4x bar = solid 51%* (settled, slong) inside dashed 59% outline (first minute), note 'dashed = 1st minute'; RED card 'BBR still wins'; card 'At 4× BDP: about even', 'Reno*: same pattern'
+  3 topology: architecture build (6 clicks) + static strip 'Real Linux TCP in Mininet · one Python runner · 95 settings × 5+ runs = 492 runs · mean ± 95% CI' at top 850; notes carry runner details, router fix (F1), follow-up machine
+  4 ccas: rate sketches (old slide 3 top embed at 1664x204) + captions Reno 'halves on every loss', CUBIC 'cuts to 70%, climbs back fast', BBR 'paces to bandwidth, not loss'; click: 'How a TCP sender decides how fast to send' (user text)
+  5 queues: queue animation (old slide 3 bottom embed, fq_codel drops red) + captions; click: 'These colors mark the queues on every result chart'; notes define BDP and Jain
   6 scenarios: S2 sketch drops packets from every flow (30%), only TCP halves; line 'Reno, CUBIC, BBR on pfifo and fq_codel (S3: fq_codel only with 4 flows) · RED in S3'
-  13 verdicts: H1 '≥ 1× BDP keeps the link busy; 0.25× costs Reno 10–15%' / 'Partly · 0.25× at 10 ms fell to 23%'; H3 'Yes on pfifo · large = even split'; H5 'Partly · CUBIC 81–86% of it, Reno 41–71%'
-  12 s3delay: 4 mixed flows 164 / 48 / '≈ 10 ms*' (fq_codel = TCP flows' own RTT; footer says a new flow waits ≈ 0)
-  14 recommendations: FIFO boxes 'Small: BBR* keeps it busy, Reno doesn't' / 'About 1×: 25–40 ms with 2–4 flows, any algorithm' / 'Large: shrink it (CUBIC adds up to 494 ms)'; footer '*tested alone; beside CUBIC or Reno, BBR takes ~90%'
-  15 demo: stage 6 'Wireshark' / 'loss → resend'; caption 'Live: each flow’s rate · the router’s queue · ping RTT · Wireshark I/O graph'; notes give expected ping 68 -> 40 ms
-  16 close: fq_codel card 'fair everywhere, delay under 12 ms'
-animations: x-embed canvases on slides 1, 2, 3 (x2), 4, 6 (x3), 7 (x2), 12; frozen in PDF/PPTX export, not in Google Slides
+  7 families (after scenarios): 'Who backs off on a loss?'; old slide 7 toy sketches only (no measured bars); takeaways 'Both back off together, so neither is pushed out' / 'Only CUBIC backs off, so BBR takes over the link'; click 3 'UDP just keeps going' (user text); JS UNVERIFIED
+  8 s1: 5 rows at 118 px, 15 px per %; side card (top 300) 'delay added on the FIFO' 27.9 / 0.8 / 37–40 ms + grey '2–4 CUBIC flows: 32–34 ms'; card (top 744, click 4) 'Reno vs CUBIC, 3-min runs*' 38 / 62%
+  11 s3share: pfifo 4x bar = solid 51%* inside dashed 59% outline; RED card 'BBR still wins'
+  12 s3delay (reworked 2026-11-15, no embed): title 'Deep FIFOs add delay. fq_codel removes it.'; click 1 left NORMALIZED (user: per-path ms growth is by construction, buffer = 4x BDP): 'How full one CUBIC flow keeps a 4× BDP pfifo buffer', rows '10/50/150 ms path' with '40/200/600 ms buffer' under them, three equal dashed outlines, fills '86/81/82% full' with '34.5/162/494 ms delay' under each, 'Buffer = 4 × BDP, so it grows with the path', 'One BBR flow: ≈ 0% full'; Reno 71/64/41% in notes (41% at 150 ms = real RTT effect); click 2 right card line 'pfifo: 164 of 200 ms, ≈ 82% full, like one CUBIC flow', bars pfifo 164 / RED 48 / fq_codel ≈ 10 ms* (own scale 400 px = 164 ms)
+  13 verdicts: H1 'Partly · 0.25× at 10 ms fell to 23%'; H5 'Partly · CUBIC 81–86% of it, Reno 41–71%'
+  14 recommendations: FIFO boxes Small 'BBR* keeps it busy, Reno doesn't' / About 1× '25–40 ms with 2–4 flows, any algorithm' / Large 'shrink it (CUBIC adds up to 494 ms)'
+  15 close: conclusion, no 'Questions?'; notes lead into the demo
+  16 demo: stages 1-6, caption 'Live: each flow’s rate · the router’s queue · ping RTT · Wireshark I/O graph', click 9 'Questions?'; notes end with the takeaway + thanks
+animations: x-embed canvases on slides 1, 2, 3, 4, 5, 6 (x3), 7 (x2); frozen in PDF/PPTX export, not in Google Slides
 embed_rules: no '<' or '&' in embed JS, <= 16 KB each, direct pinned child of <section>, canvas text >= 24 px; <= 200 elements per slide
 render_check: NONE ever done (OPEN_ITEMS 1)
 ```
@@ -138,7 +144,7 @@ UNKNOWN: whether captions/tables/references must also be 12 pt
 
 ```yaml
 url: https://claude.ai/artifact/AMpb8QkfwK4J3n4SqsSi3d   # 'Bottleneck Talk Prep', private
-last_published: 1794808955-4270 (version 26, 2026-11-15)
+last_published: 1794813222-ff08 (version 33, 2026-11-15)
 local_copy: <scratchpad>/prep/bottleneck-prep.html (publish that path); if gone, Artifact read path index.html and strip the skeleton before <body> and the trailing </body></html>
 views: Start here, Practice the talk (SLIDES array, one entry per slide in deck order, timer, default 15 min), Q&A (sl: = slide number, st:1 starred, f:1 'your call' tag, nos:1 not on slides), Demo, Reference
 sync_rule: NOTES array = deck speaker notes per slide, re-extracted from the deck (split <aside> on <br>, html-unescape, nbsp -> space, strip); keep SLIDES order and sl: numbers in step with deck order
@@ -195,10 +201,11 @@ demo_runbook: Mac + VM (CMDS: ssh tcpvm, sudo mn -c, modprobe, demo.py, livecap;
 | F24 | publish would overwrite user edits; editor re-saves slide files | Slides artifact keeps one live version | Artifact read every file you will publish, edit that copy | DONE (rule) |
 | F25 | `git commit -m "..."` failed with a pathspec error | message contained double quotes | `git commit -F - <<'EOF'` | DONE |
 | F26 | review 2026-11-15: 'BBR for delay at ~1x BDP if every sender runs BBR' (report Table III + conclusion, slide 14, guide Q&A) | evidence is single-flow (0.8 ms); S1 all-BBR pfifo measured 37-40 ms queue (CUBIC 32-34, Reno 25-29) and 3.6-10.6% retrans | report, slides 8/14/16, guide reworded 2026-11-15 | DONE |
+| F27 | review 2026-11-15: 'fq_codel ~0 ms delay' | probe pair is a sparse flow that fq_codel serves first; bulk flows' iperf3 mean_rtt sits 2-15 ms above path RTT under fq_codel (includes startup) | clean number: TCP flows' per-second sender RTT 15-60 s minus path = 0.7-11.9 ms (series.csv); report/slides/guide say 'under 12 ms' for flows, '≈ 0' for a new flow | DONE |
 | F28 | guide 'three numbers' card and takeaway: one CUBIC flow 494 ms -> '≈0 with fq_codel' | S3 single-flow runs were pfifo only; fq_codel was never run with one flow | replaced by measured 4 mixed flows 164 ms -> ≈10 ms (flows' RTT) | DONE |
 | F29 | Wireshark at the router shows no dropped packets; resend may be labelled out-of-order, not fast retransmission | tcpdump on r1-eth1 sees packets after the qdisc, drops happen at enqueue | stage-6 filter `tcp.analysis.duplicate_ack \|\| tcp.analysis.retransmission \|\| tcp.analysis.out_of_order`; rehearse on real data | UNVERIFIED |
 | F30 | Ctrl+C during node.cmd() skips demo cleanup (tcpdump, ping, iperf3, netns left) | Mininet sendCmd asserts `not self.waiting` | finally: waitOutput() on waiting nodes, then try stop probes / finally net.stop() | DONE (code), UNVERIFIED in VM |
-| F27 | review 2026-11-15: 'fq_codel ~0 ms delay' | probe pair is a sparse flow that fq_codel serves first; bulk flows' iperf3 mean_rtt sits 2-15 ms above path RTT under fq_codel (includes startup) | clean number: TCP flows' per-second sender RTT 15-60 s minus path = 0.7-11.9 ms (series.csv); report/slides/guide say 'under 12 ms' for flows, '≈ 0' for a new flow | DONE |
+| F31 | slide 12 showed CUBIC delay 34.5 / 162 / 494 ms 'by path' as if RTT caused it | buffer = 4x BDP, so buffer size and drain time (40/200/600 ms) grow with RTT by construction (user caught it) | left half shows % of buffer filled: CUBIC 86/81/82%, Reno 71/64/41% (41% at 150 ms is a real RTT effect, hedged), BBR ~0; ms kept as secondary labels | DONE |
 
 ## 8. STATE
 
@@ -207,14 +214,15 @@ demo_runbook: Mac + VM (CMDS: ssh tcpvm, sudo mn -c, modprobe, demo.py, livecap;
 | 1-8 environment, topology, validation, automation, S1-S3, analysis | DONE | main study frozen 2026-10-24 |
 | follow-ups s1w, s1x, s1l, s3w, slong | DONE | 2026-11-15 on WSL; data and summaries committed |
 | 9 report | DONE (UNVERIFIED whether submitted) | 8 pages; F26/F27 corrections committed f35ad61 |
-| 10 presentation | IN_PROGRESS | deck v262 (16 slides) and prep guide v26 published; never rendered; upgraded demo committed a859ed1, never run; recording/transcript TODO |
-| git | DONE | main == origin/main at a859ed1; only handoff.md uncommitted (user commits it as 'update handoff') |
+| 10 presentation | IN_PROGRESS | deck v272 (16 slides, user-reordered, slide 12 reworked) and prep guide v33 published; never rendered; upgraded demo committed a859ed1, never run; recording/transcript TODO |
+| git | IN_PROGRESS | main at 8802b81, 1 ahead of origin/main (push needed); handoff.md uncommitted (user commits it as 'update handoff') |
 
 ## 9. OPEN_ITEMS (priority order)
 
-1. TODO (user): step through deck version 262 in Present mode; check slides 3, 5, 6 (S2 sketch now drops every flow's packets), 7 (both animations must move: lines, grey total, red dots), 8 (3-number side card), 11 (dashed outline bar), 12, 13, 14 for overflow, overlap or wrapped titles. Fix by editing the slide file and republishing (4b).
+1. TODO (user): step through deck version 272 in Present mode; check every slide, especially 3 (bottom strip vs labels), 4 and 5 (enlarged embeds: captions must sit under the right panels), 6 (S2 sketch drops every flow's packets), 7 (both sketches must move: lines, grey total, red dots), 8 (two side cards), 11, 12 (reworked: bars vs dashed outlines, right card), 14, 16 (Questions? on click 9) for overflow, overlap or wrapped titles. Fix by editing the slide file and republishing (4b).
 2. TODO (user runs, Mac + VM): `# Mac: cd ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion && git pull && tcp-push && source helpers/mac.zsh`, then `# VM: cd ~/tcp-congestion && sudo mn -c && sudo python3 -u demo.py`, then at stage 1 `# Mac: livecap`. Build the Wireshark I/O graph once and save as profile 'demo' (tcp.dstport==5201, tcp.dstport==5202, udp.dstport==5204; bits; 100 ms). Expected: stage 2 ~48 Mbps, queue ~65-167/167, ping ~68 ms; 3 CUBIC falls toward ~5; 4 TCP ~0, ping ~73; 5 ~16 each, ping ~40. Check the stage-6 filter finds packets (F29) and the in-place redraw works in Terminal.app. Dry-run twice; paste output for R5 checks.
-3. UNKNOWN (ask): talk length (prep timer default 15 min; deck now 16 slides), whether the report was already submitted, the deadline (2026-12-11 assumed), whether the deck must be in Google Slides (then GIFs replace the animations), whether captions/tables must be 12 pt.
+3. TODO (user): `# WSL: cd ~/tcp-congestion && git push` (main is 1 commit ahead: the 'update handoff' commit; the demo code a859ed1 is already on origin, so item 2 does not wait on this).
+3a. UNKNOWN (ask): talk length (prep timer default 15 min; deck now 16 slides), whether the report was already submitted, the deadline (2026-12-11 assumed), whether the deck must be in Google Slides (then GIFs replace the animations), whether captions/tables must be 12 pt.
 4. TODO: copy the final report into evidence: `cp report/main.pdf evidence/step9-report/E9.1_report.pdf`, then commit.
 5. TODO: rehearse twice with the prep guide, then E10.2 screen recording and E10.3 transcript (from speaker notes); set guide evidence rows E10.1-E10.3.
 6. TODO (optional): back up WSL results/ (478 MB) somewhere outside WSL.
