@@ -16,8 +16,10 @@ from analysis.metrics import DATA, FIGURES, ci95, per_trial, summarize
 from topo.shaping import bdp_packets
 
 CCA_COLOR = {'reno': '#0072B2', 'cubic': '#E69F00', 'bbr': '#009E73', 'cubic+bbr': '#CC79A7'}
-QDISC_COLOR = {'pfifo': '#555555', 'red': '#D55E00', 'fq_codel': '#56B4E9'}
-QDISC_STYLE = {'pfifo': '-', 'red': '-.', 'fq_codel': '--'}
+QDISC_COLOR = {'pfifo': '#555555', 'red': '#D55E00', 'ared': '#D55E00', 'fq_codel': '#56B4E9'}
+QDISC_STYLE = {'pfifo': '-', 'red': '-.', 'ared': '-.', 'fq_codel': '--'}
+# ared ran only on the second testbed (s1r, s2r, s3r): '*' marks it in legends, as on the slides
+QDISC_LABEL = {'pfifo': 'pfifo', 'red': 'RED', 'ared': 'RED*', 'fq_codel': 'fq_codel'}
 CCAS = ['reno', 'cubic', 'bbr']
 plt.rcParams.update({'figure.dpi': 110, 'font.size': 9, 'axes.spines.top': False,
                      'axes.spines.right': False, 'axes.grid': True, 'grid.alpha': 0.3})
@@ -37,6 +39,12 @@ def csv(name):
         raise FileNotFoundError(f'{path} missing - run python3 -m analysis.parse first')
     df = pd.read_csv(path)
     return df[~df.special] if 'special' in df else df
+
+
+def red_only(scenario):
+    """The ared rows of a follow-up; its pfifo/fq_codel repeats stay out, the main study has those."""
+    s = summarize(per_trial(scenario))
+    return s[s.qdisc == 'ared']
 
 
 def f1_single_flow_cwnd():
@@ -62,24 +70,25 @@ def f1_single_flow_cwnd():
 
 
 def f2_fairness():
-    """Jain's index by CCA mix, for equal and mixed RTTs."""
-    s = summarize(per_trial('s1'))
+    """Jain's index by CCA mix, for equal and mixed RTTs; RED from s1r."""
+    s = pd.concat([summarize(per_trial('s1')), red_only('s1r')])
     s = s[s.n > 1]
     mixes = ['reno', 'cubic', 'bbr', 'cubic+bbr']
-    combos = [(2, 'pfifo'), (2, 'fq_codel'), (4, 'pfifo'), (4, 'fq_codel')]
-    shades = ['#8c8c8c', '#9ecae1', '#3a3a3a', '#2171b5']
+    combos = [(2, 'pfifo'), (2, 'ared'), (2, 'fq_codel'), (4, 'pfifo'), (4, 'ared'), (4, 'fq_codel')]
+    shades = ['#8c8c8c', '#f4a582', '#9ecae1', '#3a3a3a', '#D55E00', '#2171b5']
+    width = 0.8 / len(combos)
     fig, axes = plt.subplots(1, 2, figsize=(9, 2.8), layout='constrained', sharey=True)
     x = np.arange(len(mixes))
     for ax, mode in zip(axes, ['equal', 'mixed']):
         for k, ((n, q), color) in enumerate(zip(combos, shades)):
             d = s[(s.rtt_mode == mode) & (s.n == n) & (s.qdisc == q)].set_index('cca_mix').reindex(mixes)
-            ax.bar(x + (k - 1.5) * 0.2, d.jain_mean, 0.2, yerr=d.jain_ci, color=color,
-                   capsize=2, label=f'{n} flows, {q}')
+            ax.bar(x + (k - (len(combos) - 1) / 2) * width, d.jain_mean, width, yerr=d.jain_ci,
+                   color=color, capsize=1.5, label=f'{n} flows, {QDISC_LABEL[q]}')
         ax.set_xticks(x, mixes)
         ax.set_title(f'{mode} RTTs', loc='left')
         ax.set_ylim(0, 1.05)
     axes[0].set_ylabel("Jain's fairness index")
-    fig.legend(*axes[0].get_legend_handles_labels(), loc='outside lower center', ncol=4, fontsize=7)
+    fig.legend(*axes[0].get_legend_handles_labels(), loc='outside lower center', ncol=6, fontsize=7)
     fig.suptitle("Fairness between competing TCP flows (mean ± 95% CI)", x=0.01, ha='left')
     save(fig, 'F2_s1_fairness')
 
@@ -108,14 +117,15 @@ def f3_rtt_bias():
 
 
 def f4_tcp_vs_udp():
-    """TCP aggregate goodput, UDP loss and UDP jitter as the UDP rate rises."""
-    s = summarize(per_trial('s2'))
+    """TCP aggregate goodput, UDP loss and UDP jitter as the UDP rate rises; RED from s2r."""
+    s = pd.concat([summarize(per_trial('s2')), red_only('s2r')])
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.0), layout='constrained')
     for cca in CCAS:
-        for q in ['pfifo', 'fq_codel']:
+        for q in ['pfifo', 'ared', 'fq_codel']:
             d = s[(s.cca == cca) & (s.qdisc == q)].sort_values('udp_pct')
             kw = dict(color=CCA_COLOR[cca], ls=QDISC_STYLE[q], marker='o', ms=3, capsize=2)
-            axes[0].errorbar(d.udp_pct, d.tcp_mbps_mean, yerr=d.tcp_mbps_ci, label=f'{cca}, {q}', **kw)
+            axes[0].errorbar(d.udp_pct, d.tcp_mbps_mean, yerr=d.tcp_mbps_ci,
+                             label=f'{cca}, {QDISC_LABEL[q]}', **kw)
             axes[1].errorbar(d.udp_pct, d.udp_loss_pct_mean, yerr=d.udp_loss_pct_ci, **kw)
             axes[2].errorbar(d.udp_pct, d.udp_jitter_ms_mean, yerr=d.udp_jitter_ms_ci, **kw)
     axes[0].set_ylabel('TCP aggregate goodput (Mbps)')
@@ -124,8 +134,8 @@ def f4_tcp_vs_udp():
     for ax in axes:
         ax.set_xlabel('UDP offered load (% of bottleneck)')
         ax.set_ylim(bottom=0)
-    fig.legend(*axes[0].get_legend_handles_labels(), loc='outside lower center', ncol=6, fontsize=7)
-    fig.suptitle('3 TCP flows vs. 1 UDP flow (solid pfifo, dashed fq_codel)', x=0.01, ha='left')
+    fig.legend(*axes[0].get_legend_handles_labels(), loc='outside lower center', ncol=9, fontsize=7)
+    fig.suptitle('3 TCP flows vs. 1 UDP flow (solid pfifo, dash-dot RED*, dashed fq_codel)', x=0.01, ha='left')
     save(fig, 'F4_s2_tcp_vs_udp')
 
 
@@ -151,10 +161,10 @@ def f5_utilization_vs_buffer():
 
 
 def f6_cubic_vs_bbr():
-    """How 2 CUBIC + 2 BBR flows split the link, by buffer depth and queue."""
+    """How 2 CUBIC + 2 BBR flows split the link, by buffer depth and queue; RED from s3r."""
     s = summarize(per_trial('s3'))
-    s = s[s.n == 4]
-    qdiscs, bufs = ['pfifo', 'red', 'fq_codel'], sorted(s.buf_bdp.unique())
+    s = pd.concat([s[(s.n == 4) & (s.qdisc != 'red')], red_only('s3r')])
+    qdiscs, bufs = ['pfifo', 'ared', 'fq_codel'], sorted(s.buf_bdp.unique())
     fig, axes = plt.subplots(1, 3, figsize=(9, 2.7), layout='constrained', sharey=True)
     for ax, q in zip(axes, qdiscs):
         d = s[s.qdisc == q].set_index('buf_bdp').reindex(bufs)
@@ -166,7 +176,7 @@ def f6_cubic_vs_bbr():
         ax.axhline(50, color='k', ls=':', lw=1)
         ax.set_xticks(x, [f'{b:g}×' for b in bufs])
         ax.set_xlabel('buffer (× BDP)')
-        ax.set_title(q, loc='left')
+        ax.set_title(QDISC_LABEL[q], loc='left')
     axes[0].set_ylabel('share of TCP throughput (%)')
     axes[-1].legend(fontsize=7, loc='lower right')
     fig.suptitle('CUBIC vs. BBR share, 2 + 2 flows at 50 ms', x=0.01, ha='left')

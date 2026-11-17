@@ -34,7 +34,7 @@ San Jose, CA, USA}}
 \maketitle
 
 \begin{abstract}
-When several users share one bottleneck link, the way the router queues packets turned out to matter more than the congestion control algorithm (CCA) on the senders. To study this, I built a Mininet dumbbell network with a 50~Mbps bottleneck at a Linux router and ran 492 automated trials where Reno, CUBIC, and BBR competed with each other and with UDP under three queue disciplines (pfifo, RED, and fq\_codel). On a plain FIFO with up to 1\x{} the bandwidth-delay product (BDP) of buffer, BBR took 89--99\% of the link away from CUBIC (90\% from Reno in a follow-up) unless one BBR flow had the shorter path, UDP sent at the line rate left TCP with less than 0.1~Mbps, and a single CUBIC flow in a deep buffer added up to 494~ms of queueing delay. fq\_codel removed all three of these problems. It held Reno and CUBIC flows within 4~ms of the path RTT and BBR flows within 35~ms, and kept Jain's fairness index at or above 0.97. Its only costs were under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput. Wireshark captures show two of these mechanisms directly, and the report ends with recommendations on which queue and CCA to deploy.
+When several users share one bottleneck link, the way the router queues packets turned out to matter more than the congestion control algorithm (CCA) on the senders. To study this, I built a Mininet dumbbell network with a 50~Mbps bottleneck at a Linux router and ran 492 automated trials where Reno, CUBIC, and BBR competed with each other and with UDP under three queue disciplines (pfifo, RED, and fq\_codel). On a plain FIFO with up to 1\x{} the bandwidth-delay product (BDP) of buffer, BBR took 89--99\% of the link away from CUBIC (90\% from Reno in a follow-up) unless one BBR flow had the shorter path, UDP sent at the line rate left TCP with less than 0.1~Mbps, and a single CUBIC flow in a deep buffer added up to 494~ms of queueing delay. fq\_codel removed all three of these problems, while a follow-up RED with the same 5~ms target only removed the delay. fq\_codel held Reno and CUBIC flows within 4~ms of the path RTT and BBR flows within 35~ms, and kept Jain's fairness index at or above 0.97. Its only costs were under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,7 +47,7 @@ Since most links in a network are shared, any time several users send at once th
 
 As a result, the same network can be fair or very unfair, and fast or very slow, depending on which combination of these is deployed. The question I set out to answer was: which CCA and which bottleneck queue should an operator deploy as the number of flows, the RTTs, the buffer size, and the UDP load change, judged by throughput, fairness, and latency?
 
-To answer it, I built an emulated dumbbell network in Mininet, wrote an automated runner that sweeps 95 configurations across three scenarios, and measured every metric the project calls for: throughput, RTT, packet loss, jitter, bandwidth utilization, TCP retransmissions, and fairness. Before running anything, my proposal stated five hypotheses (H1--H5), and Section~\ref{sec:analysis} checks each one against the data. The main finding is that the queue discipline matters more than the CCA. fq\_codel was the best or tied for best on delay and fairness in every condition I tested, at a small throughput cost for Reno.
+To answer it, I built an emulated dumbbell network in Mininet, wrote an automated runner that sweeps 95 configurations across three scenarios, and measured every metric the project calls for: throughput, RTT, packet loss, jitter, bandwidth utilization, TCP retransmissions, and fairness. Before running anything, my proposal stated five hypotheses (H1--H5), and Section~\ref{sec:analysis} checks each one against the data. The main finding is that the queue discipline matters more than the CCA.
 
 \section{Background}
 
@@ -106,14 +106,14 @@ The network is a dumbbell (Fig.~\ref{fig:topo}). Four senders, h1--h4, connect t
 \label{fig:topo}
 \end{figure}
 
-Router r1 was not part of my first design. Originally I shaped a switch port, and it failed validation: 60~Mbps of UDP arrived at the receiver as 48.7~Mbps with no loss at all, which should not be possible for a 50~Mbps link with a finite queue. The cause was that across veth pairs and Open vSwitch a packet stays charged to the socket that sent it. When the queue filled up, it pushed back on the sender and throttled it instead of dropping packets, and TCP Small Queues capped TCP in a similar way. Routing through r1 releases the packet from its socket, so the queue behaves like a real router queue. After this change the same test lost 19\% of its UDP packets, which is what a 50~Mbps link should do with 60~Mbps of offered traffic.
+Router r1 was not part of my first design. Originally I shaped a switch port, and it failed validation: 60~Mbps of UDP arrived at the receiver as 48.7~Mbps with no loss at all, which should not be possible for a 50~Mbps link with a finite queue. The cause was that across veth pairs and Open vSwitch a packet stays charged to the socket that sent it. When the queue filled up, it pushed back on the sender and throttled it instead of dropping packets. Routing through r1 releases the packet from its socket, so the queue behaves like a real router queue. After this change the same test lost 19\% of its UDP packets, which is what a 50~Mbps link should do with 60~Mbps of offered traffic.
 
 \section{Implementation Methodology}
 
 \subsection{Platform}
-All experiments ran in a 4-vCPU, 4~GB UTM virtual machine on an Apple M2 Mac, running Ubuntu 26.04.1 (kernel 7.0) with Mininet 2.3.0~\cite{mininet}, Open vSwitch 3.7.1, iperf 3.20~\cite{iperf3}, and Wireshark 4.6.4. I did the analysis in Python with pandas. Buffers are sized as $k \times \mathrm{BDP}$ divided into 1500~B packets, which ranges from 11 to 2,500 packets across the grid. For RED, the minimum and maximum thresholds sit at 1/6 and 1/2 of the queue limit. I turned segmentation offloads off so that the queue sees real 1514-byte frames instead of large aggregated packets.
+All experiments ran in a 4-vCPU, 4~GB UTM virtual machine on an Apple M2 Mac, running Ubuntu 26.04.1 (kernel 7.0) with Mininet 2.3.0~\cite{mininet}, Open vSwitch 3.7.1, iperf 3.20~\cite{iperf3}, and Wireshark 4.6.4. Buffers are sized as $k \times \mathrm{BDP}$ divided into 1500~B packets, which ranges from 11 to 2,500 packets across the grid. In the main study, RED's thresholds sat at 1/6 and 1/2 of the queue limit, so its target delay grew with the buffer. The follow-up RED runs use Adaptive RED~\cite{ared} with fq\_codel's 5~ms target instead, with thresholds at 2.5 and 7.5~ms of queue and the same hard limit. All RED numbers below come from this setting unless noted. I turned segmentation offloads off so that the queue sees real 1514-byte frames instead of large aggregated packets.
 
-Later I ran 145 more trials on a second machine, Ubuntu 26.04.1 in WSL2 (kernel 6.18) on an AMD Ryzen 5 5600X with the same tool versions, to add Reno pairs, swap path lengths, and run longer flows. Ten of these configurations repeat VM runs as a check, and their 95\% confidence intervals overlapped on every metric except five small gaps, the largest a 10~ms (5\%) lower loaded RTT at 4\x{} BDP.
+Later I ran 400 more trials on a second machine, Ubuntu 26.04.1 in WSL2 (kernel 6.18) on an AMD Ryzen 5 5600X with the same tool versions, to add Reno pairs, swap path lengths, run longer flows, and test RED in every scenario. Eighteen of these configurations repeat VM runs as a check, and their 95\% confidence intervals overlapped apart from small gaps, the largest a 10~ms (5\%) lower loaded RTT at 4\x{} BDP.
 
 \subsection{Automation and Metrics}
 A runner script, \texttt{run.py}, expands each scenario's YAML grid into configurations, shuffles them, and interleaves their trials so that slow drift in the VM does not line up with any one configuration. Every trial builds a fresh network and first checks that the idle RTT matches the configured delay. iperf3 then runs for 60~s after a 5~s omit period that skips slow start. While it runs, \texttt{ping} samples the RTT every 0.2~s, \texttt{tc -s qdisc} records the queue backlog and drops every 0.5~s, and \texttt{ss} records each sender's cwnd and RTT every 0.1~s. For 16 configurations, tcpdump also captured the traffic for Wireshark.
@@ -125,10 +125,10 @@ Before any experiment, I ran nine validation checks. For example, a 40~ms path m
 
 \section{Experimental Scenarios}
 
-All three scenarios run Reno, CUBIC, and BBR through the same 50~Mbps bottleneck (Table~\ref{tab:scen}). No random loss is injected, so every drop happens at the bottleneck queue. S1 covers the single-flow baseline and competition between TCP flows: two or four flows with equal RTTs or with mixed RTTs from 20 to 80~ms, all using the same CCA or a CUBIC~+~BBR mix, plus Reno~+~CUBIC and Reno~+~BBR pairs, both path orders for each mixed-RTT pair, and 180~s Reno~+~CUBIC runs in the follow-up. S2 puts three TCP flows next to one UDP flow that sends at 25\% to 100\% of the link rate, to see how TCP handles traffic that never backs off. S3 varies the buffer size and the propagation delay together, first with a single flow and then with two CUBIC and two BBR flows under all three queue disciplines (and Reno~+~BBR on pfifo in the follow-up). In a few extra runs BBR (S1) or UDP (S2) starts late, so that the captures show the moment a new flow joins.
+All three scenarios run Reno, CUBIC, and BBR through the same 50~Mbps bottleneck (Table~\ref{tab:scen}), and no random loss is injected, so every drop happens at the bottleneck queue. S1 tests competition between TCP flows with equal or mixed RTTs, S2 puts three TCP flows next to one UDP flow that never backs off, and S3 varies the buffer size and the propagation delay together. The follow-ups added Reno pairs, both path orders for each mixed-RTT pair, 180~s runs, and RED in S1, S2, and the 2~+~2 part of S3. In a few extra runs BBR (S1) or UDP (S2) starts late, so that the captures show the moment a new flow joins.
 
 \begin{table*}[t]
-\caption{Experimental Scenarios (Defaults: 40~ms RTT, 1\x{} BDP Buffer, pfifo). Trials Include 3 Late-BBR (S1) and 2 Late-UDP (S2) Runs. A Follow-Up on a Second Machine Adds 29 Configurations (23 in S1, 6 in S3) and 145 Trials}
+\caption{Experimental Scenarios (Defaults: 40~ms RTT, 1\x{} BDP Buffer, pfifo). Trials Include 3 Late-BBR (S1) and 2 Late-UDP (S2) Runs. Follow-Ups on a Second Machine Add 80 Configurations (51 in S1, 17 in S2, 12 in S3) and 400 Trials, Including RED in Every Scenario}
 \label{tab:scen}
 \centering
 \begin{tabular}{@{}L{3.6cm}L{10.2cm}cc@{}}
@@ -147,41 +147,43 @@ Total & & 95 & 492 \\
 \section{Results}
 
 \subsection{S1: Competing Flows}
-Any single flow on its own filled the link. Utilization was 99.98\% for Reno, 99.97\% for CUBIC, and 97.5\% for BBR. The difference was in delay, where CUBIC kept 27.9~ms of queueing delay and Reno 22.6~ms, while BBR added only 0.8~ms. Flows using the same CCA with equal RTTs shared fairly, with Jain's index of about 0.95 or higher. Mixing CCAs on pfifo was a different story. CUBIC kept only 10.6\% of the throughput against one BBR flow, 1.9--3.3\% in a 2~+~2 mix, and about 5~Mbps when BBR joined late. Reno did no better. In the follow-up, Reno kept 10.0\% against one BBR flow, close to the 10.9\% that CUBIC kept on the same machine. Against CUBIC, Reno got 47.9\% in 60~s runs, with single trials anywhere from 34\% to 56\%. With 180~s flows Reno averaged 38.0\%, falling from about 49\% in the first 30~s to 34--37\% after that. Path length mattered as much as the CCA. In the original mixed-RTT runs CUBIC always got the 20~ms path. When BBR got the 20~ms path instead, CUBIC on 80~ms kept 46.8\% (47.0\% once settled) rather than 10.4\%. The same swap in the follow-up moved Reno from 12.7\% to 55.6\%. With two flows of each, BBR still won in either order (CUBIC 1.8\% and 2.9\%). With mixed RTTs (Fig.~\ref{fig:fair}), Reno gave its 20~ms flow 37.6\% of the link in the four-flow case (Jain 0.88), while CUBIC was fairer at 0.95. BBR reversed the bias. Its 80~ms flow took 39.4\% and its 20~ms flow only 6.7\% (Jain 0.74). Two or four BBR flows on pfifo also retransmitted 3.6--10.6\% of their bytes, compared with under 0.06\% for Reno and CUBIC.
+Any single flow on its own filled the link. Utilization was 99.98\% for Reno, 99.97\% for CUBIC, and 97.5\% for BBR. The difference was in delay, where CUBIC kept 27.9~ms of queueing delay and Reno 22.6~ms, while BBR added only 0.8~ms. Flows using the same CCA with equal RTTs shared fairly, with Jain's index of about 0.95 or higher. Mixing CCAs on pfifo was a different story. CUBIC kept only 10.6\% of the throughput against one BBR flow and 1.9--3.3\% in a 2~+~2 mix. Reno did no better. In the follow-up, Reno kept 10.0\% against one BBR flow, close to the 10.9\% that CUBIC kept on the same machine. Against CUBIC, Reno averaged 38.0\% in 180~s runs, falling from about 49\% in the first 30~s to 34--37\% after that. Path length mattered as much as the CCA. In the original mixed-RTT runs CUBIC always got the 20~ms path. When BBR got the 20~ms path instead, CUBIC on 80~ms kept 46.8\% (47.0\% once settled) rather than 10.4\%. With two flows of each, BBR still won in either order (CUBIC 1.8\% and 2.9\%). With mixed RTTs (Fig.~\ref{fig:fair}), Reno gave its 20~ms flow 37.6\% of the link in the four-flow case (Jain 0.88), while CUBIC was fairer at 0.95. BBR reversed the bias. Its 80~ms flow took 39.4\% and its 20~ms flow only 6.7\% (Jain 0.74). Two or four BBR flows on pfifo also retransmitted 3.6--10.6\% of their bytes, compared with under 0.06\% for Reno and CUBIC.
+
+RED did not change who won. On the second machine, CUBIC kept 5.2\% against one BBR flow and Reno 4.9\%, about half of what they kept on pfifo, and CUBIC on the 80~ms path kept only 2.2\% against BBR on 20~ms. With no BBR in the queue, RED held Reno and CUBIC within 1~ms of the path RTT, but this cost Reno 13--17\% of the link and CUBIC 3--6\%. It also made the RTT bias stronger. With mixed RTTs, Jain's index fell to 0.73--0.75 for Reno and 0.78--0.79 for CUBIC, while four Reno flows on pfifo reached 0.88 on the same machine.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.92\textwidth]{figs/F2_s1_fairness.pdf}
-\caption{Jain's fairness index in S1 (mean $\pm$ 95\% CI). The CUBIC + BBR mix on pfifo is the lowest, while fq\_codel stays between 0.97 and 1.00 everywhere.}
+\caption{Jain's fairness index in S1 (mean $\pm$ 95\% CI). RED bars come from the second machine. CUBIC + BBR is lowest on pfifo and RED, RED is also low for loss-based flows with mixed RTTs, and fq\_codel stays between 0.97 and 1.00 everywhere.}
 \label{fig:fair}
 \end{figure*}
 
 \subsection{S2: TCP and UDP}
-On pfifo, the three CUBIC flows together got 35.5, 23.1, 10.7, and 0.05~Mbps as UDP's offered load rose from 25\% to 100\% of $R$, and Reno and BBR were within 0.9~Mbps of these numbers. fq\_codel held TCP at 33--35~Mbps at every load by dropping UDP's excess instead, so UDP loss reached 75\%. The trade-off was jitter. At 75--100\% load, UDP jitter under fq\_codel rose to 0.6--0.8~ms, compared with at most 0.11~ms on pfifo (Fig.~\ref{fig:s2}).
+On pfifo, the three CUBIC flows together got 35.5, 23.1, 10.7, and 0.05~Mbps as UDP's offered load rose from 25\% to 100\% of $R$, and Reno and BBR were within 0.9~Mbps of these numbers. fq\_codel held TCP at 33--35~Mbps at every load by dropping UDP's excess instead, so UDP loss reached 75\%. RED did not protect TCP. The CUBIC flows got 34.0, 22.4, 10.9, and 2.1~Mbps, close to pfifo, likely because UDP keeps sending through RED's early drops. The trade-off was jitter. At 75--100\% load, UDP jitter under fq\_codel rose to 0.6--0.8~ms, compared with at most 0.11~ms on pfifo (Fig.~\ref{fig:s2}).
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{figs/F4_s2_tcp_vs_udp.pdf}
-\caption{TCP goodput, UDP loss, and UDP jitter versus UDP offered load in S2 (solid pfifo, dashed fq\_codel). Under fq\_codel, TCP keeps roughly three quarters of the link no matter how hard UDP pushes.}
+\caption{TCP goodput, UDP loss, and UDP jitter versus UDP offered load in S2 (solid pfifo, dash-dot RED on the second machine, dashed fq\_codel). Under fq\_codel, TCP keeps roughly three quarters of the link no matter how hard UDP pushes.}
 \label{fig:s2}
 \end{figure*}
 
 \subsection{S3: Buffers and RTT}
-With 1\x{} BDP of buffer or more, every CCA stayed above 96\% utilization. At 0.25\x{} BDP, Reno dropped to 82--87\%, while CUBIC kept 98\% and BBR 95--97\%. The one exception was the 11-packet buffer at 10~ms, where Reno and CUBIC both fell to 23\% (Fig.~\ref{fig:util}). On pfifo, CUBIC's share against BBR went from 1.4\% to 1.8\% to 58.9\% as the buffer grew from 0.25\x{} to 4\x{} BDP. That 58.9\% likely includes a head start, since 180~s runs on the second machine settled at an even 51.1\%. Reno against BBR did the same (1.9\% and 2.3\%, then 48.1\% once settled). RED kept CUBIC at about 2\% regardless of the buffer, and fq\_codel kept it at about 48\% (Fig.~\ref{fig:share}).
+With 1\x{} BDP of buffer or more, every CCA stayed above 96\% utilization. At 0.25\x{} BDP, Reno dropped to 82--87\%, while CUBIC kept 98\% and BBR 95--97\%. The one exception was the 11-packet buffer at 10~ms, where Reno and CUBIC both fell to 23\% (Fig.~\ref{fig:util}). On pfifo, CUBIC's share against BBR went from 1.4\% to 1.8\% to 58.9\% as the buffer grew from 0.25\x{} to 4\x{} BDP. That 58.9\% likely includes a head start, since 180~s runs on the second machine settled at an even 51.1\%. Reno against BBR did the same (1.9\% and 2.3\%, then 48.1\% once settled). RED kept CUBIC at 2.4--2.5\% at every buffer size, and fq\_codel kept it at about 48\% (Fig.~\ref{fig:share}).
 
-Deep buffers also showed the delay cost of loss-based CCAs. At 4\x{} BDP, a single CUBIC flow added 34.5, 162, and 494~ms of queueing delay at RTTs of 10, 50, and 150~ms. Reno added 28, 127, and 245~ms, and BBR stayed under 3~ms. With the four mixed flows at 4\x{} BDP, queueing delay was 164~ms on pfifo, 48~ms on RED, and on fq\_codel about 0 for the probe, 3~ms for CUBIC flows and 26~ms for BBR flows.
+Deep buffers also showed the delay cost of loss-based CCAs. At 4\x{} BDP, a single CUBIC flow added 34.5, 162, and 494~ms of queueing delay at RTTs of 10, 50, and 150~ms. Reno added 28, 127, and 245~ms, and BBR stayed under 3~ms. With the four mixed flows at 4\x{} BDP, queueing delay was 164~ms on pfifo, 4.8~ms on RED, close to its 5~ms target (48~ms with the main study's thresholds), and on fq\_codel about 0 for the probe, 3~ms for CUBIC flows and 26~ms for BBR flows.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.92\textwidth]{figs/F5_s3_utilization_vs_buffer.pdf}
+\includegraphics[width=0.85\textwidth]{figs/F5_s3_utilization_vs_buffer.pdf}
 \caption{Single-flow utilization versus buffer size in S3. Only shallow buffers cost throughput, and only for the loss-based CCAs.}
 \label{fig:util}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.92\textwidth]{figs/F6_s3_cubic_vs_bbr.pdf}
-\caption{CUBIC's share of TCP throughput against BBR (2 + 2 flows, 50~ms). On pfifo it follows the buffer depth, RED leaves CUBIC near 2\%, and fq\_codel evens it out.}
+\includegraphics[width=0.85\textwidth]{figs/F6_s3_cubic_vs_bbr.pdf}
+\caption{CUBIC's share of TCP throughput against BBR (2 + 2 flows, 50~ms). On pfifo it follows the buffer depth, RED (second machine) leaves CUBIC near 2\%, and fq\_codel evens it out.}
 \label{fig:share}
 \end{figure*}
 
@@ -202,7 +204,7 @@ Hypothesis & Verdict \\
 H1: $\geq$90\% utilization at $\geq$1\x{} BDP; Reno 85--90\% at 0.25\x & Partly, plus an 11-packet collapse \\
 H2: Reno favors short RTTs more than CUBIC & Supported; BBR reverses it \\
 H3: BBR wins shallow buffers, CUBIC recovers in deep ones & Supported on pfifo (even split), not RED \\
-H4: Line-rate UDP starves TCP; fq\_codel fixes it & Supported \\
+H4: Line-rate UDP starves TCP; fq\_codel fixes it & Supported, not by RED \\
 H5: A deep FIFO adds about its drain time & CUBIC yes; Reno partly \\
 \bottomrule
 \end{tabular}
@@ -214,44 +216,20 @@ The link goes idle whenever cwnd falls below one BDP, since the sender then cann
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.78\textwidth]{figs/capture_reno_inflight.png}
+\includegraphics[width=0.72\textwidth]{figs/capture_reno_inflight.png}
 \caption{Wireshark I/O graph of bytes in flight for one Reno flow with a 0.25\x{} BDP buffer at 50~ms RTT (S3, sender capture, 10~ms bins). Each loss halves the window to about 186~KB, below the 312~KB BDP, so the link sits partly idle until the window grows back.}
 \label{fig:inflight}
 \end{figure*}
 
-The 11-packet collapse was not something I predicted. In this case, unpaced bursts from Reno and CUBIC overflow the tiny queue with about 1,000 drops per trial, and the repeated losses pin cwnd near 11 packets against a 42-packet BDP. Paced BBR lost even more, about 9,500 packets per trial, and still kept 97\% utilization since it does not cut its rate on loss. This lines up with earlier work showing that tiny buffers only work with smooth traffic~\cite{enachescu}, and VM batching most likely makes the effect worse than it would be on real hardware.
-
-\subsection{H2 and H3: Sharing Between Flows}
-After a loss that hits both flows, Reno's 20~ms flow regrows about twice as fast as its 80~ms flow, because their effective RTTs including the queue are 49 and 109~ms. This is why short-RTT Reno flows win. CUBIC's time-based growth narrows the gap, which matches its higher Jain index. BBR flips the bias for a different reason. It caps its data in flight using its own minimum RTT, so a flow with a longer RTT is allowed more data in flight and ends up holding more of the FIFO~\cite{hock,ware}. The swapped-path runs fit this, since a lone BBR flow on the 20~ms path should get a small in-flight cap, although I did not measure it and BBR still won the 2~+~2 runs.
-
-The same idea explains CUBIC against BBR. In shallow buffers, BBR keeps sending through the losses it causes, while CUBIC backs off on every one of them. At 4\x{} BDP that advantage disappears. CUBIC can fill the large queue before any loss happens, but BBR's in-flight cap does not grow with the queueing delay, so CUBIC catches up and the two settle near an even split. Reno did the same. RED drops packets from both, but only CUBIC responds to those drops, so BBR stays on top at every buffer size. Under fq\_codel's round-robin, each flow gets its turn no matter how large its window is, so window size stops mattering.
-
-Under fq\_codel, Reno and CUBIC split the link almost evenly (47.5\% for Reno), but BBR still took 56\% from Reno, while CUBIC kept 49.0\% against BBR. My best explanation is that Reno halves on every CoDel drop and regrows slowly, so it leaves part of its turn unused and BBR picks it up.
-
-\subsection{H4: TCP Beside UDP}
-In a shared queue, every drop makes a TCP flow halve its rate, but UDP keeps sending at the same rate no matter what. This means TCP ends up with whatever UDP leaves behind. With 1242-byte UDP frames on the wire, this predicts 35.4, 23.1, 10.7, and 0~Mbps for TCP, which is within 0.1~Mbps of what I measured for CUBIC and Reno. At 100\% load, 3.4\% of UDP's frames cannot fit on the link, which matches its measured 3.6\% loss. Fig.~\ref{fig:udp} shows what this looks like on the wire. When UDP joins, TCP collapses within 0.3~s, and 21\% of its remaining packets are retransmissions. TCP only recovers once UDP stops.
-
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.78\textwidth]{figs/capture_late_udp.png}
+\includegraphics[width=0.72\textwidth]{figs/capture_late_udp.png}
 \caption{Wireshark I/O graph of the bottleneck capture for 3 CUBIC flows and UDP at 100\% load on pfifo, with UDP starting late (trial 1, 100~ms bins, black TCP and red UDP). TCP collapses when UDP joins at 22~s capture time (arrow) and recovers only after UDP stops.}
 \label{fig:udp}
 \end{figure*}
 
-fq\_codel avoids this by giving each of the four flows a quarter of the link. The cost is that UDP's packets are now interleaved with TCP bursts, which raises its jitter. Switching the TCP senders to BBR does not help either. At only 25\% UDP load, BBR caused 5.8\% UDP loss compared with 0.06\% under CUBIC. My best explanation is that BBR's probing kept the FIFO full, although BBR still caused 3.2\% UDP loss under fq\_codel, so the queue is probably not the whole story.
-
-\subsection{H5: Queueing Delay}
-A 4\x{} BDP buffer takes 4\x{} RTT to drain, which is 40, 200, and 600~ms at the three RTTs. CUBIC's 0.7\x{} cut leaves most of the buffer full, so its queue stayed 80--86\% full on average, and the captured RTT on a 50~ms path ranged from 175 to 250~ms. Reno cycling between 2.5 and 5~BDP should keep the buffer 69\% full on average, which matches the 64--71\% I measured at 10 and 50~ms. At 150~ms, though, Reno never fully regrows within the 60~s trial, so it only reached 41\%. A single BBR flow keeps about one BDP in flight, so it builds no standing queue. Several BBR flows on pfifo kept 37--40~ms of queue in S1, more than CUBIC (32--34~ms) or Reno (25--29~ms). Under fq\_codel the probe saw almost no delay and Reno and CUBIC flows under 4~ms, but BBR flows 4--35~ms, likely because BBR ignores CoDel's drops and keeps its own queue long.
-
-\subsection{Testbed Lessons}
-Besides the router fix in Section~\ref{sec:arch}, two measurement choices turned out to matter. First, utilization has to be counted on the wire, since goodput hides the header overhead. Second, metrics have to cover only the time when all flows overlap, which my first S2 analysis did not do. The UDP client ran from 0 to 60~s while TCP ran until 65~s, so the TCP numbers included 5~s with no UDP at all. So TCP next to line-rate UDP appeared to get 2.2~Mbps, all of it after UDP had stopped.
-
-\section{Design Recommendations}
-
-Ultimately, changing the bottleneck queue helps more than changing any CCA. The CCA choice only matters where a FIFO has to stay, for example on equipment the operator cannot reconfigure. Table~\ref{tab:rec} lists what I would deploy for each condition and why. These come from a single 50~Mbps bottleneck in a VM, with BBRv1, mostly 60~s flows, no ECN, and one RED setting, so they are a starting point, not a rule for every network.
-
 \begin{table*}[t]
-\caption{Recommendations for One 50~Mbps Bottleneck (BBRv1, 60~s Flows, in a VM)}
+\caption{Recommendations for One Emulated 50~Mbps Bottleneck (BBRv1, 60~s Flows)}
 \label{tab:rec}
 \centering
 \begin{tabular}{@{}L{4.6cm}L{5.4cm}L{6.0cm}@{}}
@@ -259,19 +237,42 @@ Ultimately, changing the bottleneck queue helps more than changing any CCA. The 
 Condition & Recommendation & Evidence \\
 \midrule
 Operator controls the bottleneck & fq\_codel, any CCA & Delay $<$4~ms (BBR $\leq$35); Jain $\geq$0.97 \\
-Unresponsive UDP & fq\_codel; no CCA helps & TCP $<$0.1~Mbps on pfifo \\
+Unresponsive UDP & fq\_codel; no CCA helps & TCP $<$0.1~Mbps on pfifo, 2.1 on RED \\
 Mixed CCAs or RTTs on a FIFO & fq\_codel, not RED & CUBIC 1.4--10.6\%, Reno 10.0\% vs.\ BBR \\
+RED instead of fq\_codel & Not a substitute & Low delay, but Reno 83--87\%, BBR still wins \\
 Deep FIFO ($\geq$4\x{} BDP) & fq\_codel, or shrink to $\sim$1\x{} BDP & CUBIC +494~ms; one BBR flow $<$3~ms \\
 $\sim$1\x{} BDP FIFO & No CCA fixes delay; fix the queue & 2--4 flows add 25--40~ms, BBR most \\
 Shallow FIFO ($\leq$0.25\x{} BDP) & BBR, or CUBIC at RTT $\geq$50~ms & Reno 82--87\%; 23\% at 10~ms \\
 \bottomrule
-\end{tabular}\\[3pt]
-{\footnotesize Under fq\_codel, Reno loses about 5\% of its throughput.}
+\end{tabular}
 \end{table*}
+
+The 11-packet collapse was not something I predicted. In this case, unpaced bursts from Reno and CUBIC overflow the tiny queue with about 1,000 drops per trial, and the repeated losses pin cwnd near 11 packets against a 42-packet BDP. Paced BBR lost even more, about 9,500 packets per trial, and still kept 97\% utilization since it does not cut its rate on loss. This lines up with earlier work showing that tiny buffers only work with smooth traffic~\cite{enachescu}, and VM batching most likely makes the effect worse than it would be on real hardware.
+
+RED's cost for Reno fits the same model. Since RED drops early from 2.5~ms of queue and drops everything above 7.5~ms, Reno sees a buffer of only 0.06--0.19~BDP, for which the model predicts 79--86\%. I measured 83--87\%. The slower queue average that the Adaptive RED paper recommends made this worse, since after slow start RED dropped every packet for seconds at a time and Reno used only 63--82\% of the link even late in each run.
+
+\subsection{H2 and H3: Sharing Between Flows}
+After a loss that hits both flows, Reno's 20~ms flow regrows about twice as fast as its 80~ms flow, because their effective RTTs including the queue are 49 and 109~ms. This is why short-RTT Reno flows win. CUBIC's time-based growth narrows the gap, which matches its higher Jain index. BBR flips the bias for a different reason. It caps its data in flight using its own minimum RTT, so a flow with a longer RTT is allowed more data in flight and ends up holding more of the FIFO~\cite{hock,ware}. The swapped-path runs fit this, since a lone BBR flow on the 20~ms path should get a small in-flight cap, although I did not measure it and BBR still won the 2~+~2 runs. RED makes Reno's bias stronger, likely because with almost no queue the RTTs stay near 20 and 80~ms instead of 49 and 109~ms, and RED drops every packet with the same probability, so each rate scales with one over its RTT. This predicts a Jain index of 0.74 for two Reno flows, and I measured 0.75.
+
+The same idea explains CUBIC against BBR. In shallow buffers, BBR keeps sending through the losses it causes, while CUBIC backs off on every one of them. At 4\x{} BDP that advantage disappears. CUBIC can fill the large queue before any loss happens, but BBR's in-flight cap does not grow with the queueing delay, so CUBIC catches up and the two settle near an even split. Reno did the same. RED drops packets from both, but only CUBIC responds to those drops, so BBR stays on top at every buffer size. Under fq\_codel's round-robin, each flow gets its turn no matter how large its window is, so window size stops mattering.
+
+Under fq\_codel, Reno and CUBIC split the link almost evenly (47.5\% for Reno), but BBR still took 56\% from Reno, while CUBIC kept 49.0\% against BBR. My best explanation is that Reno halves on every CoDel drop and regrows slowly, so it leaves part of its turn unused and BBR picks it up.
+
+\subsection{H4: TCP Beside UDP}
+In a shared queue, every drop makes a TCP flow halve its rate, but UDP keeps sending at the same rate no matter what. This means TCP ends up with whatever UDP leaves behind. With 1242-byte UDP frames on the wire, this predicts 35.4, 23.1, 10.7, and 0~Mbps for TCP, which is within 0.1~Mbps of what I measured for CUBIC and Reno. Fig.~\ref{fig:udp} shows what this looks like on the wire. When UDP joins, TCP collapses within 0.3~s, and 21\% of its remaining packets are retransmissions. TCP only recovers once UDP stops.
+
+fq\_codel avoids this by giving each of the four flows a quarter of the link. The cost is that UDP's packets are now interleaved with TCP bursts, which raises its jitter. Switching the TCP senders to BBR does not help either, and at only 25\% UDP load BBR caused 5.8\% UDP loss compared with 0.06\% under CUBIC.
+
+\subsection{H5: Queueing Delay}
+A 4\x{} BDP buffer takes 4\x{} RTT to drain, which is 40, 200, and 600~ms at the three RTTs. CUBIC's 0.7\x{} cut leaves most of the buffer full, so its queue stayed 80--86\% full on average, and the captured RTT on a 50~ms path ranged from 175 to 250~ms. Reno cycling between 2.5 and 5~BDP should keep the buffer 69\% full on average, which matches the 64--71\% I measured at 10 and 50~ms. At 150~ms, though, Reno never fully regrows within the 60~s trial, so it only reached 41\%. A single BBR flow keeps about one BDP in flight, so it builds no standing queue. Several BBR flows on pfifo kept 37--40~ms of queue in S1, more than CUBIC (32--34~ms) or Reno (25--29~ms). Under fq\_codel the probe saw almost no delay and Reno and CUBIC flows under 4~ms, but BBR flows 4--35~ms, likely because BBR ignores CoDel's drops and keeps its own queue long.
+
+\section{Design Recommendations}
+
+Ultimately, changing the bottleneck queue helps more than changing any CCA. The CCA choice only matters where a FIFO has to stay. Table~\ref{tab:rec} lists what I would deploy for each condition and why. These come from a single emulated 50~Mbps bottleneck, with BBRv1, mostly 60~s flows, and no ECN, so they are a starting point, not a rule for every network.
 
 \section{Conclusion}
 
-Across 492 trials, the bottleneck queue shaped fairness and delay more than the senders' CCA did. On a FIFO, BBR and UDP take bandwidth from flows that back off on loss, and loss-based senders turn deep buffers into hundreds of milliseconds of delay. fq\_codel removed all of these effects at the cost of under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput. If a FIFO has to stay, one BBR flow keeps tiny buffers busy with almost no delay, but several BBR flows queued more than CUBIC, so no CCA replaces fixing the queue. Future work could extend this study to a two-bottleneck parking-lot topology, BBRv3, and real hardware without VM batching.
+Across 892 trials on two machines, the bottleneck queue shaped fairness and delay more than the senders' CCA did. On a FIFO, BBR and UDP take bandwidth from flows that back off on loss, and loss-based senders turn deep buffers into hundreds of milliseconds of delay. fq\_codel removed all of these effects at the cost of under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput. RED with the same 5~ms target removed only the delay, and it cost Reno 13--17\% of the link. If a FIFO has to stay, one BBR flow keeps tiny buffers busy with almost no delay, but several BBR flows queued more than CUBIC, so no CCA replaces fixing the queue. Future work could extend this study to a two-bottleneck parking-lot topology, BBRv3, and real hardware without VM batching.
 
 \begin{thebibliography}{99}
 
@@ -295,6 +296,9 @@ S.~Floyd and V.~Jacobson, ``Random early detection gateways for congestion avoid
 
 \bibitem{rfc8290}
 T.~H{\o}iland-J{\o}rgensen \emph{et al.}, ``The flow queue CoDel packet scheduler and active queue management algorithm,'' IETF RFC 8290, Jan. 2018. [Online]. Available: \url{https://www.rfc-editor.org/rfc/rfc8290}
+
+\bibitem{ared}
+S.~Floyd, R.~Gummadi, and S.~Shenker, ``Adaptive RED: An algorithm for increasing the robustness of RED's active queue management,'' ICSI, Tech. Rep., Aug. 2001.
 
 \bibitem{codel}
 K.~Nichols and V.~Jacobson, ``Controlling queue delay,'' \emph{ACM Queue}, 2012.

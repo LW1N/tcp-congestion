@@ -99,7 +99,7 @@ If a run crashes and leaves bridges or processes behind, clean up with `sudo mn 
 
 - One 50 Mbps bottleneck. Bandwidth was not varied, only delay and buffer size.
 - BBR version 1, and ECN never negotiated (kernel default `tcp_ecn=2`, no `ecn` flag on RED).
-- Two RED settings. `red` (S3, s3q) puts its thresholds at 1/6 and 1/2 of the buffer, so its target delay grows with the buffer. `ared` (s1r, s2r, s3r, s3qr) is Adaptive RED aiming for a 5 ms average queue, fq_codel's target, at any buffer size.
+- Three RED settings. `red` (S3, s3q) puts its thresholds at 1/6 and 1/2 of the buffer, so its target delay grows with the buffer. `ared` (s1r, s2r, s3r, s3qr) is Adaptive RED aiming for a 5 ms average queue, fq_codel's target, at any buffer size. `ared_slow` (s1rs, s2rs, s3qrs) is `ared` with the ARED paper's slow average, which locked flows out after slow start.
 - 60 s flows. Three competition results were still changing at 60 s and were rerun for 180 s (`slong`).
 - Emulated links in VMs, whose timing and packet batching differ from real hardware, which matters most for very small buffers.
 
