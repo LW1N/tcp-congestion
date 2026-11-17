@@ -1,0 +1,12 @@
+# Follow-up on the WSL testbed: S3's 2 CUBIC + 2 BBR buffer sweep under ared.
+# S3's red set its thresholds at 1/6 and 1/2 of the buffer, so its target delay grew with the
+# buffer while fq_codel's stayed at 5 ms. ared aims for the same 5 ms at every buffer size
+# (topo/shaping.py), so RED and fq_codel differ only in how they queue and drop.
+# The pfifo configs repeat S3 configs: S3 ran on the VM, so they give same-machine baselines.
+scenario: s3r
+trials: 5
+duration: 60          # seconds per flow, as in S3
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: [0.25, 1, 4], rtt: 50, cca_mix: cubic+bbr, qdisc: [ared, pfifo]}

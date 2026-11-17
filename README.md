@@ -12,7 +12,7 @@ Three scenarios, at least 5 trials per configuration:
 | S2 TCP vs UDP | `experiments/s2_tcp_udp.yaml` | UDP load (25-100% of the link), CCA, queue |
 | S3 buffer x delay | `experiments/s3_buffer_delay.yaml` | buffer size (0.25x, 1x, 4x BDP), RTT, CCA, queue |
 
-Follow-up experiments ran later on a second testbed (Ubuntu 26.04 in WSL2 on an x86 PC). Each has its own scenario name, so its data never overwrites S1-S3. Configurations that repeat an original setting check that the two testbeds agree.
+Follow-up experiments ran later on a second testbed (Ubuntu 26.04 in WSL2 on an x86 PC). Each has its own scenario name, so its data never overwrites S1-S3. Configurations that repeat an original setting check that the two testbeds agree. The RED follow-ups use `ared`, a RED set by a delay target instead of the buffer size (`topo/shaping.py`).
 
 | Follow-up | File | What it adds |
 | --- | --- | --- |
@@ -22,8 +22,10 @@ Follow-up experiments ran later on a second testbed (Ubuntu 26.04 in WSL2 on an 
 | s3w | `experiments/s3w_reno_bbr.yaml` | 2 Reno + 2 BBR across buffer sizes; 1 S3 setting repeated |
 | slong | `experiments/slong_steady_state.yaml` | 180 s reruns of three results still changing at 60 s |
 | s3q | `experiments/s3q_queue_fill.yaml` | buffer fill at 4x BDP for 4 flows of each algorithm under pfifo, RED and fq_codel; 1 slong setting repeated |
-| s1r | `experiments/s1r_red_competing.yaml` | the S1 grid under RED, plus RED for BBR on the short path and Reno vs BBR; 2 S1 settings repeated |
-| s2r | `experiments/s2r_red_tcp_udp.yaml` | the S2 grid under RED; 3 S2 settings repeated |
+| s1r | `experiments/s1r_red_competing.yaml` | the S1 grid under `ared`, plus BBR on the short path and Reno vs BBR; 2 S1 settings repeated |
+| s2r | `experiments/s2r_red_tcp_udp.yaml` | the S2 grid under `ared`; 3 S2 settings repeated |
+| s3r | `experiments/s3r_ared_buffer.yaml` | S3's 2 CUBIC + 2 BBR buffer sweep under `ared`; 3 S3 settings repeated |
+| s3qr | `experiments/s3qr_ared_queue_fill.yaml` | s3q's deep-buffer fill test under `ared` |
 
 Main finding: the queue discipline matters more than the CCA. fq_codel was best or tied-best on delay and fairness in every tested condition. The full write-up is in `report/main.pdf`.
 
@@ -95,7 +97,8 @@ If a run crashes and leaves bridges or processes behind, clean up with `sudo mn 
 ## Limitations
 
 - One 50 Mbps bottleneck. Bandwidth was not varied, only delay and buffer size.
-- BBR version 1, ECN never negotiated (kernel default `tcp_ecn=2`, no `ecn` flag on RED), and one RED setting (thresholds at 1/6 and 1/2 of the queue).
+- BBR version 1, and ECN never negotiated (kernel default `tcp_ecn=2`, no `ecn` flag on RED).
+- Two RED settings. `red` (S3, s3q) puts its thresholds at 1/6 and 1/2 of the buffer, so its target delay grows with the buffer. `ared` (s1r, s2r, s3r, s3qr) is Adaptive RED aiming for a 5 ms average queue, fq_codel's target, at any buffer size.
 - 60 s flows. Three competition results were still changing at 60 s and were rerun for 180 s (`slong`).
 - Emulated links in VMs, whose timing and packet batching differ from real hardware, which matters most for very small buffers.
 

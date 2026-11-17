@@ -1,4 +1,4 @@
-# Follow-up on the WSL testbed: S2 (3 TCP + 1 UDP) under RED, the S3 RED setting.
+# Follow-up on the WSL testbed: S2 (3 TCP + 1 UDP) under RED, as ared (5 ms target like fq_codel).
 # S2 compared only pfifo and fq_codel, so RED was never tested beside unresponsive UDP.
 # The pfifo and fq_codel configs repeat S2 configs: S2 never ran on WSL, so these calibrate
 # it against the VM.
@@ -8,6 +8,6 @@ duration: 60
 omit: 5
 defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, n: 3, udp_len: 1200}
 grid:
-  - {udp_pct: [25, 50, 75, 100], cca: [reno, cubic, bbr], qdisc: red}
+  - {udp_pct: [25, 50, 75, 100], cca: [reno, cubic, bbr], qdisc: ared}
   - {udp_pct: [25, 100], cca: cubic, qdisc: pfifo}
   - {udp_pct: 100, cca: cubic, qdisc: fq_codel}

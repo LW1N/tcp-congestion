@@ -1,0 +1,12 @@
+# Follow-up on the WSL testbed: s3q's deep-buffer fill test under ared.
+# In s3q, red let about 34 ms queue at 4x BDP before dropping, and 4 Reno or 4 CUBIC flows
+# settled just under that threshold, so its delay restated the setting. ared aims for 5 ms,
+# like fq_codel, at any buffer size. s3q (same testbed, same settings) supplies the pfifo,
+# red and fq_codel runs to compare.
+scenario: s3qr
+trials: 5
+duration: 180         # seconds per flow, as in s3q
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: 4, rtt: 50, cca_mix: [reno, cubic, bbr, cubic+bbr], qdisc: ared}

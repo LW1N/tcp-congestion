@@ -17,8 +17,17 @@ def _tc(node, cmd):
         raise RuntimeError(f'tc failed on {node.name}: {cmd}\n{out}')
 
 
+ARED_TARGET_MS = 5        # ared's target average queue, fq_codel's default target
+
+
 def qdisc_spec(qdisc, rate_mbit, buf_pkts):
-    """Child qdisc under htb. The hard queue limit is buf_pkts for all three."""
+    """Child qdisc under htb. The hard queue limit is buf_pkts for all of them.
+
+    red sets its thresholds at 1/6 and 1/2 of the buffer, so they grow with it.
+    ared follows Adaptive RED (Floyd, Gummadi, Shenker 2001): thresholds from a delay target
+    at the link rate, not from the buffer, and the kernel adapts max_p (1%-50%) to hold the
+    average queue near the target.
+    """
     if qdisc == 'pfifo':
         return f'pfifo limit {buf_pkts}'
     if qdisc == 'fq_codel':
@@ -30,6 +39,13 @@ def qdisc_spec(qdisc, rate_mbit, buf_pkts):
         burst = math.ceil((2 * qmin + qmax) / (3 * MTU)) + 1
         return (f'red limit {limit} min {qmin} max {qmax} avpkt {MTU} '
                 f'burst {burst} bandwidth {rate_mbit}mbit probability 0.1')
+    if qdisc == 'ared':
+        rate_bytes_ms = rate_mbit * 1e6 / 8 / 1e3
+        qmin = max(5 * MTU, round(ARED_TARGET_MS / 2 * rate_bytes_ms))   # half the target
+        qmax = 3 * qmin                                                  # 1.5x the target
+        burst = math.ceil((2 * qmin + qmax) / (3 * MTU)) + 1
+        return (f'red limit {buf_pkts * MTU} min {qmin} max {qmax} avpkt {MTU} '
+                f'burst {burst} bandwidth {rate_mbit}mbit probability 0.1 adaptive')
     raise ValueError(f'unknown qdisc {qdisc}')
 
 
