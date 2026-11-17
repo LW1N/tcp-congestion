@@ -99,10 +99,6 @@ def bottleneck(net):
     return net.get('r1'), BOTTLENECK_INTF
 
 
-def bottleneck_intf(net):
-    return BOTTLENECK_INTF
-
-
 def receiver_port(net, host):
     """s2's interface facing a receiver; its netem delay sets that path's RTT."""
     return net.get('s2').connectionsTo(net.get(host))[0][0].name

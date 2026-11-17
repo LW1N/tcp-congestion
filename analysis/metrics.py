@@ -38,7 +38,6 @@ def per_trial(scenario):
     rows = []
     for (config, trial), g in flows.groupby(['config', 'trial']):
         tcp, udp = g[g.kind == 'tcp'], g[g.kind == 'udp']
-        rate = g.rate.iloc[0]
         row = dict(config=config, trial=trial,
                    tcp_mbps=tcp.goodput_mbps.sum(),
                    jain=jain(tcp.goodput_mbps),

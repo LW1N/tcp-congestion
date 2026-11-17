@@ -1,0 +1,24 @@
+# Deck and guide tools
+
+The talk is presented from a .pptx in Google Slides (the user's download, with their own speaker notes).
+These scripts edit that file in place instead of re-exporting the HTML deck, which would overwrite the
+notes and lose the animations. They were used on 2026-11-17 to add the RED follow-ups.
+
+Run from a work folder that holds the user's `user.pptx`; Python needs `lxml` (and `pillow` for render.py):
+
+```bash
+uv run --no-project --with lxml --with pillow==11.3.0 python <script> ...
+```
+
+| script | does |
+| --- | --- |
+| `edit_deck.py` | helpers: find, move, clone and recolor shapes, rebuild rounded bar paths, clone click steps, edit note lines |
+| `apply_red.py` | the RED edits (slides 6, 8, 9, 11, 12, 14 and notes); run once on a fresh unpack into `un/` |
+| `pack.py` | zip `un/` back into a .pptx |
+| `shapes.py`, `timing.py`, `notes_lines.py` | inspect shapes, click steps and note lines |
+| `render.py` | rough PNG of a slide from shape geometry (fills, lines, text; no wrapping), for layout checks |
+| `edit_guide.py` | the matching prep-guide update; re-syncs the guide's NOTES from `un/` |
+
+Workflow: unpack (`python3 -c "import zipfile; zipfile.ZipFile('user.pptx').extractall('un')"`), apply,
+`pack.py user.pptx out.pptx`, then the pptx skill's `validate.py out.pptx --original user.pptx`, render the
+changed slides, and diff the slide text against the original (pptx skill `slide_text.py`).
