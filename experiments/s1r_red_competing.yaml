@@ -1,0 +1,16 @@
+# Follow-up on the WSL testbed: S1 under RED, the S3 RED setting (thresholds 1/6 and 1/2 of the queue).
+# S1 compared only pfifo and fq_codel, so RED was never tested with mixed RTTs, same-CCA flows,
+# or the second-machine rows of the S1 slide (BBR on the short path, Reno vs BBR).
+# n4-equal-cubic-pfifo and n4-mixed-reno-pfifo repeat S1 configs: same-machine baselines for
+# RED's delay and RTT-bias comparisons.
+scenario: s1r
+trials: 5
+duration: 60          # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, qdisc: pfifo}
+grid:
+  - {n: [2, 4], rtt_mode: [equal, mixed], cca_mix: [reno, cubic, bbr, cubic+bbr], qdisc: red}
+  - {n: 2, rtt_mode: mixed, cca_mix: bbr+cubic, qdisc: red}
+  - {n: 2, rtt_mode: equal, cca_mix: reno+bbr, qdisc: red}
+  - {n: 4, rtt_mode: equal, cca_mix: cubic, qdisc: pfifo}
+  - {n: 4, rtt_mode: mixed, cca_mix: reno, qdisc: pfifo}
