@@ -1,0 +1,10 @@
+# Follow-up on the WSL testbed: s2r's 25% UDP runs for Reno and CUBIC under ared_slow.
+# At 25% UDP, ared cost Reno about 10% of the link; this checks whether its fast average
+# caused that (s1rs_ared_slow.yaml has the details). s2r supplies the ared runs to compare.
+scenario: s2rs
+trials: 5
+duration: 60
+omit: 5
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0, n: 3, udp_len: 1200}
+grid:
+  - {udp_pct: 25, cca: [reno, cubic], qdisc: ared_slow}

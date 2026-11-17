@@ -1,0 +1,11 @@
+# Follow-up on the WSL testbed: s3qr's Reno and CUBIC runs under ared_slow.
+# Under ared, 4 Reno flows used 86% of the link and the queue stayed far below its 5 ms target
+# at 4x BDP; this checks whether ared's fast average caused that (s1rs_ared_slow.yaml has the
+# details). s3qr and s3q supply the ared, pfifo, red and fq_codel runs to compare.
+scenario: s3qrs
+trials: 5
+duration: 180         # seconds per flow, as in s3qr
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: 4, rtt: 50, cca_mix: [reno, cubic], qdisc: ared_slow}

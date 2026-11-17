@@ -128,7 +128,7 @@ def main():
     parser.add_argument('--rate', type=float, default=50)
     parser.add_argument('--rtt', type=float, default=40)
     parser.add_argument('--buf-bdp', type=float, default=1.0)
-    parser.add_argument('--qdisc', default='pfifo', choices=['pfifo', 'red', 'ared', 'fq_codel'])
+    parser.add_argument('--qdisc', default='pfifo', choices=['pfifo', 'red', 'ared', 'ared_slow', 'fq_codel'])
     parser.add_argument('--cli', action='store_true', help='drop into the Mininet CLI')
     args = parser.parse_args()
 

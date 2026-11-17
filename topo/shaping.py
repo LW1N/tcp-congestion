@@ -26,7 +26,8 @@ def qdisc_spec(qdisc, rate_mbit, buf_pkts):
     red sets its thresholds at 1/6 and 1/2 of the buffer, so they grow with it.
     ared follows Adaptive RED (Floyd, Gummadi, Shenker 2001): thresholds from a delay target
     at the link rate, not from the buffer, and the kernel adapts max_p (1%-50%) to hold the
-    average queue near the target.
+    average queue near the target. Its average moves fast, though (tc-red's burst guideline).
+    ared_slow is the same with the paper's slow average, so RED tolerates short bursts.
     """
     if qdisc == 'pfifo':
         return f'pfifo limit {buf_pkts}'
@@ -39,14 +40,37 @@ def qdisc_spec(qdisc, rate_mbit, buf_pkts):
         burst = math.ceil((2 * qmin + qmax) / (3 * MTU)) + 1
         return (f'red limit {limit} min {qmin} max {qmax} avpkt {MTU} '
                 f'burst {burst} bandwidth {rate_mbit}mbit probability 0.1')
-    if qdisc == 'ared':
+    if qdisc in ('ared', 'ared_slow'):
         rate_bytes_ms = rate_mbit * 1e6 / 8 / 1e3
         qmin = max(5 * MTU, round(ARED_TARGET_MS / 2 * rate_bytes_ms))   # half the target
         qmax = 3 * qmin                                                  # 1.5x the target
-        burst = math.ceil((2 * qmin + qmax) / (3 * MTU)) + 1
+        if qdisc == 'ared':
+            # tc-red's burst guideline; tc turns it into a fast average (weight 1/16 at 50 Mbit)
+            burst = math.ceil((2 * qmin + qmax) / (3 * MTU)) + 1
+        else:
+            burst = ared_paper_burst(qmin, rate_mbit)
         return (f'red limit {buf_pkts * MTU} min {qmin} max {qmax} avpkt {MTU} '
                 f'burst {burst} bandwidth {rate_mbit}mbit probability 0.1 adaptive')
     raise ValueError(f'unknown qdisc {qdisc}')
+
+
+def tc_ewma_log(qmin, burst):
+    """The averaging weight 2^-Wlog that tc derives from burst (tc_red_eval_ewma in iproute2)."""
+    a = burst + 1 - qmin / MTU
+    w = 0.5
+    for wlog in range(1, 32):
+        if a >= 1 and a <= (1 - (1 - w) ** burst) / w:
+            return wlog
+        w /= 2
+    return None
+
+
+def ared_paper_burst(qmin, rate_mbit):
+    """Smallest burst for which tc picks ARED's averaging weight, w_q = 1 - exp(-1/C) with C the
+    link rate in packets/s (Floyd, Gummadi, Shenker 2001): Wlog 12 at 50 Mbit."""
+    pkts_per_s = rate_mbit * 1e6 / 8 / MTU
+    wlog = round(-math.log2(1 - math.exp(-1 / pkts_per_s)))
+    return next(b for b in range(1, 100_000) if tc_ewma_log(qmin, b) == wlog)
 
 
 def apply_bottleneck(node, intf, rate_mbit, buf_pkts, qdisc='pfifo'):

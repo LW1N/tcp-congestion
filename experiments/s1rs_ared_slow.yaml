@@ -1,0 +1,13 @@
+# Follow-up on the WSL testbed: s1r's Reno and CUBIC runs under ared_slow.
+# In s1r, ared's average followed the instant queue (tc picked a weight of 1/16), so Reno and
+# CUBIC were dropped whenever the queue briefly passed ~10 packets. Reno then used only 83-87%
+# of the link and mixed RTTs split the link almost by 1/RTT. ared_slow keeps ared's thresholds
+# and adaptive max_p but uses the ARED paper's slow average (topo/shaping.py). s1r (same testbed,
+# same settings) supplies the ared runs to compare.
+scenario: s1rs
+trials: 5
+duration: 60          # seconds per flow, as in s1r
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, rtt: 40, buf_bdp: 1.0}
+grid:
+  - {n: [2, 4], rtt_mode: [equal, mixed], cca_mix: [reno, cubic], qdisc: ared_slow}
