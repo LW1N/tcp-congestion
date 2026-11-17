@@ -1,0 +1,13 @@
+# Follow-up on the WSL testbed: how full each queue keeps a deep buffer, by algorithm.
+# S3 compared pfifo, RED and fq_codel only for the 2 CUBIC + 2 BBR mix, and ran single
+# algorithms in a deep buffer only as one flow on pfifo. This runs 4 flows of each algorithm
+# (and the mix) under all three queues at 4x BDP, 50 ms, the S3 RED setting.
+# 180 s flows, as in slong: deep buffers settle slowly and Reno needs over a minute to regrow.
+# n4-b4-rtt50-cubic+bbr-pfifo repeats a slong config and checks repeatability on WSL.
+scenario: s3q
+trials: 5
+duration: 180         # seconds per flow
+omit: 5               # slow start excluded from iperf3's summary
+defaults: {rate: 50, qdisc: pfifo}
+grid:
+  - {n: 4, buf_bdp: 4, rtt: 50, cca_mix: [reno, cubic, bbr, cubic+bbr], qdisc: [pfifo, red, fq_codel]}

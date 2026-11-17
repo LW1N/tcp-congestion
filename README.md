@@ -21,6 +21,7 @@ Follow-up experiments ran later on a second testbed (Ubuntu 26.04 in WSL2 on an 
 | s1l | `experiments/s1l_long_reno_cubic.yaml` | Reno vs CUBIC with 180 s flows |
 | s3w | `experiments/s3w_reno_bbr.yaml` | 2 Reno + 2 BBR across buffer sizes; 1 S3 setting repeated |
 | slong | `experiments/slong_steady_state.yaml` | 180 s reruns of three results still changing at 60 s |
+| s3q | `experiments/s3q_queue_fill.yaml` | buffer fill at 4x BDP for 4 flows of each algorithm under pfifo, RED and fq_codel; 1 slong setting repeated |
 
 Main finding: the queue discipline matters more than the CCA. fq_codel was best or tied-best on delay and fairness in every tested condition. The full write-up is in `report/main.pdf`.
 
