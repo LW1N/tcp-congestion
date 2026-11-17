@@ -26,7 +26,7 @@ Follow-up experiments ran later on a second testbed (Ubuntu 26.04 in WSL2 on an 
 | s2r | `experiments/s2r_red_tcp_udp.yaml` | the S2 grid under `ared`; 3 S2 settings repeated |
 | s3r | `experiments/s3r_ared_buffer.yaml` | S3's 2 CUBIC + 2 BBR buffer sweep under `ared`; 3 S3 settings repeated |
 | s3qr | `experiments/s3qr_ared_queue_fill.yaml` | s3q's deep-buffer fill test under `ared` |
-| s1rs, s2rs, s3qrs | `experiments/s1rs_ared_slow.yaml`, `s2rs_ared_slow.yaml`, `s3qrs_ared_slow.yaml` | the Reno and CUBIC runs of s1r, s2r (25% UDP) and s3qr under `ared_slow`: `ared` with the ARED paper's slow queue average instead of tc's fast default |
+| s1rs, s2rs, s3qrs | `experiments/s1rs_ared_slow.yaml`, `s2rs_ared_slow.yaml`, `s3qrs_ared_slow.yaml` | the Reno and CUBIC runs of s1r, s2r (25% UDP) and s3qr under `ared_slow`: `ared` with the ARED paper's slow queue average instead of tc's fast default. A negative result: after slow start the average stayed above RED's upper threshold, so RED dropped every packet for seconds at a time and utilization fell below `ared`'s. s3qrs was stopped early because 4 Reno flows locked out in every attempt; it holds 2 CUBIC trials and no Reno trials, so `metrics --check` fails for it |
 
 Main finding: the queue discipline matters more than the CCA. fq_codel was best or tied-best on delay and fairness in every tested condition. The full write-up is in `report/main.pdf`.
 

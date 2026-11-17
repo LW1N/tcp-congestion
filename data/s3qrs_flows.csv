@@ -1,0 +1,9 @@
+n,cca,cca_mix,rtt_mode,qdisc,buf_bdp,rtt,udp_pct,rate,config,trial,run,special,src,kind,flow_cca,path_rtt,start,goodput_mbps,retransmits,bytes_sent,retrans_pct,mean_rtt_ms,max_rtt_ms,cca_reported
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,1,20261117-121729,False,h1,tcp,cubic,50,0,5.421942625331252,256,122028032,0.30377282491944146,74.793,103.532,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,1,20261117-121729,False,h2,tcp,cubic,50,0,4.402780453259584,361,99090432,0.5275262095940807,74.186,102.651,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,1,20261117-121729,False,h3,tcp,cubic,50,0,4.571677847743272,208,103022592,0.2923475270356234,73.464,100.224,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,1,20261117-121729,False,h4,tcp,cubic,50,0,4.862865169846388,212,109707264,0.27981374141278376,71.759,97.053,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,2,20261117-121729,False,h1,tcp,cubic,50,0,9.510253784053827,203,213778432,0.1374993713116953,51.942,58.344,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,2,20261117-121729,False,h2,tcp,cubic,50,0,9.85968535479027,194,221642752,0.12674089157672974,51.865,58.881,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,2,20261117-121729,False,h3,tcp,cubic,50,0,10.727428761429424,193,241565696,0.11568861168102279,51.921,63.08,cubic
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,2,20261117-121729,False,h4,tcp,cubic,50,0,9.66748174852242,206,217710592,0.13701124840081277,51.917,60.117,cubic

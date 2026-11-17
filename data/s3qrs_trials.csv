@@ -1,0 +1,3 @@
+n,cca,cca_mix,rtt_mode,qdisc,buf_bdp,rtt,udp_pct,rate,config,trial,run,special,buffer_pkts,idle_rtt_ms,probe_rtt_p50,probe_rtt_p95,max_backlog_pkts,mean_backlog_pkts,wire_mbps,drops,queue_delay_ms
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,1,20261117-121729,False,834,50.1,50.1,56.23500000000001,34,2.3380281690140845,20.04081991485157,922,0.0
+4,,cubic,,ared_slow,4,50,,50,n4-b4-rtt50-cubic-ared_slow,2,20261117-121729,False,834,50.1,50.3,56.8,33,5.256338028169014,41.57027341250404,799,0.19999999999999574
