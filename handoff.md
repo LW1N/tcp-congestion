@@ -4,16 +4,16 @@
 Format: optimized for AI agents. Facts are key: value lines or tables with exact identifiers.
 Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. UNVERIFIED = implemented but never observed
 working where it matters. UNKNOWN = ask the user or check before relying on it.
-Last updated: 2026-11-16 (/handoff refresh: animated .pptx built from the user's export (native click builds, GIF loops for the 10 canvas embeds, fade transitions, slide 14 arrows fixed); talk shown in Google Slides).
+Last updated: 2026-11-16 (/handoff refresh from a Mac session: RED follow-ups s1r + s2r for S1/S2 approved, written, dry-run, committed 0307ade; runs pending in WSL; deck live version moved to 1794885141-44f9).
 -->
 
 ## 0. READ_FIRST
 
 1. Read this file, then `requirements.md` (course requirements: report sections, 6-8 pages, rubric 20/20/20/20/10/10).
-2. Code and docs are edited on the user's Windows PC in WSL2 (`/home/lucas/tcp-congestion`). The live demo runs on the Mac + VM: code reaches the VM via GitHub -> Mac `git pull` -> `tcp-push`. Claude cannot run sudo; the user runs experiments and demo.py and pastes output.
+2. Code and docs are usually edited on the user's Windows PC in WSL2 (`/home/lucas/tcp-congestion`); the 2026-11-16 RED session ran Claude on the Mac repo instead (section 3 mac_claude). Check `pwd` to know which. The live demo runs on the Mac + VM: code reaches the VM via GitHub -> Mac `git pull` -> `tcp-push`. Claude cannot run sudo; the user runs experiments and demo.py and pastes output.
 3. Deliverables: report `report/main.pdf` (8 pages, 4c), slide deck (4b, 16 slides; presented from the animated .pptx in Google Slides, 4b pptx_animated), prep guide (4d). All data is in git.
 4. Before editing the deck or guide, re-read them (F24, F37): list files, do a bare Artifact read of the url, then read the files you will change, and diff against any local copy. Scratchpad copies from earlier sessions are gone.
-5. Highest priority: OPEN_ITEMS #1 (user checks the animated .pptx in Google Slides), #1a (build scripts exist only in a scratchpad wiped on WSL restart: any deck edit after that means rewriting them) and #2 (demo.py dry run with livecap on Mac + VM; never run).
+5. Highest priority: OPEN_ITEMS #1c (user runs s1r + s2r in WSL and pastes output; check the anchors against the VM before using any RED number), then #1 (user checks the animated .pptx in Google Slides), #1a (build scripts exist only in a scratchpad wiped on WSL restart: RED results will need slides 8/9 rebuilt in the .pptx) and #2 (demo.py dry run with livecap on Mac + VM; never run).
 6. Prose rules: R12, R14 (user's voice). Slide rules: R13, R19, R22. Do not trust UNKNOWN items (9, item 3a).
 
 ## 1. USER_RULES (must follow)
@@ -52,7 +52,8 @@ scenarios: {S1: competing TCP flows + single-flow baseline, S2: 3 TCP + 1 UDP, S
 dropped: [random-loss scenario, bandwidth sweep (fixed 50 Mbps), parking-lot topology (future work)]
 axes: {cca: [reno, cubic, bbr v1], qdisc: [pfifo, red, fq_codel], buffer_x_bdp: [0.25, 1, 4], rtt_ms: [10..150]}
 main_study (VM): {configs: 95, trials: 492, run: 2026-10-23..24}
-follow_ups (WSL, own scenario names): {configs: 41 (23 S1, 18 S3), trials: 205; the report counts 29 / 145 because s3q is slides and guide only; 10 configs repeat VM settings, CIs overlap except 5 small gaps (largest 10 ms / 5% loaded RTT at 4x BDP)}
+follow_ups (WSL, own scenario names): {configs: 41 (23 S1, 18 S3), trials: 205; the report counts 29 / 145 because s3q is slides and guide only; 10 configs repeat VM settings, CIs overlap except 5 small gaps (largest 10 ms / 5% loaded RTT at 4x BDP); pending s1r + s2r add 35 configs / 175 trials (not run)}
+red_scope_decision (2026-11-16): the main study ran RED only in S3 (2 CUBIC + 2 BBR) with no recorded reason; the user judged that not defensible, so S1 and S2 get full RED grids (s1r, s2r). Report/slide wording waits for the data, not the predictions
 framing: loss-based (Reno, CUBIC) vs model-based (BBR v1) vs unresponsive (UDP)
 headline: the router queue matters more than the CCA; fq_codel best or tied-best on delay and fairness everywhere (averaged over a setting's flows)
 presentation_format: animated .pptx imported into Google Slides (user confirmed 2026-11-16; click steps and transitions seen working there)
@@ -71,13 +72,15 @@ Key numbers (main study, pfifo unless noted): single flow util Reno/CUBIC 99.98/
 | s3w `experiments/s3w_reno_bbr.yaml` | 2 Reno + 2 BBR: 1.9 / 2.3% at 0.25/1x; 4x 55.3% at 60 s |
 | slong `experiments/slong_steady_state.yaml` | 180 s reruns (F22): CUBIC vs BBR 4x 51.1%; Reno vs BBR 4x 48.1%; BBR 20 ms vs CUBIC 80 ms 47.0% |
 | s3q `experiments/s3q_queue_fill.yaml` | 4 flows each, 4x BDP (834 pkts, 200 ms), 50 ms, 180 s, 60 trials, run 2026-11-16, committed ae671b2. Fill % pfifo/RED/fq_codel: Reno 78/12/0.9, CUBIC 85/15/0.9, BBR 30/26/6.7, CUBIC+BBR 75/23/6.7; steady over 3 min. Probe delay pfifo 162/171/64/159 ms, RED 26/30/56/49. fq_codel flows' own RTT: Reno 2.2, CUBIC 2.4, 4 BBR 13.6, mix CUBIC 2.5 / BBR 23.6. BBR under RED ~48,000 drops/trial, 6.6% resent. Mix pfifo 74.5% vs slong 73%. Fill = mean_backlog_pkts / buffer_pkts from data/s3q_trials.csv (not in the summary CSV) |
+| s1r `experiments/s1r_red_competing.yaml` | TODO (not run): S1 grid under RED (n 2/4 x equal/mixed x reno, cubic, bbr, cubic+bbr = 16), plus n2-mixed-bbr+cubic-red and n2-equal-reno+bbr-red (slide 8 starred rows); anchors n4-equal-cubic-pfifo, n4-mixed-reno-pfifo repeat S1. 20 configs, 100 runs, ~2.0 h |
+| s2r `experiments/s2r_red_tcp_udp.yaml` | TODO (not run): S2 grid under RED (udp 25/50/75/100 x 3 CCAs = 12); anchors udp25-cubic-pfifo, udp100-cubic-pfifo, udp100-cubic-fq_codel repeat S2 (first S2 runs on WSL). 15 configs, 75 runs, ~1.5 h |
 
 ## 3. ENVIRONMENT
 
 ```yaml
 wsl_pc (current):
   host: Windows PC, AMD Ryzen 5 5600X, 15 GB RAM; Ubuntu 26.04.1 in WSL2, kernel 6.18.58.1-microsoft-standard-WSL2, systemd on
-  repo: /home/lucas/tcp-congestion (origin https://github.com/LW1N/tcp-congestion, PUBLIC); main at ae671b2 = origin/main (2026-11-16)
+  repo: /home/lucas/tcp-congestion (origin https://github.com/LW1N/tcp-congestion, PUBLIC); last seen at ae671b2; needs `git pull` to 0307ade before the RED runs
   apt: {mininet: 2.3.0-1.1build1, openvswitch-switch: 3.7.1-2, iperf3: 3.20-2, tcpdump: 4.99.6-1, iproute2: 6.19.0, tmux: installed}
   python: system 3.14.4 (has yaml; runner runs under sudo with it); analysis via uv 0.13.7 (~/.local/bin/uv); run ad-hoc scripts from the repo with PYTHONPATH=.
   latex: tectonic 0.17.0 (~/.local/bin); needs Times New Roman via fontconfig (F23)
@@ -88,7 +91,8 @@ wsl_pc (current):
   uv_tools_that_work: `uv run --no-project --with pillow==11.3.0 --with imageio-ffmpeg==0.6.0` (Pillow + an ffmpeg binary with libx264/gif); pptx skill validate.py needs `--python 3.12 --with lxml --with defusedxml --with python-pptx`
 bring_up_wsl: "# WSL: sudo modprobe -a tcp_bbr sch_htb sch_red sch_fq_codel sch_netem openvswitch && sudo systemctl enable --now openvswitch-switch && cat /proc/sys/net/ipv4/tcp_available_congestion_control   (expect reno cubic bbr)"
 long_runs_wsl: "tmux new -s <name>, then sudo python3 -u run.py <yaml> 2>&1 | tee ~/<name>_run.log; keep the PC awake (Windows sleep pauses WSL)"
-mac (demo machine): Apple M2, zsh, repo ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion (git pull); results/ 2.6 GB of the main study (46 pcaps); Wireshark at /Applications/Wireshark.app/Contents/MacOS/Wireshark (UNVERIFIED)
+mac_claude: Claude Code also runs on the Mac (Darwin 25.6.0); `uv run python run.py <yaml> --dry-run` works there (no sudo, no Mininet); scratchpad /private/tmp/claude-501/-Users-lucasnguyen-Desktop-SJSU-cmpe-206-network-project-tcp-congestion/<session>/scratchpad; tectonic there UNKNOWN
+mac (demo machine): Apple M2, zsh, repo ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion at 0307ade = origin/main (2026-11-16); results/ 2.6 GB of the main study (46 pcaps); Wireshark at /Applications/Wireshark.app/Contents/MacOS/Wireshark (UNVERIFIED)
 vm (original testbed, demo host): UTM, Ubuntu 26.04.1 ARM64, kernel 7.0.0-38-generic, 4 vCPU, 3.3 GiB; host vm0, user lucas, alias tcpvm; ~/tcp-congestion; 1.4 GB free
 vm_bring_up: ["# Mac: ssh tcpvm 'echo connected to $(hostname)'", "# VM: cd ~/tcp-congestion && sudo -v && sudo mn -c"]
 ```
@@ -108,7 +112,7 @@ Doc quirks: the docs `read` tool is deferred (ToolSearch `select:mcp__1a59c906-0
 ```yaml
 url: https://claude.ai/artifact/2GZMMEVvtSyVmNHZ44rzys   # private until the user shares it
 type_url: https://claude.ai/artifact/8jTsAFQMFDb2oA8MsPJ2eL (contract 0.2.47); inline deck (no `format` key): inline styles, data-build-in click steps, no deck.css
-last_published: 1794875688-f02c (seen 2026-11-16; version number UNKNOWN; newer than v277 1794873610-6a88, text matches the .pptx export)
+last_published: 1794885141-44f9 (seen 2026-11-16 from the Mac); what changed since 1794875688-f02c (the version the .pptx export matches) is UNKNOWN: diff before any deck edit
 order: [cover, problem, topology, ccas, queues, scenarios, families, s1, s2, capture, s3share, s3delay, verdicts, recommendations, close, demo]
 numbering: footer 'n / 16' (none on cover/close), eyebrow 'NN ·' = n-1, progress bar width 104*n px at top 1040; renumber all three when order changes
 edit_flow: Artifact list scope=files -> bare Artifact read of the url (F37) -> Artifact read with paths project/deck.json + project/slides/<id>.html into a fresh folder -> edit -> publish url, root=<folder holding project/>, file_path=<one changed slide>, files={"project/slides/<id>.html": "project/slides/<id>.html", ...}; deck.json only when order/sections change
@@ -117,8 +121,9 @@ export: Share › Export (PowerPoint), deck page only (user does it). Observed: 
 style: Capture Dark (bg #111019, card #1C1B27, text #F4F3F7, muted #A9A7BB, footer #8A889C); pfifo #FFB23E, RED #A78BFA, fq_codel #4FD1E0; drop #FF6B6B; fonts Schibsted Grotesk + IBM Plex Mono
 slides_of_note:
   3 topology: 6-click build + strip '95 settings × 5+ runs = 492 runs'; notes: router fix (F1), second machine '205 more runs'
-  6 scenarios: notes '205 more runs' incl. the deep-buffer queue test (s3q)
-  8 s1: CUBIC/Reno share vs BBR rows, delay side card 27.9 / 0.8 / 37–40 ms, card 'Reno vs CUBIC, 3-min runs*' 38 / 62%
+  6 scenarios: notes '205 more runs' incl. the deep-buffer queue test (s3q); strip 'RED in S3' and notes 'only one that tests RED' change once s1r/s2r land
+  8 s1: CUBIC/Reno share vs BBR, 5 rows (1+1 same RTT, CUBIC 20 + BBR 80, BBR 20 + CUBIC 80*, 2+2 same RTT, Reno + BBR*); bars left 500, height 34, pfifo top 340/458/576/694/812 (click 1), fq_codel +42 (click 2), ~15 px per % (730 px = 48.7%); dashed 50% line x 1250; delay card 27.9 / 0.8 / 37–40 ms (click 3); card 'Reno vs CUBIC, 3-min runs*' 38 / 62% (click 4). A RED bar per row needs thinner bars or tighter rows
+  9 s2: TCP total of 3 CUBIC flows vs UDP 25/50/75/100%; baseline y 820, 10 px per Mbps; pfifo bars x 260/535/810/1085 (click 1), fq_codel +82 (click 2), width 72; cards 'link − UDP' (click 3), 'under 1 ms' jitter (click 4). Room for a third bar per group (pitch 275)
   11 s3share: pfifo 4x bar solid 51%* inside dashed 59%; RED 'BBR still wins'
   12 s3delay (rebuilt 2026-11-16 from s3q): 'The queue decides how full the buffer stays'; 4x3 grid rows Reno/CUBIC/BBR/2 CUBIC + 2 BBR, columns pfifo 440 / RED 900 / fq_codel 1360 px (click 1/2/3), rows top 410/510/610/710, dashed 300x44 outline = full buffer, solid fill 300 px = 100%, label at col+312; legend top 810; footer '*second test machine, 3-minute runs' (width 1440)
   13 verdicts: H1 'Partly · 0.25× at 10 ms fell to 23%'; H5 'Partly · CUBIC 81–86% of it, Reno 41–71%'; notes carry the single-flow 494 ms
@@ -148,6 +153,7 @@ build_wsl: F23, then the page count in section 9 must print 8
 page_budget: none left. Only text on the last pages moves the page count (pages 4-6 break early around figures); 2026-11-16 a net -58 character edit still gave 9 pages until the conclusion was trimmed
 content_2026-11-16 (F32): abstract 'held Reno and CUBIC flows within 4 ms of the path RTT and BBR flows within 35 ms'; S3 fq_codel 'about 0 for the probe, 3 ms for CUBIC flows and 26 ms for BBR flows'; H5 'BBR flows 4-35 ms, likely because BBR ignores CoDel's drops'; Table III 'Delay <4 ms (BBR <=35); Jain >=0.97'; trims: intro and conclusion caveat sentences (caveats remain in Design Recommendations + Table III caption)
 not_in_report: s3q buffer-fill grid (slides and guide only; adding it needs text traded), negative queue-delay explanation
+red_touchpoints (after s1r/s2r): abstract 'under three queue disciplines'; Table I S1/S2 grid rows + caption follow-up counts; S1 and S2 Results paragraphs; F2 (S1 Jain) and F4 (S2) need a RED series (plots.py has no follow-up plots yet); Table III rows 'Unresponsive UDP', 'Mixed CCAs or RTTs on a FIFO' (F42), '~1x BDP FIFO'; Design Recommendations caveat 'one RED setting'
 UNKNOWN: whether captions/tables/references must also be 12 pt
 ```
 
@@ -170,13 +176,13 @@ checks: string/bracket balance of the <script> block plus a regex for ',\s*,' an
 | topo/dumbbell.py, topo/shaping.py | Mininet dumbbell (router r1, bottleneck r1-eth1, netem on s2 receiver ports); htb + pfifo/red/fq_codel; RED min limit/6, max limit/2, p 0.1, no ecn flag |
 | traffic/iperf.py, traffic/probes.py | iperf3 clients/servers; ping, ss, tc, tcpdump probes |
 | run.py | YAML runner (`sudo python3 -u run.py <yaml> [--dry-run --only ID --trials N --staggered --udp-delay S --capture --resume DIR]`); `a+b` cca_mix alternates flows, first-named CCA gets h1 and the shortest mixed RTT; a single cca_mix name gives n flows of it |
-| experiments/*.yaml | s1/s2/s3 main grids; follow-ups s1w, s1x, s1l, s3w, slong, s3q (section 2) |
+| experiments/*.yaml | s1/s2/s3 main grids; follow-ups s1w, s1x, s1l, s3w, slong, s3q, s1r, s2r (section 2). Config IDs use only keys written in the grid entry, not defaults: write `qdisc` in every entry |
 | analysis/parse.py | results/<scenario> -> data/<scenario>_*.csv; newest copy wins per (config, trial); exits 1 if a scenario has no trials |
 | analysis/metrics.py | figures/<scenario>_summary.csv (mean + 95% CI); <first CCA>_share_pct for 'a+b' mixes; --check; expected configs from experiments/<scenario>_*.yaml |
 | analysis/plots.py | F1-F8 for s1-s3 only (follow-ups have no plots) |
 | demo.py | 6-stage live demo (CUBIC + BBR, UDP 100%, fq_codel switch); per-second block (rate bars, child-queue backlog x/167, ping RTT); tcpdump of r1-eth1 to /tmp/demo.pcap; stage-6 LOSS_FILTER; Ctrl+C-safe cleanup (F30); UNVERIFIED in the VM |
 | devtools/gen_fake.py | fake results for pipeline tests (run in a scratch copy: it writes results/) |
-| README.md | overview, follow-up table (incl. s3q), WSL bring-up, demo + livecap, limitations |
+| README.md | overview, follow-up table (incl. s3q, s1r, s2r), WSL bring-up, demo + livecap, limitations |
 | helpers/mac.zsh, helpers/vm.sh | Mac and VM shell helpers (section 6) |
 | report/ | main.tex, main.pdf, figs/ |
 | data/, figures/ | tracked CSVs for all 9 scenarios |
@@ -222,6 +228,7 @@ checks: string/bracket balance of the <script> block plus a regex for ',\s*,' an
 | F39 | animated .pptx showed still images in Google Slides; click steps and transitions worked | Google Slides never plays video embedded in an imported .pptx (shows the poster) | embeds as looping animated GIFs instead of MP4 (R23) | DONE (code), UNVERIFIED in Google Slides |
 | F40 | slide 14 grey arrows ran along the FIFO box edge and into the corners of the size boxes | exporter's elbow routing of x-connector route=elbow | native lines: stub (1240,620)->(1290,620), spine x 1290 y 516.5-759.5, arrows (1290->1340) at y 518/638/758; the live HTML deck's rendering of these connectors is UNVERIFIED | DONE in .pptx |
 | F41 | first MP4 build: p14:media ext GUID wrong | written from memory | correct `{DAA4B4D4-6D71-4841-9C94-3DE7FCFB9230}` (python-pptx); moot after F39 | DONE |
+| F42 | Table III row 'Mixed CCAs or RTTs on a FIFO: fq_codel, not RED' (report/main.tex:263) and 'Unresponsive UDP' rest on no RED data: RED ran only for 2 CUBIC + 2 BBR on equal 50 ms paths | S1/S2 grids omitted RED, no reason recorded; s3q shows RED cuts same-CCA loss-based fill 78-85% -> 12-15%, so RED is not 'like pfifo' outside BBR mixes | s1r + s2r | TODO (runs pending) |
 | F38 | guide Q&A array got `},,` (would break the Q&A view); bracket tokenizer passed it | replacement string ended in a comma the original already had | regex check for ',\s*,' and '\[\s*,' before publishing (caught by the Sonnet review) | DONE (rule) |
 
 ## 8. STATE
@@ -230,16 +237,17 @@ checks: string/bracket balance of the <script> block plus a regex for ',\s*,' an
 | --- | --- | --- |
 | 1-8 environment, topology, validation, automation, S1-S3, analysis | DONE | main study frozen 2026-10-24 |
 | follow-ups s1w, s1x, s1l, s3w, slong, s3q | DONE | WSL 2026-11-15/16; data and summaries committed (s3q in ae671b2) |
+| follow-ups s1r, s2r (RED in S1/S2) | TODO | YAML committed 0307ade, dry-run on the Mac (20 + 15 configs); not run |
 | 9 report | DONE (UNKNOWN whether submitted) | 8 pages, F32 wording committed 2e29abb |
-| 10 presentation | IN_PROGRESS | deck 1794875688-f02c, guide v35; .pptx exported and animated (4b); GIF version UNVERIFIED in Google Slides; demo never run; recording/transcript TODO |
-| git | DONE | main at ae671b2 = origin/main; only handoff.md modified (user commits it as 'update handoff'); .pptx files and build scripts are outside the repo |
+| 10 presentation | IN_PROGRESS | deck 1794885141-44f9 (.pptx from 1794875688-f02c), guide v35; .pptx exported and animated (4b); GIF version UNVERIFIED in Google Slides; demo never run; recording/transcript TODO |
+| git | DONE | Mac main at 0307ade = origin/main (2026-11-16); WSL copy still at ae671b2 until pulled; handoff.md edits get committed by the user as 'update handoff'; .pptx files and build scripts are outside the repo |
 | review 2026-11-16 | DONE | code, data (--check), report, slides, guide, docs checked; F32-F35 fixed, F36 open |
 
 ## 9. OPEN_ITEMS (priority order)
 
 1. TODO (user): import '... (animated).pptx' (4b pptx_animated) into Google Slides as a new copy and present it: GIFs on slides 1-7 move and loop, slide 3 GIF crops line up with wires and r1's queue, slide 14 bracket arrows, click counts (4b click_steps). Problems: user sends screenshots.
 1a. UNKNOWN (ask now): save the build scripts (4b build_scripts) in the repo, e.g. devtools/pptx/? They are lost on WSL restart; a later deck edit then needs a re-export and a rewrite of the scripts. Offered once, no answer yet.
-1c. TODO (user runs in WSL): RED follow-up approved 2026-11-16. Files `experiments/s1r_red_competing.yaml` (20 configs, 100 runs, ~2.0 h) and `experiments/s2r_red_tcp_udp.yaml` (15 configs, 75 runs, ~1.5 h) written on the Mac and dry-run there; anchors repeat S1/S2 IDs (S2 never ran on WSL before). After the runs: parse + metrics --check, then decide report/slide wording from the results. Original reasoning: Reasons: S1/S2 compare pfifo vs fq_codel only, Table III row 'Mixed CCAs or RTTs on a FIFO: fq_codel, not RED' was never tested with mixed RTTs or UDP, and s3q shows RED is not like pfifo for same-CCA loss-based flows. Costs: report text trade (no page room), F2/F4 RED series, slides 8/9 third bar, guide sync, animated .pptx rebuild (1a). Deck live version seen 2026-11-16 is 1794885141-44f9 (newer than 4b last_published).
+1c. TODO (user runs in WSL): RED follow-ups s1r + s2r (section 2, F42). Commands: `# WSL: cd ~/tcp-congestion && git pull` then bring_up_wsl, then `sudo python3 -u run.py experiments/s1r_red_competing.yaml --dry-run && sudo python3 -u run.py experiments/s2r_red_tcp_udp.yaml --dry-run` (expect 20 and 15 configurations), then in `tmux new -s red`: `cd ~/tcp-congestion && sudo python3 -u run.py experiments/s1r_red_competing.yaml 2>&1 | tee ~/s1r_run.log && sudo python3 -u run.py experiments/s2r_red_tcp_udp.yaml 2>&1 | tee ~/s2r_run.log`, then `for s in s1r s2r; do uv run python -m analysis.parse $s && uv run python -m analysis.metrics $s --check; done`. Next for Claude: compare anchors with the VM rows in figures/s1_summary.csv (n4-equal-cubic-pfifo, n4-mixed-reno-pfifo) and figures/s2_summary.csv (udp25-cubic-pfifo, udp100-cubic-pfifo, udp100-cubic-fq_codel); then draft report (4c red_touchpoints), slides 6/8/9/13/14 and guide changes from the data; then .pptx rebuild (1a). Predictions, NOT results (R18): CUBIC+BBR under RED ~2% as in S3; same-CCA loss-based flows lower delay than pfifo; Reno mixed-RTT bias possibly smaller; TCP beside UDP unknown
 1b. Optional, if the live HTML deck is still used: check whether its slide 14 elbow connectors look like F40 and fix the x-connector routes there.
 2. TODO (user runs, Mac + VM): `# Mac: cd ~/Desktop/SJSU/cmpe-206-network/project/tcp-congestion && git pull && tcp-push && source helpers/mac.zsh`, then `# VM: cd ~/tcp-congestion && sudo mn -c && sudo python3 -u demo.py`, then at stage 1 `# Mac: livecap`. Build the Wireshark I/O graph once, save as profile 'demo' (tcp.dstport==5201, tcp.dstport==5202, udp.dstport==5204; bits; 100 ms). Expected: stage 2 ~48 Mbps, queue ~65-167/167, ping ~68 ms; 3 CUBIC falls toward ~5; 4 TCP ~0, ping ~73; 5 ~16 each, ping ~40. Check the stage-6 filter finds packets (F29) and the in-place redraw in Terminal.app. Dry-run twice; paste output (R5).
 3. DONE 2026-11-16: F32-F35 fixed; report committed 2e29abb; s3q run, slide 12 rebuilt, committed ae671b2; all pushed.
@@ -261,7 +269,7 @@ cd ~/tcp-congestion && python3 -c "import ast,glob; [ast.parse(open(f).read(),f)
 rm -rf /tmp/tcpcheck && mkdir /tmp/tcpcheck && cd ~/tcp-congestion && cp -r run.py analysis experiments data figures topo /tmp/tcpcheck/ && cd /tmp/tcpcheck && for s in s1 s2 s3 s1w s1x s1l s3w slong s3q; do uv run --project ~/tcp-congestion python -m analysis.metrics $s --check; done
 ```
 
-Expected: 'all configurations OK' nine times. Regenerated s1-s3 summaries differ from the committed ones only in the last float digits (generated on the Mac/VM), so never commit a regenerated figures/s{1,2,3}_summary.csv.
+Expected: 'all configurations OK' nine times (add s1r s2r to the loop once they have data; then eleven). Regenerated s1-s3 summaries differ from the committed ones only in the last float digits (generated on the Mac/VM), so never commit a regenerated figures/s{1,2,3}_summary.csv.
 
 ```bash
 # WSL: report page count without a PDF library (expect 8)
