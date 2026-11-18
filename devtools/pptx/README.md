@@ -15,6 +15,7 @@ uv run --no-project --with lxml --with pillow==11.3.0 python <script> ...
 | `edit_deck.py` | helpers: find, move, clone and recolor shapes, rebuild rounded bar paths, clone click steps, edit note lines |
 | `apply_red.py` | the RED edits (slides 6, 8, 9, 11, 12, 14 and notes); run once on a fresh unpack into `un/` |
 | `questions_slide.py` | turns the predictions slide (13) into 'What the experiments answered': five questions in talk order with answers, notes rebuilt in the user's paragraph styles (2026-11-17) |
+| `conclusions_slide.py` | slide 14 as general recommendations with a scope line, plus slide 13 row 1 (2026-11-17) |
 | `pack.py` | zip `un/` back into a .pptx, including parts added since the original (a new slide and its notes) |
 | `shapes.py`, `timing.py`, `notes_lines.py` | inspect shapes, click steps and note lines |
 | `render.py` | rough PNG of a slide from shape geometry (fills, lines, text; no wrapping), for layout checks |
