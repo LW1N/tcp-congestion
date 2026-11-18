@@ -1,11 +1,11 @@
-"""Turn the predictions slide (slide13.xml) into 'What the experiments answered': five questions in
-talk order (slides 8, 9, 11, 12, then the small-buffer result from the notes), each with its answer.
+"""Turn the predictions slide (slide13.xml) into 'What the experiments answered': four questions in
+talk order (slides 8, 9, 11, 12), each with its answer; the fifth row and its click are removed.
 The proposal's predictions stay in the report (Table II); the notes say so. Layout, click steps and
 formatting are kept: only the text of the existing cells changes, and the notes reuse the user's
-paragraph styles (header line, '-' bullet, indented '-' bullet). Run from the folder holding un/.
+paragraph styles (header line, '-' bullet). Run from the folder holding un/.
 """
 import copy
-from edit_deck import A, load, save, shape, set_runs, text_of, notes_runs
+from edit_deck import A, P, load, save, shape, set_runs, text_of, notes_runs
 
 SLIDE = 'un/ppt/slides/slide13.xml'
 NOTES = 'un/ppt/notesSlides/notesSlide13.xml'
@@ -14,7 +14,6 @@ ROWS = [  # (question cell id, answer cell id, question, answer)
     (489, 490, 'What if one flow never slows down?', 'FIFO: TCP gets 0.05 Mbps · fq_codel: 35 Mbps'),
     (493, 494, 'Does queue size change who wins?', 'FIFO: BBR wins up to 1× BDP, even split at 4×'),
     (497, 498, 'How full does a deep buffer stay?', 'FIFO: CUBIC 85% (~170 ms) · fq_codel under 1%'),
-    (501, 502, 'How small can a buffer get before the link idles?', '1× BDP is enough · 11 packets: Reno/CUBIC 23%'),
 ]
 NOTE_LINES = [
     ('h', 'The questions the experiments answered, in the order of the talk:'),
@@ -28,11 +27,6 @@ NOTE_LINES = [
     ('h', 'How full does a deep buffer stay?'),
     ('-', 'Four CUBIC flows kept a 4x BDP FIFO 85 percent full, about 170 milliseconds of waiting. fq_codel kept it under 1 percent, as its 5 ms target intends.'),
     ('-', 'One CUBIC flow on the 150 millisecond path, with a 4x BDP buffer, added 494 milliseconds.'),
-    ('h', 'How small can a buffer get before the link goes idle?'),
-    ('-', 'One BDP keeps it busy. At 0.25x BDP on the 50 ms path, Reno got 86.7 percent, close to a simple model’s 89.'),
-    ('-', 'The surprise was a tiny 11-packet buffer on the 10 millisecond path,'),
-    ('--', 'where bursts of packets overflow it and both loss-based algorithms collapse to 23 percent'),
-    ('--', 'while BBR, which spaces its packets out, keeps 97.'),
     ('', ''),
     ('h', 'NOTE: before any runs, my proposal made five predictions. The report checks each one (Table II): three held (one only on a FIFO) and two held partly. Reno did favor short paths more than CUBIC, and BBR turned out to favor the long path.'),
 ]
@@ -45,6 +39,14 @@ set_runs(shape(r, 482), 'Answer')
 for q_id, a_id, q, a in ROWS:
     set_runs(shape(r, q_id), q)
     set_runs(shape(r, a_id), a)
+ROW5 = {'499', '500', '501', '502'}                 # background, number, question, answer of row 5
+for el in list(r.iter(P + 'sp')):
+    if el.find('.//' + P + 'cNvPr').get('id') in ROW5:
+        el.getparent().remove(el)
+seq = r.find('.//' + P + 'cTn[@nodeType="mainSeq"]').find(P + 'childTnLst')
+for step in list(seq):                              # drop the click that revealed row 5
+    if {t.get('spid') for t in step.iter(P + 'spTgt')} <= ROW5:
+        seq.remove(step)
 save(t, SLIDE)
 
 nt = load(NOTES); tx = notes_runs(nt.getroot())
@@ -55,8 +57,7 @@ lvl = lambda p: (p.find(A + 'pPr').get('lvl') if p.find(A + 'pPr') is not None e
 bullet = lambda p: p.find('.//' + A + 'buChar') is not None
 text = lambda p: ''.join(x.text or '' for x in p.iter(A + 't')).strip()
 tmpl = {'h': first(lambda p: not bullet(p) and text(p) and p.find(A + 'br') is None),
-        '-': first(lambda p: bullet(p) and lvl(p) == '0'),
-        '--': first(lambda p: bullet(p) and lvl(p) == '1')}
+        '-': first(lambda p: bullet(p) and lvl(p) == '0')}
 blank = copy.deepcopy(tmpl['h'])
 for run in blank.findall(A + 'r'):
     blank.remove(run)
