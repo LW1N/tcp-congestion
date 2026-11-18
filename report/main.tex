@@ -272,7 +272,7 @@ Ultimately, changing the bottleneck queue helps more than changing any CCA. The 
 
 \section{Conclusion}
 
-Across 892 trials on two machines, the bottleneck queue shaped fairness and delay more than the senders' CCA did. On a FIFO, BBR and UDP take bandwidth from flows that back off on loss, and loss-based senders turn deep buffers into hundreds of milliseconds of delay. fq\_codel removed all of these effects at the cost of under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput. RED with the same 5~ms target removed only the delay, and it cost Reno 13--17\% of the link. If a FIFO has to stay, one BBR flow keeps tiny buffers busy with almost no delay, but several BBR flows queued more than CUBIC, so no CCA replaces fixing the queue. Future work could extend this study to a two-bottleneck parking-lot topology, BBRv3, and real hardware without VM batching.
+Across 892 trials on two machines, the bottleneck queue shaped fairness and delay more than the senders' CCA did. On a FIFO, BBR and UDP take bandwidth from flows that back off on loss, and loss-based senders turn deep buffers into hundreds of milliseconds of delay. fq\_codel removed all of these effects at the cost of under 1~ms of UDP jitter and up to 5.5\% of Reno's throughput. RED with the same 5~ms target removed only the delay, and it cost Reno 13--17\% of the link. If a FIFO has to stay, one BBR flow keeps tiny buffers busy with almost no delay, but several BBR flows kept a 1\x{} BDP FIFO about as full as CUBIC did, so no CCA replaces fixing the queue. Future work could extend this study to a two-bottleneck parking-lot topology, BBRv3, and real hardware without VM batching.
 
 \begin{thebibliography}{99}
 
