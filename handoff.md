@@ -4,8 +4,8 @@
 Format: optimized for AI agents. Facts are key: value lines or tables with exact identifiers.
 Status values: DONE | TODO | IN_PROGRESS | UNVERIFIED | UNKNOWN. UNVERIFIED = implemented but never observed
 working where it matters. UNKNOWN = ask the user or check before relying on it.
-Last updated: 2026-11-17 (/handoff refresh: RED follow-ups run, verified and written into figures, report, deck and guide;
-talk file is now 'TCP Congestion and Network Performance (RED v3 questions).pptx'; Claude report doc and implementation doc deleted).
+Last updated: 2026-11-17 (/handoff refresh: talk file is now 'TCP Congestion and Network Performance (RED v3 conclusions).pptx'
+(slide 13 = questions recap, slide 14 = general recommendations); guide v48; git clean at 7912c94).
 -->
 
 ## 0. READ_FIRST
@@ -108,13 +108,13 @@ Deleted 2026-11-17 at the user's request: report doc (7vJiBvAn1QoxLYNaCXatnG) an
 
 ```yaml
 current_talk_file: /mnt/c/Users/lucas/Downloads/TCP Congestion and Network Performance (RED v3 conclusions).pptx   # 16 slides, 2026-11-17; = the user's '(RED v3 questions)(1).pptx' (their slide 13 answer edits + slide 14 notes restructure) + slide 14 generalized by devtools/pptx/conclusions_slide.py (title 'What to deploy at a shared bottleneck', scope line 'Recommendations from one emulated 50 Mbps link (BBRv1, no ECN): directions, not guarantees', FIFO branch 'Size it near 1× BDP' with too small / about 1× / too large principles, closing line on FIFO/RED queues, BBR* footnote removed; wording narrowed after a Sonnet review) + slide 13 row 1 'FIFO: BBR, mostly · fq_codel: even split'. The user may have edited it since: ask
-derived_from: the user's own '(RED v3).pptx' (unchanged in Downloads) + slide 13 questions edit; '(RED v4)'/'(RED v5)' = abandoned path-length slide versions, unused
+derived_from: '(RED v3 questions)(1).pptx' (the user's latest download, still in Downloads); older versions (v3, v4, v5 path-length tries) were deleted by the user
 edit_flow: copy the user's latest file to a scratch folder; unzip to un/; edit with devtools/pptx (helpers in edit_deck.py; ids come from shapes.py/timing.py because Google renumbers shape ids on every download); pack.py <orig> out.pptx; pptx skill validate.py out.pptx --original <orig>; render.py the changed slides; slide_text.py diff vs the original must show only intended lines; save as a NEW file in Downloads (R24)
 adding_slides: pptx skill add_slide.py leaves the new slide without notes: copy a notesSlide part + rel + content-type override; renumber footers 'n / N', eyebrows 'NN ·' (= n-1) and progress bars (fill A78BFA at y 1040, width 1664*n/N px)
 slides: 1 cover, 2 problem, 3 topology, 4 CCAs, 5 queues, 6 scenarios, 7 families, 8 S1 (RED bars; delay card with resend %), 9 S2 (RED bars), 10 capture, 11 S3 share, 12 buffer fill (RED · 5 ms target), 13 'What the experiments answered' (4 questions in talk order; notes point to report Table II for the predictions), 14 'What to deploy at a shared bottleneck' (general principles, scope line), 15 close, 16 demo
 click_steps: 3:6, 4:1, 5:0, 6:4, 7:3, 8:5, 9:5, 10:3, 11:4, 12:3, 13:5, 14:3, 16:7
 user_edits_in_v3: slide 6 S3 card 'Queue Size' (RTT chip removed), strip 'Reno, CUBIC, BBR on pfifo, fq_codel, and RED'; slide 8 stars removed, delay card '(4–11% of data resent)', '32-34 ms', '(<0.1% resent)', Reno vs CUBIC card text removed; notes restructured as plain bulleted lines
-known_issue: slide 8 click 5 shows the empty box (shape 194) left from the Reno vs CUBIC card, and the CUBIC lines (y 674-803) run past the delay card (ends y 766); flagged to the user, unchanged
+known_issue: still present 2026-11-17 in the conclusions file: slide 8 click 5 shows the empty box (shape 194) left from the Reno vs CUBIC card, and the CUBIC lines (shapes 257, 252; y 674-803) run past the delay card (243, ends y 766); flagged to the user, unchanged
 style: bg #111019, card #1C1B27, text #F4F3F7, muted #A9A7BB, footer #8A889C; pfifo #FFB23E, RED #A78BFA, fq_codel #4FD1E0, drop #FF6B6B; fonts Schibsted Grotesk + IBM Plex Mono; 1920x1080 px frame = 6350 EMU/px
 animations: looping GIFs on slides 1-7 (from the 2026-11-16 build), native entrance effects, fades
 html_deck_artifact: https://claude.ai/artifact/2GZMMEVvtSyVmNHZ44rzys  STALE (no RED, no user note edits); do not export from it
@@ -207,13 +207,14 @@ checks: string/bracket balance of the <script> block plus regex ',\s*,' and '\[\
 | 1-8 environment, topology, validation, automation, S1-S3, analysis | DONE | main study frozen 2026-10-24 |
 | follow-ups incl. RED (s1r s2r s3r s3qr) and ared_slow (s1rs s2rs s3qrs) | DONE | run 2026-11-16/17, verified from raw files (devtools/verify_red.py), data committed |
 | 9 report | DONE (UNKNOWN whether submitted) | 8 pages with RED; committed 1d73cc0 |
-| 10 presentation | IN_PROGRESS | deck = 4b current_talk_file; guide v47; demo never run; rehearsal, recording, transcript TODO |
+| 10 presentation | IN_PROGRESS | deck = 4b current_talk_file; guide v48; demo never run; rehearsal, recording, transcript TODO |
 | review 2026-11-17 | DONE | code, all 16 experiment dry-runs, metrics --check (13 OK, s1rs/s3qrs fail by design), figures regenerate identically, report refs/cites, docs |
-| git | DONE | main at 195a02e = origin/main (2026-11-17); clean except this handoff.md |
+| git | DONE | main at 7912c94 = origin/main (2026-11-17); clean except this handoff.md |
 
 ## 9. OPEN_ITEMS (priority order)
 
-1. DONE 2026-11-17: RED results in the deck; talk file = 4b current_talk_file. Optional: fix slide 8's empty click-5 box (4b known_issue) if the user wants.
+1. DONE 2026-11-17: RED results in the deck; slide 13 reframed as 'What the experiments answered' (4 questions); slide 14 rewritten as general recommendations with a scope line; talk file = 4b current_talk_file. Optional: fix slide 8's empty click-5 box (4b known_issue) if the user wants; the user may add a note line for slide 14's new closing line (no note covers it yet).
+1i. Q&A prep answered in chat 2026-11-17, not yet in the guide: ECN (marks instead of drops; senders never negotiated it, tcp_ecn=2, RED had no `ecn` flag; would likely help Reno/CUBIC under RED, not BBRv1 or UDP; the guide's 'Was ECN on?' Q&A covers most of it) and why two switches (s1 merges senders onto one router port = one shared queue; s2 holds per-receiver netem delay after the bottleneck so flows get different RTTs without a second queue; r1 is the bottleneck because shaping a switch port never dropped, F1). Optional: add the switches answer to the guide's 'Why a dumbbell topology?' Q&A if the user wants.
 1a. DONE: animation build scripts lost; superseded by devtools/pptx.
 1b. REMOVED: the HTML deck artifact is no longer used (4b html_deck_artifact).
 1c, 1d, 1f, 1g, 1h, 1g2, 1h2: DONE 2026-11-17 (RED runs, verification, docs update, project review, multi-BBR delay scoping); details in sections 2, 4c, 7.
